@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#070509">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TheLord_Aviator">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>TheLord_Aviator | Calculadora & Gestão</title>
+<style>
+:root{
+  --bg:#070509;--card:#0f0b18;--card2:#15111e;--border:rgba(255,30,67,.32);
+  --white:#fff;--muted:#e4c483;--gold:#ffc01f;--gold2:#e8a000;
+  --red:#ff1e43;--green:#00e676;--blue:#5aa7ff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  background:var(--bg);color:var(--white);padding:16px 16px 105px;
+  min-height:100vh;background-image:radial-gradient(circle at top,rgba(255,30,67,.15),transparent 58%);
+}
+.app{width:100%;max-width:520px;margin:auto}
+.header,.card{
+  background:rgba(15,11,24,.96);border:1px solid var(--border);border-radius:22px;
+  box-shadow:0 8px 32px rgba(0,0,0,.45);margin-bottom:16px
+}
+.header{padding:18px;display:flex;align-items:center;gap:15px}
+.logo{
+  width:72px;height:72px;min-width:72px;border-radius:50%;border:2px solid var(--red);
+  box-shadow:0 0 18px rgba(255,30,67,.55);display:flex;align-items:center;justify-content:center;
+  background:#12080a;font-size:34px
+}
+.eyebrow{font-size:.62rem;font-weight:900;letter-spacing:.12em;color:var(--gold);text-transform:uppercase}
+h1{font-size:1.18rem;margin-top:3px}
+.subtitle{font-size:.72rem;color:var(--muted);margin-top:4px}
+.card{padding:20px}
+.title{font-size:.86rem;font-weight:900;color:var(--gold);text-transform:uppercase;letter-spacing:.07em;margin-bottom:15px}
+.input-label{display:block;font-size:.75rem;color:var(--muted);font-weight:800;margin-bottom:6px}
+.input{
+  width:100%;padding:15px;border-radius:13px;background:rgba(255,255,255,.045);
+  border:1px solid rgba(255,255,255,.15);color:#fff;font-size:1.25rem;font-weight:900;outline:none
+}
+.input:focus{border-color:var(--gold);box-shadow:0 0 12px rgba(255,192,31,.25)}
+.example{opacity:.42}
+.hint{font-size:.67rem;color:var(--muted);margin-top:6px}
+.btn{
+  width:100%;padding:15px;border:0;border-radius:13px;margin-top:12px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1200;
+  font-weight:950;text-transform:uppercase;cursor:pointer
+}
+.btn-secondary{background:rgba(255,30,67,.1);border:1px solid rgba(255,30,67,.4);color:var(--red)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.box{
+  background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.09);
+  border-radius:15px;padding:14px
+}
+.label{font-size:.63rem;color:var(--muted);font-weight:850;text-transform:uppercase}
+.value{font-size:1.35rem;font-weight:950;margin-top:4px}
+.gold{color:var(--gold)}.green{color:var(--green)}.red{color:var(--red)}.blue{color:var(--blue)}
+.hidden{display:none!important}
+.notice{
+  padding:12px;border:1px dashed rgba(255,192,31,.35);border-radius:12px;
+  color:#ebdcb0;font-size:.72rem;line-height:1.4;margin-top:12px
+}
+
+.entry-report{margin-top:14px}.entry-report-title{font-size:.68rem;color:var(--gold);font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}.entry-list{display:flex;flex-direction:column;gap:8px}.entry-item{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.09);border-radius:13px;padding:11px 12px}.entry-top{display:flex;justify-content:space-between;align-items:center;gap:8px}.entry-result{font-size:.72rem;font-weight:950}.entry-result.win{color:var(--green)}.entry-result.loss{color:var(--red)}.entry-value{font-size:.85rem;font-weight:950}.entry-meta{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:5px;color:var(--muted);font-size:.65rem;font-weight:750}.entry-empty{padding:12px;border:1px dashed rgba(255,255,255,.12);border-radius:12px;color:var(--muted);font-size:.7rem;text-align:center}
+.dev-notice{
+  min-height:205px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:22px 14px;
+  margin-top:2px;
+}
+.dev-icon{
+  font-size:1.75rem;
+  line-height:1;
+  margin-bottom:8px;
+}
+.dev-title{
+  color:var(--gold);
+  font-size:1.38rem;
+  line-height:1.2;
+  font-weight:950;
+  margin-bottom:12px;
+}
+.dev-subtitle{
+  color:#ebdcb0;
+  font-size:.9rem;
+  line-height:1.4;
+}
+.tabs{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px
+}
+.tab{
+  padding:11px;border-radius:10px;background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.12);color:var(--muted);font-weight:850;cursor:pointer
+}
+.tab.active{border-color:var(--gold);color:var(--gold);background:rgba(255,192,31,.12)}
+.section{margin-top:16px}
+.bottom{
+  position:fixed;z-index:20;left:50%;bottom:10px;transform:translateX(-50%);
+  width:min(520px,calc(100% - 24px));background:rgba(10,7,14,.97);
+  border:1px solid var(--border);border-radius:22px;padding:8px;
+  display:grid;grid-template-columns:repeat(4,1fr);box-shadow:0 8px 30px rgba(0,0,0,.65)
+}
+.nav{border:0;background:transparent;color:#a99f8d;padding:7px 2px;border-radius:14px;font-size:.65rem;font-weight:850}
+.nav.active{background:rgba(255,192,31,.1);color:var(--gold)}
+.nav span{display:block;font-size:1.25rem;margin-bottom:3px}
+.empty{color:#888;font-size:1.1rem}
+.small{font-size:.68rem;color:var(--muted);margin-top:5px}
+.entry{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.entry:last-child{border-bottom:0}
+.status{font-size:.68rem;font-weight:900;padding:5px 8px;border-radius:7px}
+.status.win{color:var(--green);background:rgba(0,230,118,.1)}
+.status.loss{color:var(--red);background:rgba(255,30,67,.1)}
+
+/* Interface visual — padrão Lovable aprovado */
+body{background:#08060c;background-image:radial-gradient(circle at 15% 0%,rgba(255,30,67,.18),transparent 42%),radial-gradient(circle at 85% 20%,rgba(120,0,45,.16),transparent 40%);padding:12px 12px 105px}
+.app{max-width:560px}
+.header{padding:16px 18px;border-radius:24px;background:rgba(14,9,20,.94);border-color:rgba(255,30,67,.45);box-shadow:0 8px 30px rgba(0,0,0,.55),0 0 28px rgba(255,30,67,.06)}
+.logo{width:64px;height:64px;min-width:64px;font-size:28px}
+.header h1{font-size:1.16rem;font-weight:950}
+.subtitle{font-size:.68rem}
+.card{background:rgba(14,10,21,.94);border-color:rgba(255,30,67,.42);border-radius:24px;padding:20px;box-shadow:0 8px 30px rgba(0,0,0,.48)}
+.title{font-size:.88rem;letter-spacing:.08em}
+.box{background:rgba(255,255,255,.035);border-color:rgba(255,255,255,.095);border-radius:16px;padding:14px}
+.value{font-size:1.32rem}
+.input{background:rgba(255,255,255,.045);border-radius:16px;padding:16px;font-size:1.22rem}
+.example{opacity:.42}
+.btn{border-radius:16px;padding:15px;background:linear-gradient(135deg,#ffc72c,#f1a900);box-shadow:0 5px 18px rgba(255,192,31,.16)}
+.btn-secondary{background:rgba(255,30,67,.09);box-shadow:none}
+.notice{border-color:rgba(255,192,31,.32);background:rgba(255,192,31,.018);border-radius:15px}
+.bottom{bottom:10px;width:min(560px,calc(100% - 20px));border-radius:24px;background:rgba(10,7,14,.97);border-color:rgba(255,30,67,.5);padding:7px;backdrop-filter:blur(12px)}
+.nav{padding:8px 2px;font-size:.64rem;border-radius:17px}.nav.active{background:rgba(255,192,31,.12);color:var(--gold)}
+.dev-notice{min-height:270px}.dev-icon{font-size:2rem}.dev-title{font-size:1.42rem}.dev-subtitle{font-size:.88rem}
+.mode-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.mode-btn{padding:12px 8px;border-radius:13px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.035);color:var(--muted);font-weight:900;font-size:.72rem;text-transform:uppercase;cursor:pointer}
+.mode-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(255,192,31,.12);box-shadow:0 0 10px rgba(255,192,31,.15)}
+.distribution{margin-top:14px;padding:13px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:rgba(255,255,255,.02)}
+.dist-title{font-size:.7rem;color:var(--gold);font-weight:900;text-transform:uppercase;margin-bottom:8px}
+.dist-line{font-size:.7rem;color:#ebdcb0;line-height:1.65}
+
+</style>
+</head>
+<body>
+<div class="app">
+
+<header class="header">
+  <div class="logo">✈️</div>
+  <div>
+    <div class="eyebrow">Gestão Oficial</div>
+    <h1>TheLord_Aviator | Calculadora &amp; Gestão</h1>
+    <div class="subtitle">Gestão de banca · acompanhamento pessoal</div>
+  </div>
+</header>
+
+<main id="overview">
+  <section class="card">
+    <div class="title">📊 Visão Geral</div>
+    <div class="grid">
+      <div class="box"><div class="label">Banca Inicial</div><div class="value gold" id="ovInitial">R$ 0,00</div></div>
+      <div class="box"><div class="label">Banca Atual</div><div class="value" id="ovCurrent">R$ 0,00</div></div>
+      <div class="box"><div class="label">Resultado</div><div class="value" id="ovResult">R$ 0,00</div></div>
+      <div class="box"><div class="label">Variação</div><div class="value" id="ovVariation">0,00%</div></div>
+    </div>
+    <div class="notice" id="ovMessage">🔒 Nenhuma gestão iniciada. Preencha a banca na Calculadora e confirme para começar.</div>
+  </section>
+
+  <section class="card">
+    <div class="title">🎯 Limites de Hoje</div>
+    <div class="grid">
+      <div class="box"><div class="label">Resultado do Dia</div><div class="value green" id="todayResult">+R$ 0,00</div></div>
+      <div class="box"><div class="label">Perda do Dia</div><div class="value" id="todayLoss">R$ 0,00</div><div class="small" id="todayStopLoss">Stop Loss: R$ 0,00</div></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="title">📅 Operações</div>
+    <div class="grid">
+      <div class="box"><div class="label">Dias Operados</div><div class="value blue" id="days">0</div></div>
+      <div class="box"><div class="label">Total de Entradas</div><div class="value" id="entries">0</div></div>
+      <div class="box"><div class="label">Stop Win</div><div class="value green" id="wins">0</div></div>
+      <div class="box"><div class="label">Stop Loss</div><div class="value red" id="losses">0</div></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="title">💰 Resultados</div>
+    <div class="grid">
+      <div class="box"><div class="label">Total Ganho · Stop Win</div><div class="value green" id="totalWin">+R$ 0,00</div></div>
+      <div class="box"><div class="label">Total Perdido · Stop Loss</div><div class="value red" id="totalLoss">-R$ 0,00</div></div>
+      <div class="box"><div class="label">Wins · Percentual</div><div class="value green" id="winPct">0,00%</div></div>
+      <div class="box"><div class="label">Loss · Percentual</div><div class="value red" id="lossPct">0,00%</div></div>
+    </div>
+  </section>
+</main>
+
+<main id="calculator" class="hidden">
+  <section class="card">
+    <div class="title">🧮 Calculadora de Gestão</div>
+    <label class="input-label">Valor disponível na banca (R$)</label>
+    <input id="bank" class="input example" type="number" value="100" placeholder="Digite sua banca">
+    <div class="hint">R$ 100,00 é apenas um exemplo. Digite o valor real da sua banca.</div>
+
+    <div class="mode-buttons">
+      <button id="modePercent" class="mode-btn active" onclick="setEntryMode('percent')">📊 Por porcentagem</button>
+      <button id="modeFixed" class="mode-btn" onclick="setEntryMode('fixed')">💰 Valor fixo</button>
+    </div>
+    <div id="entryModeHint" class="notice">Entrada de referência: <b>10% da banca</b>. O valor informado é usado para orientar a gestão.</div>
+
+    <div class="grid section">
+      <div class="box"><div class="label">Mão 1 · Proteção</div><div class="value" id="hand1">R$ 10,00</div><div class="small">10% da banca</div></div>
+      <div class="box"><div class="label">Mão 2 · Lucro</div><div class="value" id="hand2">R$ 3,00</div><div class="small">30% da Mão 1</div></div>
+    </div>
+
+    <div class="box section">
+      <div class="label">Stop Win · Diário</div>
+      <div class="value green" id="stopWin">R$ 20,00 — R$ 30,00</div>
+      <div class="small">Média recomendada: 20% a 30% da banca.</div>
+    </div>
+
+    <div class="box section">
+      <div class="label">Stop Loss · Diário</div>
+      <div class="value red" id="stopLoss">R$ 20,00</div>
+      <div class="small">Limite definido: 20% da banca.</div>
+    </div>
+
+    <div class="distribution">
+      <div class="dist-title">Exemplos de distribuição das entradas</div>
+      <div class="dist-line">• <b>R$ 7 + R$ 3</b> = uma entrada dentro dos 10%.</div>
+      <div class="dist-line">• <b>R$ 5 + R$ 5</b> = uma entrada dentro dos 10%.</div>
+      <div class="dist-line">• <b>Duas entradas de R$ 5:</b> cada uma com R$ 3 + R$ 2.</div>
+      <div class="small">A divisão é apenas um exemplo operacional. O valor da entrada não é contabilizado como lucro ou loss; o registro considera somente o resultado.</div>
+    </div>
+
+    <button class="btn" onclick="startManagement()">⚡ Iniciar gestão com esta banca</button>
+    <div class="notice">💡 Ao confirmar, a banca informada passa a alimentar a Visão Geral e os resultados da gestão.</div>
+  </section>
+
+  <section class="card">
+    <div class="title">➕ Registrar Entrada</div>
+    <div class="grid">
+      <div><label class="input-label">Resultado</label>
+        <select id="resultType" class="input"><option value="WIN">STOP WIN</option><option value="LOSS">STOP LOSS</option></select>
+      </div>
+      <div><label class="input-label">Valor (R$)</label><input id="resultValue" class="input" type="number" value="20"></div>
+    </div>
+    <button class="btn" onclick="registerEntry()">Registrar entrada</button>
+    <button class="btn btn-secondary" onclick="newMonth()">🔄 Limpar histórico e iniciar novo mês</button>
+    <div class="notice">⚠️ Ao iniciar um novo mês, os registros da gestão atual serão zerados e a banca voltará para o exemplo de R$ 100,00 até você confirmar uma nova banca.</div>
+
+    <div class="entry-report">
+      <div class="entry-report-title">📋 Relatório das Entradas</div>
+      <div id="entryList" class="entry-list"><div class="entry-empty">Nenhuma entrada registrada ainda.</div></div>
+    </div>
+  </section>
+</main>
+
+<main id="monitor" class="hidden">
+  <section class="card">
+    <div class="title">📈 MONITOR DE VELAS</div>
+    <div class="dev-notice">
+      <div class="dev-icon">🚧</div>
+      <div class="dev-title">Aba em desenvolvimento</div>
+      <div class="dev-subtitle">Em breve estará disponível! ✅💥</div>
+    </div>
+  </section>
+</main>
+
+<main id="timing" class="hidden">
+  <section class="card">
+    <div class="title">⏱️ MINUTAGEM</div>
+    <div class="dev-notice">
+      <div class="dev-icon">🚧</div>
+      <div class="dev-title">Aba em desenvolvimento</div>
+      <div class="dev-subtitle">Em breve estará disponível! ✅💥</div>
+    </div>
+  </section>
+</main>
+
+</div>
+
+<nav class="bottom">
+  <button class="nav active" onclick="showPage('overview',this)"><span>📊</span>Visão Geral</button>
+  <button class="nav" onclick="showPage('calculator',this)"><span>🧮</span>Calculadora</button>
+  <button class="nav" onclick="showPage('monitor',this)"><span>📈</span>Monitor</button>
+  <button class="nav" onclick="showPage('timing',this)"><span>⏱️</span>Minutagem</button>
+</nav>
+
+<script>
+let data=JSON.parse(localStorage.getItem('lord_demo_data_oficial_alunos_v1')||'null')||{
+  started:false,initial:0,current:0,wins:0,losses:0,totalWin:0,totalLoss:0,days:0,entries:[],alerts:{win:false,loss:false,date:''}
+};
+if(!Array.isArray(data.entries)) data.entries=[];
+if(!data.alerts || typeof data.alerts!=='object') data.alerts={win:false,loss:false,date:''};
+
+const money=v=>'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const pct=v=>Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%';
+
+function save(){localStorage.setItem('lord_demo_data_oficial_alunos_v1',JSON.stringify(data))}
+let entryMode='percent';
+function setEntryMode(mode){
+  entryMode=mode;
+  document.getElementById('modePercent').classList.toggle('active',mode==='percent');
+  document.getElementById('modeFixed').classList.toggle('active',mode==='fixed');
+  document.getElementById('entryModeHint').innerHTML=mode==='fixed'
+    ? '💰 <b>Valor fixo:</b> o valor de referência permanece em <b>10% da banca</b>. Ex.: banca de R$ 100,00 = R$ 10,00.'
+    : '📊 <b>Por porcentagem:</b> o valor de referência é calculado em <b>10% da banca</b>.';
+  calc();
+}
+function calc(){
+  const b=parseFloat(document.getElementById('bank').value)||0;
+  document.getElementById('hand1').textContent=money(b*.10);
+  document.getElementById('hand2').textContent=money(b*.03);
+  document.getElementById('stopWin').textContent=money(b*.20)+' — '+money(b*.30);
+  document.getElementById('stopLoss').textContent=money(b*.20);
+  const todayWin=data.entries.filter(e=>e.type==='WIN' && e.date===new Date().toLocaleDateString('pt-BR')).reduce((a,e)=>a+Number(e.value||0),0);
+  const todayLoss=data.entries.filter(e=>e.type==='LOSS' && e.date===new Date().toLocaleDateString('pt-BR')).reduce((a,e)=>a+Number(e.value||0),0);
+  const tr=document.getElementById('todayResult');
+  const tl=document.getElementById('todayLoss');
+  const ts=document.getElementById('todayStopLoss');
+  if(tr) tr.textContent='+'+money(todayWin-todayLoss);
+  if(tl) tl.textContent=money(todayLoss);
+  if(ts) ts.textContent='Stop Loss: '+money(b*.20);
+}
+function startManagement(){
+  const b=parseFloat(document.getElementById('bank').value)||0;
+  if(b<=0){alert('Digite um valor de banca válido.');return}
+  data={started:true,initial:b,current:b,wins:0,losses:0,totalWin:0,totalLoss:0,days:0,entries:[],alerts:{win:false,loss:false,date:new Date().toLocaleDateString('pt-BR')}};
+  document.getElementById('bank').classList.remove('example');
+  save(); updateOverview(); alert('Gestão iniciada com '+money(b)+'.');
+}
+function getPeriod(hour){
+  if(hour>=5 && hour<12) return 'Manhã';
+  if(hour>=12 && hour<18) return 'Tarde';
+  return 'Noite';
+}
+function registerEntry(){
+  if(!data.started){alert('Primeiro confirme sua banca na Calculadora para iniciar a gestão.');return}
+  const type=document.getElementById('resultType').value;
+  const val=parseFloat(document.getElementById('resultValue').value)||0;
+  if(val<=0){alert('Informe um valor válido.');return}
+  const now=new Date();
+  const today=now.toLocaleDateString('pt-BR');
+  if(data.alerts.date!==today){data.alerts={win:false,loss:false,date:today}}
+  const entry={id:Date.now(),type,value:val,date:today,time:now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),period:getPeriod(now.getHours())};
+  data.entries.push(entry);
+  if(type==='WIN'){data.wins++;data.totalWin+=val;data.current+=val}
+  else{data.losses++;data.totalLoss+=val;data.current=Math.max(0,data.current-val)}
+  data.days=new Set(data.entries.map(e=>e.date)).size;
+  save();updateOverview();renderEntryReport();calc();
+
+  const todayWin=data.entries.filter(e=>e.type==='WIN' && e.date===today).reduce((a,e)=>a+Number(e.value||0),0);
+  const todayLoss=data.entries.filter(e=>e.type==='LOSS' && e.date===today).reduce((a,e)=>a+Number(e.value||0),0);
+  const stopTarget=data.initial*.20;
+  if(todayWin>=stopTarget && !data.alerts.win){
+    data.alerts.win=true;save();
+    alert('🟢 STOP WIN ALCANÇADO!\n\nResultado positivo do dia: '+money(todayWin)+'\nMeta mínima de Stop Win: '+money(stopTarget)+'\n\nGestão diária concluída.');
+  } else if(todayLoss>=stopTarget && !data.alerts.loss){
+    data.alerts.loss=true;save();
+    alert('🔴 STOP LOSS ALCANÇADO!\n\nPerda do dia: '+money(todayLoss)+'\nLimite de Stop Loss: '+money(stopTarget)+'\n\nEncerre a gestão do dia para respeitar o limite.');
+  } else {
+    alert('Entrada registrada com sucesso.');
+  }
+}
+
+function renderEntryReport(){
+  const list=document.getElementById('entryList');
+  if(!list)return;
+  if(!data.entries.length){list.innerHTML='<div class="entry-empty">Nenhuma entrada registrada ainda.</div>';return}
+  list.innerHTML=[...data.entries].reverse().map(e=>{
+    const win=e.type==='WIN';
+    const label=win?'🟢 STOP WIN':'🔴 STOP LOSS';
+    const cls=win?'win':'loss';
+    const sign=win?'+':'-';
+    const period=e.period||getPeriod(Number((e.time||'00:00').split(':')[0]));
+    return `<div class="entry-item"><div class="entry-top"><span class="entry-result ${cls}">${label}</span><span class="entry-value ${cls}">${sign}${money(e.value)}</span></div><div class="entry-meta"><span>📅 ${e.date}</span><span>🕐 ${period}</span><span>⏰ ${e.time}</span></div></div>`;
+  }).join('');
+}
+
+function updateOverview(){
+  if(!data.started){
+    ['ovInitial','ovCurrent'].forEach(id=>document.getElementById(id).textContent='R$ 0,00');
+    document.getElementById('ovResult').textContent='R$ 0,00';
+    document.getElementById('ovVariation').textContent='0,00%';
+    document.getElementById('ovMessage').textContent='🔒 Nenhuma gestão iniciada. Preencha a banca na Calculadora e confirme para começar.';
+    ['days','entries','wins','losses'].forEach(id=>document.getElementById(id).textContent='0');
+    document.getElementById('totalWin').textContent='+R$ 0,00';
+    document.getElementById('totalLoss').textContent='-R$ 0,00';
+    document.getElementById('winPct').textContent='0,00%';
+    document.getElementById('lossPct').textContent='0,00%';
+    renderEntryReport();
+    return;
+  }
+  const result=data.current-data.initial;
+  const variation=data.initial?result/data.initial*100:0;
+  const total=data.wins+data.losses;
+  document.getElementById('ovInitial').textContent=money(data.initial);
+  document.getElementById('ovCurrent').textContent=money(data.current);
+  document.getElementById('ovResult').textContent=(result>=0?'+':'')+money(result);
+  document.getElementById('ovVariation').textContent=(variation>=0?'+':'')+pct(variation);
+  document.getElementById('ovMessage').textContent='✅ Gestão ativa. Acompanhe sua banca e registre cada entrada.';
+  document.getElementById('days').textContent=data.days;
+  document.getElementById('entries').textContent=total;
+  document.getElementById('wins').textContent=data.wins;
+  document.getElementById('losses').textContent=data.losses;
+  document.getElementById('totalWin').textContent='+'+money(data.totalWin);
+  document.getElementById('totalLoss').textContent='-'+money(data.totalLoss);
+  document.getElementById('winPct').textContent=pct(total?data.wins/total*100:0);
+  document.getElementById('lossPct').textContent=pct(total?data.losses/total*100:0);
+  renderEntryReport();
+}
+function newMonth(){
+  if(!confirm('Deseja limpar o histórico deste mês e começar uma nova gestão?')) return;
+  data={started:false,initial:0,current:0,wins:0,losses:0,totalWin:0,totalLoss:0,days:0,entries:[],alerts:{win:false,loss:false,date:''}};
+  save();
+  const bank=document.getElementById('bank');
+  bank.value=0;
+  bank.classList.add('example');
+  calc();updateOverview();renderEntryReport();
+  alert('Novo mês iniciado. Todos os valores foram zerados. Informe sua banca para começar novamente.');
+}
+
+function showPage(id,btn){
+  ['overview','calculator','monitor','timing'].forEach(x=>document.getElementById(x).classList.toggle('hidden',x!==id));
+  document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));btn.classList.add('active');
+  if(id==='calculator')calc();
+}
+document.getElementById('bank').addEventListener('input',calc);
+if(data.started){
+  document.getElementById('bank').value=data.initial;
+  document.getElementById('bank').classList.remove('example');
+}else{
+  document.getElementById('bank').value=100;
+  document.getElementById('bank').classList.add('example');
+}
+calc();updateOverview();
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+
+</script>
+</body>
+</html>
