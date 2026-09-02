@@ -60,9 +60,28 @@ h1{font-size:1.18rem;margin-top:3px}
   color:#ebdcb0;font-size:.72rem;line-height:1.4;margin-top:12px
 }
 
+.withdrawal-report{margin-top:14px}.withdrawal-report-title{font-size:.68rem;color:var(--gold);font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}.withdrawal-list{display:flex;flex-direction:column;gap:8px}.withdrawal-item{background:rgba(255,255,255,.035);border:1px solid rgba(255,192,31,.16);border-radius:13px;padding:11px 12px}.withdrawal-top{display:flex;justify-content:space-between;align-items:center;gap:8px}.withdrawal-label{font-size:.72rem;font-weight:950;color:var(--gold)}.withdrawal-value{font-size:.85rem;font-weight:950;color:var(--gold)}.withdrawal-meta{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:5px;color:var(--muted);font-size:.65rem;font-weight:750}.withdrawal-empty{padding:12px;border:1px dashed rgba(255,255,255,.12);border-radius:12px;color:var(--muted);font-size:.7rem;text-align:center}.withdrawal-form{margin-top:12px}.withdrawal-note{font-size:.67rem;color:var(--muted);margin-top:6px;line-height:1.35}
 .entry-report{margin-top:14px}.entry-report-title{font-size:.68rem;color:var(--gold);font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}.entry-list{display:flex;flex-direction:column;gap:8px}.entry-item{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.09);border-radius:13px;padding:11px 12px}.entry-top{display:flex;justify-content:space-between;align-items:center;gap:8px}.entry-result{font-size:.72rem;font-weight:950}.entry-result.win{color:var(--green)}.entry-result.loss{color:var(--red)}.entry-value{font-size:.85rem;font-weight:950}.entry-meta{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:5px;color:var(--muted);font-size:.65rem;font-weight:750}.entry-empty{padding:12px;border:1px dashed rgba(255,255,255,.12);border-radius:12px;color:var(--muted);font-size:.7rem;text-align:center}
-.withdrawal-form{margin-top:12px}.withdrawal-note{font-size:.67rem;color:var(--muted);margin-top:6px;line-height:1.35}
-.withdrawal-report{margin-top:14px}.withdrawal-report-title{font-size:.68rem;color:var(--gold);font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}.withdrawal-list{display:flex;flex-direction:column;gap:8px}.withdrawal-item{background:rgba(255,255,255,.035);border:1px solid rgba(255,192,31,.16);border-radius:13px;padding:11px 12px}.withdrawal-top{display:flex;justify-content:space-between;align-items:center;gap:8px}.withdrawal-label{font-size:.72rem;font-weight:950;color:var(--gold)}.withdrawal-value{font-size:.85rem;font-weight:950;color:var(--gold)}.withdrawal-meta{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:5px;color:var(--muted);font-size:.65rem;font-weight:750}.withdrawal-empty{padding:12px;border:1px dashed rgba(255,255,255,.12);border-radius:12px;color:var(--muted);font-size:.7rem;text-align:center}
+
+/* Projeção de evolução da banca — única adição desta versão */
+.projection{margin-top:16px;padding:16px;border:1px solid rgba(255,192,31,.20);border-radius:18px;background:rgba(255,255,255,.018)}
+.projection-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px}
+.projection-title{font-size:.78rem;color:var(--gold);font-weight:900;text-transform:uppercase;letter-spacing:.05em}
+.projection-sub{font-size:.68rem;color:var(--muted);margin-top:5px;line-height:1.45}
+.projection-badge{font-size:.68rem;font-weight:900;color:var(--green);white-space:nowrap}
+.projection-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px}
+.projection-tab{padding:10px 6px;border-radius:12px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.035);color:var(--muted);font-weight:900;font-size:.68rem;text-transform:uppercase;cursor:pointer}
+.projection-tab.active{border-color:var(--gold);color:var(--gold);background:rgba(255,192,31,.10)}
+.projection-summary{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
+.projection-summary .box{padding:12px}
+.projection-summary .value{font-size:1.05rem}
+.projection-list{display:flex;flex-direction:column;gap:7px;max-height:390px;overflow:auto;padding-right:2px}
+.projection-day{display:grid;grid-template-columns:54px 1fr auto;align-items:center;gap:8px;padding:10px 11px;border:1px solid rgba(255,255,255,.07);border-radius:13px;background:rgba(255,255,255,.025)}
+.projection-day-label{font-size:.67rem;color:var(--gold);font-weight:900}
+.projection-flow{font-size:.69rem;color:#d9cfb8}.projection-flow b{color:#fff}
+.projection-profit{font-size:.72rem;color:var(--green);font-weight:900;text-align:right}
+.projection-note{margin-top:10px;font-size:.64rem;color:var(--muted);line-height:1.5}
+@media(max-width:380px){.projection-day{grid-template-columns:48px 1fr}.projection-profit{grid-column:2;text-align:left}.projection-summary .value{font-size:.95rem}}
 
 .dev-notice{
   min-height:205px;
@@ -143,26 +162,6 @@ body{background:#08060c;background-image:radial-gradient(circle at 15% 0%,rgba(2
 .dist-title{font-size:.7rem;color:var(--gold);font-weight:900;text-transform:uppercase;margin-bottom:8px}
 .dist-line{font-size:.7rem;color:#ebdcb0;line-height:1.65}
 
-
-/* Projeção de evolução da banca */
-.projection{margin-top:16px;padding:16px;border:1px solid rgba(255,192,31,.20);border-radius:18px;background:rgba(255,255,255,.018)}
-.projection-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px}
-.projection-title{font-size:.78rem;color:var(--gold);font-weight:900;text-transform:uppercase;letter-spacing:.05em}
-.projection-sub{font-size:.68rem;color:var(--muted);margin-top:5px;line-height:1.45}
-.projection-badge{font-size:.68rem;font-weight:900;color:var(--green);white-space:nowrap}
-.projection-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px}
-.projection-tab{padding:10px 6px;border-radius:12px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.035);color:var(--muted);font-weight:900;font-size:.68rem;text-transform:uppercase;cursor:pointer}
-.projection-tab.active{border-color:var(--gold);color:var(--gold);background:rgba(255,192,31,.10)}
-.projection-summary{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
-.projection-summary .box{padding:12px}
-.projection-summary .value{font-size:1.05rem}
-.projection-list{display:flex;flex-direction:column;gap:7px;max-height:390px;overflow:auto;padding-right:2px}
-.projection-day{display:grid;grid-template-columns:54px 1fr auto;align-items:center;gap:8px;padding:10px 11px;border:1px solid rgba(255,255,255,.07);border-radius:13px;background:rgba(255,255,255,.025)}
-.projection-day-label{font-size:.67rem;color:var(--gold);font-weight:900}
-.projection-flow{font-size:.69rem;color:#d9cfb8}.projection-flow b{color:#fff}
-.projection-profit{font-size:.72rem;color:var(--green);font-weight:900;text-align:right}
-.projection-note{margin-top:10px;font-size:.64rem;color:var(--muted);line-height:1.5}
-@media(max-width:380px){.projection-day{grid-template-columns:48px 1fr}.projection-profit{grid-column:2;text-align:left}.projection-summary .value{font-size:.95rem}}
 </style>
 </head>
 <body>
@@ -237,8 +236,8 @@ body{background:#08060c;background-image:radial-gradient(circle at 15% 0%,rgba(2
   <section class="card">
     <div class="title">🧮 Calculadora de Gestão</div>
     <label class="input-label">Valor disponível na banca (R$)</label>
-    <input id="bank" class="input example" type="number" value="100" placeholder="Digite sua banca">
-    <div class="hint">R$ 100,00 é apenas um exemplo. Digite o valor real da sua banca.</div>
+    <input id="bank" class="input" type="number" value="0" placeholder="Digite sua banca">
+    <div class="hint">Digite o valor real da sua banca para iniciar a gestão.</div>
 
     <div class="mode-buttons">
       <button id="modePercent" class="mode-btn active" onclick="setEntryMode('percent')">📊 Por porcentagem</button>
@@ -247,19 +246,19 @@ body{background:#08060c;background-image:radial-gradient(circle at 15% 0%,rgba(2
     <div id="entryModeHint" class="notice">Entrada de referência: <b>10% da banca</b>. O valor informado é usado para orientar a gestão.</div>
 
     <div class="grid section">
-      <div class="box"><div class="label">Mão 1 · Proteção</div><div class="value" id="hand1">R$ 10,00</div><div class="small">10% da banca</div></div>
-      <div class="box"><div class="label">Mão 2 · Lucro</div><div class="value" id="hand2">R$ 3,00</div><div class="small">30% da Mão 1</div></div>
+      <div class="box"><div class="label">Mão 1 · Proteção</div><div class="value" id="hand1">R$ 0,00</div><div class="small">10% da banca</div></div>
+      <div class="box"><div class="label">Mão 2 · Lucro</div><div class="value" id="hand2">R$ 0,00</div><div class="small">30% da Mão 1</div></div>
     </div>
 
     <div class="box section">
       <div class="label">Stop Win · Diário</div>
-      <div class="value green" id="stopWin">R$ 20,00 — R$ 30,00</div>
+      <div class="value green" id="stopWin">R$ 0,00 — R$ 0,00</div>
       <div class="small">Média recomendada: 20% a 30% da banca.</div>
     </div>
 
     <div class="box section">
       <div class="label">Stop Loss · Diário</div>
-      <div class="value red" id="stopLoss">R$ 20,00</div>
+      <div class="value red" id="stopLoss">R$ 0,00</div>
       <div class="small">Limite definido: 20% da banca.</div>
     </div>
 
@@ -271,8 +270,6 @@ body{background:#08060c;background-image:radial-gradient(circle at 15% 0%,rgba(2
       <div class="small">A divisão é apenas um exemplo operacional. O valor da entrada não é contabilizado como lucro ou loss; o registro considera somente o resultado.</div>
     </div>
 
-    <button class="btn" onclick="startManagement()">⚡ Iniciar gestão com esta banca</button>
-    <div class="notice">💡 Ao confirmar, a banca informada passa a alimentar a Visão Geral e os resultados da gestão.</div>
 
     <div class="projection">
       <div class="projection-head">
@@ -288,12 +285,14 @@ body{background:#08060c;background-image:radial-gradient(circle at 15% 0%,rgba(2
         <button id="proj30" class="projection-tab" onclick="setProjectionDays(30)">30 dias</button>
       </div>
       <div class="projection-summary">
-        <div class="box"><div class="label">Banca inicial</div><div class="value gold" id="projectionInitial">R$ 100,00</div></div>
-        <div class="box"><div class="label">Projeção final</div><div class="value green" id="projectionFinal">R$ 619,17</div></div>
+        <div class="box"><div class="label">Banca inicial</div><div class="value gold" id="projectionInitial">R$ 0,00</div></div>
+        <div class="box"><div class="label">Projeção final</div><div class="value green" id="projectionFinal">R$ 0,00</div></div>
       </div>
-      <div id="projectionList" class="projection-list"></div>
+      <div id="projectionList" class="projection-list"><div class="entry-empty">Informe sua banca para visualizar a projeção.</div></div>
       <div class="projection-note">💡 Esta é uma projeção, não uma garantia de resultado. Ela não altera a banca real, os registros ou os resultados da gestão.</div>
     </div>
+    <button class="btn" onclick="startManagement()">⚡ Iniciar gestão com esta banca</button>
+    <div class="notice">💡 Ao confirmar, a banca informada passa a alimentar a Visão Geral e os resultados da gestão.</div>
   </section>
 
   <section class="card">
@@ -347,7 +346,7 @@ body{background:#08060c;background-image:radial-gradient(circle at 15% 0%,rgba(2
 </nav>
 
 <script>
-let data=JSON.parse(localStorage.getItem('lord_demo_data_oficial_alunos_v1')||'null')||{
+let data=JSON.parse(localStorage.getItem('lord_demo_data_oficial_zerada_v1')||'null')||{
   started:false,initial:0,current:0,wins:0,losses:0,totalWin:0,totalLoss:0,days:0,entries:[],withdrawals:[],alerts:{win:false,loss:false,date:''}
 };
 if(!Array.isArray(data.entries)) data.entries=[];
@@ -357,7 +356,7 @@ if(!data.alerts || typeof data.alerts!=='object') data.alerts={win:false,loss:fa
 const money=v=>'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const pct=v=>Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%';
 
-function save(){localStorage.setItem('lord_demo_data_oficial_alunos_v1',JSON.stringify(data))}
+function save(){localStorage.setItem('lord_demo_data_oficial_zerada_v1',JSON.stringify(data))}
 let entryMode='percent';
 function setEntryMode(mode){
   entryMode=mode;
@@ -381,8 +380,6 @@ function renderProjection(){
   const list=document.getElementById('projectionList');
   if(!initialEl||!finalEl||!list)return;
   initialEl.textContent=money(b);
-  // A projeção segue a mesma lógica do gerenciamento: a meta diária é calculada
-  // sempre sobre a banca inicial informada pelo aluno, sem juros compostos.
   const dailyTarget=b*.20;
   let current=b;
   let html='';
@@ -394,6 +391,7 @@ function renderProjection(){
   finalEl.textContent=money(current);
   list.innerHTML=html||'<div class="entry-empty">Informe sua banca para visualizar a projeção.</div>';
 }
+
 function calc(){
   const b=parseFloat(document.getElementById('bank').value)||0;
   document.getElementById('hand1').textContent=money(b*.10);
@@ -413,7 +411,7 @@ function calc(){
 function startManagement(){
   const b=parseFloat(document.getElementById('bank').value)||0;
   if(b<=0){alert('Digite um valor de banca válido.');return}
-  data={started:true,initial:b,current:b,wins:0,losses:0,totalWin:0,totalLoss:0,days:0,entries:[],alerts:{win:false,loss:false,date:new Date().toLocaleDateString('pt-BR')}};
+  data={started:true,initial:b,current:b,wins:0,losses:0,totalWin:0,totalLoss:0,days:0,entries:[],withdrawals:[],alerts:{win:false,loss:false,gordura:0,date:new Date().toLocaleDateString('pt-BR')}};
   document.getElementById('bank').classList.remove('example');
   save(); updateOverview(); alert('Gestão iniciada com '+money(b)+'.');
 }
@@ -429,7 +427,7 @@ function registerEntry(){
   if(val<=0){alert('Informe um valor válido.');return}
   const now=new Date();
   const today=now.toLocaleDateString('pt-BR');
-  if(data.alerts.date!==today){data.alerts={win:false,loss:false,date:today}}
+  if(data.alerts.date!==today){data.alerts={win:false,loss:false,gordura:0,date:today}}
   const entry={id:Date.now(),type,value:val,date:today,time:now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),period:getPeriod(now.getHours())};
   data.entries.push(entry);
   if(type==='WIN'){data.wins++;data.totalWin+=val;data.current+=val}
@@ -440,9 +438,16 @@ function registerEntry(){
   const todayWin=data.entries.filter(e=>e.type==='WIN' && e.date===today).reduce((a,e)=>a+Number(e.value||0),0);
   const todayLoss=data.entries.filter(e=>e.type==='LOSS' && e.date===today).reduce((a,e)=>a+Number(e.value||0),0);
   const stopTarget=data.initial*.20;
+  const gordura=Math.max(0,todayWin-stopTarget);
   if(todayWin>=stopTarget && !data.alerts.win){
-    data.alerts.win=true;save();
-    alert('🟢 STOP WIN ALCANÇADO!\n\nResultado positivo do dia: '+money(todayWin)+'\nMeta mínima de Stop Win: '+money(stopTarget)+'\n\nGestão diária concluída.');
+    data.alerts.win=true;
+    data.alerts.gordura=gordura;
+    save();
+    alert('🟢 STOP WIN ALCANÇADO!\n\nResultado positivo do dia: '+money(todayWin)+'\nMeta mínima de Stop Win: '+money(stopTarget)+'\n💰 Gordura acima da meta: '+money(gordura)+'\n\nGestão diária concluída.');
+  } else if(todayWin>stopTarget && data.alerts.win && gordura>(Number(data.alerts.gordura)||0)){
+    data.alerts.gordura=gordura;
+    save();
+    alert('💰 GORDURA DA META!\n\nMeta de Stop Win: '+money(stopTarget)+'\nResultado do dia: '+money(todayWin)+'\nGordura acumulada acima da meta: '+money(gordura)+'\n\nEsse valor está acima da meta diária.');
   } else if(todayLoss>=stopTarget && !data.alerts.loss){
     data.alerts.loss=true;save();
     alert('🔴 STOP LOSS ALCANÇADO!\n\nPerda do dia: '+money(todayLoss)+'\nLimite de Stop Loss: '+money(stopTarget)+'\n\nEncerre a gestão do dia para respeitar o limite.');
@@ -464,7 +469,7 @@ function makeWithdrawal(){
   document.getElementById('withdrawalValue').value=0;
   updateOverview();
   renderWithdrawalReport();
-  alert('💰 Sangria realizada com sucesso.\\n\\nValor retirado: '+money(val)+'\\nBanca atual: '+money(data.current));
+  alert('💰 Sangria realizada com sucesso.\n\nValor retirado: '+money(val)+'\nBanca atual: '+money(data.current));
 }
 
 function renderWithdrawalReport(){
@@ -527,10 +532,11 @@ function newMonth(){
   data={started:false,initial:0,current:0,wins:0,losses:0,totalWin:0,totalLoss:0,days:0,entries:[],withdrawals:[],alerts:{win:false,loss:false,date:''}};
   save();
   const bank=document.getElementById('bank');
-  bank.value=100;
-  bank.classList.add('example');
-  calc();updateOverview();renderEntryReport();
-  alert('Novo mês iniciado. A banca voltou para R$ 100,00 como exemplo.');
+  bank.value=0;
+  bank.classList.remove('example');
+  document.getElementById('resultValue').value=0;
+  calc();updateOverview();renderEntryReport();renderWithdrawalReport();
+  alert('Novo mês iniciado. Todos os valores foram zerados. Digite sua nova banca para começar.');
 }
 
 function showPage(id,btn){
@@ -543,10 +549,11 @@ if(data.started){
   document.getElementById('bank').value=data.initial;
   document.getElementById('bank').classList.remove('example');
 }else{
-  document.getElementById('bank').value=100;
-  document.getElementById('bank').classList.add('example');
+  document.getElementById('bank').value=0;
+  document.getElementById('bank').classList.remove('example');
+  document.getElementById('resultValue').value=0;
 }
-calc();updateOverview();
+calc();updateOverview();renderWithdrawalReport();
 </script>
 </body>
 </html>
