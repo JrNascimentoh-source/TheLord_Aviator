@@ -223,35 +223,34 @@
   </section>
 
   <section class="card">
-    <div class="monitor-status">
-      <div class="monitor-status-title">📊 Como está o Game agora</div>
+    <div class="sala-header">
+      <div class="sala-title" id="salaTitle">✈ Aviator</div>
       <div class="monitor-clock" id="monitorClock">00:00:00</div>
     </div>
-    <div class="monitor-fact" id="monitorFact">Registre rodadas para acompanhar o histórico real do jogo.</div>
-    <div class="monitor-disclaimer">💡 Estes números são apenas um histórico do que já aconteceu. Rodadas passadas não influenciam nem preveem o resultado das próximas — cada rodada é independente.</div>
-  </section>
+    <div class="monitor-disclaimer" style="margin-top:8px">💡 Estatísticas calculadas apenas com as rodadas que você mesmo registrou abaixo. Não é um feed ao vivo, e rodadas passadas não preveem as próximas.</div>
 
-  <section class="card">
-    <div class="monitor-stats">
-      <div class="box monitor-stat-box"><div class="label">Última Vela Alta (≥10x)</div><div class="value pink" id="statLastHigh" style="color:#ff5fa8">—</div><div class="monitor-stat-time" id="statLastHighTime">Nenhuma ainda</div></div>
-      <div class="box monitor-stat-box"><div class="label">Última Extrema · 24h (≥100x)</div><div class="value red" id="statLastExtreme">—</div><div class="monitor-stat-time" id="statLastExtremeTime">Nenhuma ainda</div></div>
-      <div class="box monitor-stat-box"><div class="label">Última 10x–50x</div><div class="value" id="stat1050" style="color:#ff5fa8">—</div><div class="monitor-stat-time" id="stat1050Time">Nenhuma ainda</div></div>
-      <div class="box monitor-stat-box"><div class="label">Última 50x–100x</div><div class="value" id="stat50100" style="color:#ff5fa8">—</div><div class="monitor-stat-time" id="stat50100Time">Nenhuma ainda</div></div>
+    <div class="sala-stats">
+      <div class="sala-stat"><div class="sala-stat-value" id="statRounds">0</div><div class="sala-stat-label">Rodadas</div></div>
+      <div class="sala-stat"><div class="sala-stat-value" id="statAvg">0.00x</div><div class="sala-stat-label">Média</div></div>
+      <div class="sala-stat"><div class="sala-stat-value" id="statAbove2">0%</div><div class="sala-stat-label">Acima de 2x</div></div>
+      <div class="sala-stat"><div class="sala-stat-value" id="statAbove10">0%</div><div class="sala-stat-label">Acima de 10x</div></div>
+      <div class="sala-stat"><div class="sala-stat-value" id="statAbove100">0</div><div class="sala-stat-label">Acima de 100x</div></div>
+      <div class="sala-stat"><div class="sala-stat-value" id="statMax">0.00x</div><div class="sala-stat-label">Máxima</div></div>
     </div>
-  </section>
+    <button type="button" class="btn btn-secondary sala-dist-btn" id="distToggleBtn" onclick="toggleDistribution()">🧭 Distribuição ▾</button>
 
-  <section class="card">
-    <div class="title">🧭 Distribuição · última hora</div>
-    <div class="donut-row">
-      <div class="donut-wrap">
-        <div class="donut-ring" id="donutRing" style="background:conic-gradient(rgba(255,255,255,.08) 0 360deg)"></div>
-        <div class="donut-center" id="donutCenter">0</div>
-      </div>
-      <div class="donut-legend">
-        <div class="donut-legend-row"><span class="donut-dot" style="background:#5aa7ff"></span><span class="donut-legend-label">Azul &lt;2x</span><span class="donut-legend-pct" id="pctBlue">0%</span><span class="donut-legend-count" id="cntBlue">0</span></div>
-        <div class="donut-legend-row"><span class="donut-dot" style="background:#8b5cf6"></span><span class="donut-legend-label">Roxo 2–10x</span><span class="donut-legend-pct" id="pctPurple">0%</span><span class="donut-legend-count" id="cntPurple">0</span></div>
-        <div class="donut-legend-row"><span class="donut-dot" style="background:#ff2f87"></span><span class="donut-legend-label">Rosa 10–100x</span><span class="donut-legend-pct" id="pctPink">0%</span><span class="donut-legend-count" id="cntPink">0</span></div>
-        <div class="donut-legend-row"><span class="donut-dot" style="background:#ff1e43"></span><span class="donut-legend-label">Hot ≥100x</span><span class="donut-legend-pct" id="pctHot">0%</span><span class="donut-legend-count" id="cntHot">0</span></div>
+    <div id="distributionPanel" class="hidden">
+      <div class="donut-row" style="margin-top:14px">
+        <div class="donut-wrap">
+          <div class="donut-ring" id="donutRing" style="background:conic-gradient(rgba(255,255,255,.08) 0 360deg)"></div>
+          <div class="donut-center" id="donutCenter">0</div>
+        </div>
+        <div class="donut-legend">
+          <div class="donut-legend-row"><span class="donut-dot" style="background:#5aa7ff"></span><span class="donut-legend-label">Azul &lt;2x</span><span class="donut-legend-pct" id="pctBlue">0%</span><span class="donut-legend-count" id="cntBlue">0</span></div>
+          <div class="donut-legend-row"><span class="donut-dot" style="background:#8b5cf6"></span><span class="donut-legend-label">Roxo 2–10x</span><span class="donut-legend-pct" id="pctPurple">0%</span><span class="donut-legend-count" id="cntPurple">0</span></div>
+          <div class="donut-legend-row"><span class="donut-dot" style="background:#ff2f87"></span><span class="donut-legend-label">Rosa 10–100x</span><span class="donut-legend-pct" id="pctPink">0%</span><span class="donut-legend-count" id="cntPink">0</span></div>
+          <div class="donut-legend-row"><span class="donut-dot" style="background:#ff1e43"></span><span class="donut-legend-label">Hot ≥100x</span><span class="donut-legend-pct" id="pctHot">0%</span><span class="donut-legend-count" id="cntHot">0</span></div>
+        </div>
       </div>
     </div>
   </section>
@@ -261,19 +260,21 @@
       <div class="round-header-left">
         <div class="title" style="margin-bottom:0">🎯 Últimas Rodadas</div>
       </div>
-      <span class="badge-live"><span class="dot"></span>tempo real</span>
+      <span class="badge-live"><span class="dot"></span>registro manual</span>
     </div>
     <div class="round-form">
       <input id="roundValue" class="input" type="number" step="0.01" min="0" placeholder="Ex: 2.35">
       <button class="btn" onclick="registerRound()">➕ Registrar</button>
     </div>
 
-    <div class="round-header" style="margin-bottom:10px;margin-top:16px">
-      <span class="small" style="margin-top:0">🔢 Contagem de casas <span class="badge-active">Ativada</span></span>
+    <div class="contagem-row">
+      <span class="contagem-label">🔢 Contagem de Casas</span>
+      <button type="button" id="contagemToggle" class="badge-active" onclick="toggleContagemCasas()">● Ativada</button>
     </div>
     <div id="roundGrid" class="round-grid"></div>
     <button class="btn btn-secondary" style="margin-top:14px" onclick="clearRounds()">🔄 Limpar histórico de rodadas</button>
   </section>
+
 
   <section class="card">
     <div class="title">🎨 O que significa cada cor</div>
