@@ -209,16 +209,16 @@ body{background:#08060c;background-image:radial-gradient(circle at 15% 0%,rgba(2
 .filter-header{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
 .filter-count{font-size:.68rem;color:var(--muted);font-weight:800}
 .filter-clear{background:none;border:0;color:#ff5a6e;font-size:.68rem;font-weight:800;cursor:pointer;padding:2px}
-.filter-chips{display:flex;gap:7px;overflow-x:auto;padding:10px 0 2px;scrollbar-width:none}
+.filter-chips{display:flex;flex-wrap:wrap;gap:7px;padding:10px 0 2px}
 .filter-chips::-webkit-scrollbar{display:none}
 .filter-chip{flex:none;padding:8px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:var(--muted);font-weight:850;font-size:.72rem;white-space:nowrap;cursor:pointer}
 .filter-chip.active{border-color:#fff;color:#fff;background:rgba(255,255,255,.12)}
 .filter-chip[data-min="2"].active{border-color:#8b5cf6;color:#c4a9ff;background:rgba(139,92,246,.18)}
 .filter-chip[data-min="10"].active{border-color:#ff2f87;color:#ff8ec1;background:rgba(255,47,135,.16)}
-.filter-chip[data-min="50"].active{border-color:#00e676;color:#7cffb0;background:rgba(0,230,118,.14)}
-.filter-chip[data-min="100"].active{border-color:#ff1e43;color:#ff8b98;background:rgba(255,30,67,.16)}
-.filter-chip[data-min="500"].active{border-color:#ffc01f;color:#ffdb7d;background:rgba(255,192,31,.16)}
-.filter-chip[data-min="1000"].active{border-color:#e8a000;color:#ffdb7d;background:rgba(232,160,0,.2)}
+.filter-chip[data-min="50"].active{border-color:#ff2f87;color:#ff8ec1;background:rgba(255,47,135,.16)}
+.filter-chip[data-min="100"].active{border-color:#ffc01f;color:#ffdb7d;background:rgba(255,192,31,.18)}
+.filter-chip[data-min="500"].active{border-color:#ff1e43;color:#ff8b98;background:rgba(255,30,67,.18)}
+.filter-chip[data-min="1000"].active{border-color:#ff6a1a;color:#ffdb7d;background:linear-gradient(135deg,rgba(255,192,31,.28),rgba(255,30,67,.32))}
 .monitor-status-title{font-size:.78rem;color:var(--gold);font-weight:900;text-transform:uppercase;letter-spacing:.06em}
 .monitor-clock{font-size:.9rem;font-weight:950;color:#fff;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:5px 10px;font-variant-numeric:tabular-nums}
 .monitor-fact{margin-top:10px;font-size:.78rem;color:#ebdcb0;line-height:1.5}
@@ -259,14 +259,18 @@ body{background:#08060c;background-image:radial-gradient(circle at 15% 0%,rgba(2
 .round-chip-idx{position:absolute;top:5px;left:7px;font-size:.58rem;color:rgba(255,255,255,.55);font-weight:800}
 .round-chip-val{font-size:.92rem;font-weight:950;margin-top:8px}
 .round-chip-time{font-size:.6rem;color:rgba(255,255,255,.55);margin-top:2px}
-.chip-blue{background:rgba(58,130,246,.14);border-color:rgba(58,130,246,.35)}
-.chip-blue .round-chip-val{color:#5aa7ff}
-.chip-purple{background:rgba(139,92,246,.16);border-color:rgba(139,92,246,.4)}
-.chip-purple .round-chip-val{color:#b18bff}
-.chip-pink{background:rgba(255,47,135,.16);border-color:rgba(255,47,135,.4)}
-.chip-pink .round-chip-val{color:#ff5fa8}
-.chip-hot{background:rgba(255,30,67,.22);border-color:rgba(255,30,67,.55)}
-.chip-hot .round-chip-val{color:#ff5a6e}
+.chip-blue{background:rgba(58,130,246,.22);border-color:#5aa7ff}
+.chip-blue .round-chip-val{color:#8ec2ff}
+.chip-purple{background:rgba(139,92,246,.32);border-color:#8b5cf6}
+.chip-purple .round-chip-val{color:#c4a9ff}
+.chip-pink{background:rgba(255,47,135,.3);border-color:#ff2f87}
+.chip-pink .round-chip-val{color:#ff8ec1}
+.chip-hot{background:rgba(255,30,67,.3);border-color:#ff1e43}
+.chip-hot .round-chip-val{color:#ff8b98}
+.chip-yellow{background:rgba(255,192,31,.16);border-color:rgba(255,192,31,.45)}
+.chip-yellow .round-chip-val{color:#ffd35a}
+.chip-fire{background:linear-gradient(135deg,rgba(255,192,31,.28),rgba(255,30,67,.32));border-color:rgba(255,106,26,.65)}
+.chip-fire .round-chip-val{background:linear-gradient(135deg,#ffd35a,#ff3b1a);-webkit-background-clip:text;background-clip:text;color:transparent}
 
 .color-legend{display:flex;flex-direction:column;gap:10px}
 .color-legend-row{display:flex;align-items:center;gap:10px;font-size:.75rem;color:#ebdcb0}
