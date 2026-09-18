@@ -267,6 +267,20 @@
       <button class="btn" onclick="registerRound()">➕ Registrar</button>
     </div>
 
+    <div class="filter-header">
+      <span class="filter-count" id="filterCount">0 rodadas</span>
+      <button type="button" class="filter-clear" id="filterClearBtn" onclick="setRoundFilter(0)">✕ Limpar filtro</button>
+    </div>
+    <div class="filter-chips" id="filterChips">
+      <button type="button" class="filter-chip active" data-min="0" onclick="setRoundFilter(0)">Todos</button>
+      <button type="button" class="filter-chip" data-min="2" onclick="setRoundFilter(2)">⚡ ≥2x</button>
+      <button type="button" class="filter-chip" data-min="10" onclick="setRoundFilter(10)">🌀 ≥10x</button>
+      <button type="button" class="filter-chip" data-min="50" onclick="setRoundFilter(50)">🔥 ≥50x</button>
+      <button type="button" class="filter-chip" data-min="100" onclick="setRoundFilter(100)">🚀 ≥100x</button>
+      <button type="button" class="filter-chip" data-min="500" onclick="setRoundFilter(500)">⭐ ≥500x</button>
+      <button type="button" class="filter-chip" data-min="1000" onclick="setRoundFilter(1000)">🌟 ≥1000x</button>
+    </div>
+
     <div class="contagem-row">
       <span class="contagem-label">🔢 Contagem de Casas</span>
       <button type="button" id="contagemToggle" class="badge-active" onclick="toggleContagemCasas()">● Ativada</button>

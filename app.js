@@ -725,6 +725,12 @@ function timeAgo(ts){
   return d+' dia'+(d>1?'s':'')+' atrás';
 }
 let contagemCasasEnabled=(data.contagemAtivada!==undefined)?data.contagemAtivada:true;
+let roundFilterMin=0;
+function setRoundFilter(min){
+  roundFilterMin=min;
+  document.querySelectorAll('.filter-chip').forEach(b=>b.classList.toggle('active',Number(b.dataset.min)===min));
+  renderMonitor();
+}
 function toggleContagemCasas(){
   contagemCasasEnabled=!contagemCasasEnabled;
   data.contagemAtivada=contagemCasasEnabled;
@@ -758,11 +764,21 @@ function renderMonitor(){
     toggleBtn.classList.toggle('off',!contagemCasasEnabled);
   }
 
+  const filterCountEl=document.getElementById('filterCount');
+  const filtered=roundFilterMin>0?rounds.filter(r=>Number(r.value||0)>=roundFilterMin):rounds;
+  if(filterCountEl){
+    filterCountEl.textContent=roundFilterMin>0
+      ? `${filtered.length} de ${rounds.length} rodadas (≥${roundFilterMin}x)`
+      : `${rounds.length} rodadas`;
+  }
+
   if(!rounds.length){
     grid.innerHTML='<div class="round-empty">Nenhuma rodada registrada ainda. Use o campo acima para adicionar.</div>';
+  }else if(!filtered.length){
+    grid.innerHTML='<div class="round-empty">Nenhuma rodada encontrada com esse filtro.</div>';
   }else{
     const {labelById,streakEndById}=computeStreakLabels(rounds);
-    grid.innerHTML=rounds.slice(0,60).map((r)=>{
+    grid.innerHTML=filtered.slice(0,60).map((r)=>{
       const cls=r.color||classifyRound(r.value).key;
       const valLabel=(r.value!==null && r.value!==undefined)?r.value.toFixed(2)+'x':colorMeta[cls].label;
       const isStreakEnd=streakEndById[r.id];

@@ -205,6 +205,20 @@ body{background:#08060c;background-image:radial-gradient(circle at 15% 0%,rgba(2
 .sala-dist-btn{margin-top:12px}
 .contagem-row{display:flex;align-items:center;justify-content:flex-end;gap:9px;margin:16px 0 10px}
 .contagem-label{font-size:.72rem;color:var(--muted);font-weight:800}
+
+.filter-header{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
+.filter-count{font-size:.68rem;color:var(--muted);font-weight:800}
+.filter-clear{background:none;border:0;color:#ff5a6e;font-size:.68rem;font-weight:800;cursor:pointer;padding:2px}
+.filter-chips{display:flex;gap:7px;overflow-x:auto;padding:10px 0 2px;scrollbar-width:none}
+.filter-chips::-webkit-scrollbar{display:none}
+.filter-chip{flex:none;padding:8px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:var(--muted);font-weight:850;font-size:.72rem;white-space:nowrap;cursor:pointer}
+.filter-chip.active{border-color:#fff;color:#fff;background:rgba(255,255,255,.12)}
+.filter-chip[data-min="2"].active{border-color:#8b5cf6;color:#c4a9ff;background:rgba(139,92,246,.18)}
+.filter-chip[data-min="10"].active{border-color:#ff2f87;color:#ff8ec1;background:rgba(255,47,135,.16)}
+.filter-chip[data-min="50"].active{border-color:#00e676;color:#7cffb0;background:rgba(0,230,118,.14)}
+.filter-chip[data-min="100"].active{border-color:#ff1e43;color:#ff8b98;background:rgba(255,30,67,.16)}
+.filter-chip[data-min="500"].active{border-color:#ffc01f;color:#ffdb7d;background:rgba(255,192,31,.16)}
+.filter-chip[data-min="1000"].active{border-color:#e8a000;color:#ffdb7d;background:rgba(232,160,0,.2)}
 .monitor-status-title{font-size:.78rem;color:var(--gold);font-weight:900;text-transform:uppercase;letter-spacing:.06em}
 .monitor-clock{font-size:.9rem;font-weight:950;color:#fff;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:5px 10px;font-variant-numeric:tabular-nums}
 .monitor-fact{margin-top:10px;font-size:.78rem;color:#ebdcb0;line-height:1.5}
