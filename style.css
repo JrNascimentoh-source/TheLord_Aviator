@@ -41,6 +41,12 @@ h1{font-size:1.18rem;margin-top:3px}
 }
 .btn-secondary{background:rgba(255,30,67,.1);border:1px solid rgba(255,30,67,.4);color:var(--red)}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.result-select{text-align:center;text-align-last:center}
+.hand-row{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}
+.hand-btn{padding:11px 8px;border-radius:13px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:var(--muted);font-weight:900;font-size:.76rem;cursor:pointer;text-align:center;line-height:1.4}
+.hand-btn span{display:block;font-size:.6rem;font-weight:700;text-transform:none;color:var(--muted);margin-top:2px}
+.hand-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(255,192,31,.1)}
+.hand-btn.active span{color:var(--gold);opacity:.85}
 .box{
   background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.09);
   border-radius:15px;padding:14px
