@@ -673,7 +673,9 @@ function newMonth(){
    estatísticas de histórico.
 ====================================================== */
 function classifyRound(v){
-  if(v>=100) return {cls:'hot',color:'#ff1e43',key:'hot'};
+  if(v>=1000) return {cls:'fire',color:'#ff5a1a',key:'fire'};
+  if(v>=500) return {cls:'hot',color:'#ff1e43',key:'hot'};
+  if(v>=100) return {cls:'yellow',color:'#ffc01f',key:'yellow'};
   if(v>=10) return {cls:'pink',color:'#ff2f87',key:'pink'};
   if(v>=2) return {cls:'purple',color:'#8b5cf6',key:'purple'};
   return {cls:'blue',color:'#5aa7ff',key:'blue'};
@@ -682,7 +684,9 @@ const colorMeta={
   blue:{cls:'blue',label:'Azul'},
   purple:{cls:'purple',label:'Roxo'},
   pink:{cls:'pink',label:'Rosa'},
-  hot:{cls:'hot',label:'Vermelha'}
+  yellow:{cls:'yellow',label:'Amarela'},
+  hot:{cls:'hot',label:'Vermelha'},
+  fire:{cls:'fire',label:'Fogo'}
 };
 function nowTimeStr(d){d=d||new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0')}
 function currentRounds(){return data.roundsByGame[data.activeGame]}
@@ -743,8 +747,8 @@ function computeStreakLabels(roundsDesc){
   const labelById={},streakEndById={};
   chronological.forEach(r=>{
     counter++;
-    const cls=r.color||classifyRound(r.value).key;
-    const isHigh=cls==='pink'||cls==='hot';
+    const cls=classifyRound(r.value).key;
+    const isHigh=cls==='pink'||cls==='yellow'||cls==='hot'||cls==='fire';
     labelById[r.id]=counter;
     streakEndById[r.id]=isHigh;
     if(isHigh) counter=0;
@@ -779,7 +783,7 @@ function renderMonitor(){
   }else{
     const {labelById,streakEndById}=computeStreakLabels(rounds);
     grid.innerHTML=filtered.slice(0,60).map((r)=>{
-      const cls=r.color||classifyRound(r.value).key;
+      const cls=classifyRound(r.value).key;
       const valLabel=(r.value!==null && r.value!==undefined)?r.value.toFixed(2)+'x':colorMeta[cls].label;
       const isStreakEnd=streakEndById[r.id];
       const showBadge=contagemCasasEnabled;
@@ -811,23 +815,25 @@ function renderMonitor(){
   setText('statAbove100',above100Count);
   setText('statMax',maxValue.toFixed(2)+'x');
 
-  const counts={blue:0,purple:0,pink:0,hot:0};
-  rounds.forEach(r=>counts[r.color||classifyRound(r.value).key]++);
+  const counts={blue:0,purple:0,pink:0,yellow:0,hot:0,fire:0};
+  rounds.forEach(r=>counts[classifyRound(r.value).key]++);
   const total=rounds.length;
-  const colors={blue:'#5aa7ff',purple:'#8b5cf6',pink:'#ff2f87',hot:'#ff1e43'};
+  const colors={blue:'#5aa7ff',purple:'#8b5cf6',pink:'#ff2f87',yellow:'#ffc01f',hot:'#ff1e43',fire:'#ff5a1a'};
   document.getElementById('donutCenter').textContent=total;
   let acc=0;
   const stops=[];
-  ['blue','purple','pink','hot'].forEach(k=>{
+  ['blue','purple','pink','yellow','hot','fire'].forEach(k=>{
     const p=total?(counts[k]/total*360):0;
     if(p>0){stops.push(`${colors[k]} ${acc.toFixed(2)}deg ${(acc+p).toFixed(2)}deg`);acc+=p}
   });
   document.getElementById('donutRing').style.background=stops.length?`conic-gradient(${stops.join(',')})`:'conic-gradient(rgba(255,255,255,.08) 0 360deg)';
-  ['Blue','Purple','Pink','Hot'].forEach(label=>{
+  ['Blue','Purple','Pink','Yellow','Hot','Fire'].forEach(label=>{
     const k=label.toLowerCase();
     const p=total?Math.round(counts[k]/total*100):0;
-    document.getElementById('pct'+label).textContent=p+'%';
-    document.getElementById('cnt'+label).textContent=counts[k];
+    const pctEl=document.getElementById('pct'+label);
+    const cntEl=document.getElementById('cnt'+label);
+    if(pctEl) pctEl.textContent=p+'%';
+    if(cntEl) cntEl.textContent=counts[k];
   });
 }
 function toggleDistribution(){

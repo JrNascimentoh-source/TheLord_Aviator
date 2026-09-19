@@ -267,10 +267,10 @@ body{background:#08060c;background-image:radial-gradient(circle at 15% 0%,rgba(2
 .chip-pink .round-chip-val{color:#ff8ec1}
 .chip-hot{background:rgba(255,30,67,.3);border-color:#ff1e43}
 .chip-hot .round-chip-val{color:#ff8b98}
-.chip-yellow{background:rgba(255,192,31,.16);border-color:rgba(255,192,31,.45)}
-.chip-yellow .round-chip-val{color:#ffd35a}
-.chip-fire{background:linear-gradient(135deg,rgba(255,192,31,.28),rgba(255,30,67,.32));border-color:rgba(255,106,26,.65)}
-.chip-fire .round-chip-val{background:linear-gradient(135deg,#ffd35a,#ff3b1a);-webkit-background-clip:text;background-clip:text;color:transparent}
+.chip-yellow{background:rgba(255,192,31,.32);border-color:#ffc01f}
+.chip-yellow .round-chip-val{color:#ffdb7d}
+.chip-fire{background:linear-gradient(135deg,rgba(255,192,31,.4),rgba(255,58,26,.4));border-color:#ff6a1a}
+.chip-fire .round-chip-val{background:linear-gradient(135deg,#ffe08a,#ff5a1a);-webkit-background-clip:text;background-clip:text;color:transparent}
 
 .color-legend{display:flex;flex-direction:column;gap:10px}
 .color-legend-row{display:flex;align-items:center;gap:10px;font-size:.75rem;color:#ebdcb0}
