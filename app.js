@@ -187,11 +187,26 @@ function getPeriod(hour){
   if(hour>=12 && hour<18) return 'Tarde';
   return 'Noite';
 }
-let entryHand=1;
-function setEntryHand(n){
-  entryHand=n;
-  document.getElementById('handBtn1').classList.toggle('active',n===1);
-  document.getElementById('handBtn2').classList.toggle('active',n===2);
+function computeHandResult(n){
+  const val=parseFloat(document.getElementById('hand'+n+'Value').value)||0;
+  const mult=parseFloat(document.getElementById('hand'+n+'Mult').value)||0;
+  const winChecked=document.getElementById('hand'+n+'Win').checked;
+  const lossChecked=document.getElementById('hand'+n+'Loss').checked;
+  let result=0;
+  if(winChecked) result=val*mult;
+  else if(lossChecked) result=-val;
+  const resEl=document.getElementById('hand'+n+'Result');
+  resEl.textContent=(result<0?'-':'')+money(Math.abs(result));
+  resEl.className=result>0?'green':(result<0?'red':'');
+}
+function handStatusChange(n,which){
+  const win=document.getElementById('hand'+n+'Win');
+  const loss=document.getElementById('hand'+n+'Loss');
+  if(which==='win' && win.checked) loss.checked=false;
+  if(which==='loss' && loss.checked) win.checked=false;
+  document.getElementById('hand'+n+'WinLabel').classList.toggle('win-active',win.checked);
+  document.getElementById('hand'+n+'LossLabel').classList.toggle('loss-active',loss.checked);
+  computeHandResult(n);
 }
 function registerEntry(){
   if(!data.started){alert('Primeiro confirme sua banca na Calculadora para iniciar a gestão.');return}
@@ -201,7 +216,7 @@ function registerEntry(){
   const now=new Date();
   const today=now.toLocaleDateString('pt-BR');
   if(data.alerts.date!==today){data.alerts={win:false,loss:false,gordura:0,date:today}}
-  const entry={id:Date.now(),type,value:val,hand:entryHand,date:today,time:now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),period:getPeriod(now.getHours())};
+  const entry={id:Date.now(),type,value:val,date:today,time:now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),period:getPeriod(now.getHours())};
   data.entries.push(entry);
   if(type==='WIN'){data.wins++;data.totalWin+=val;data.current+=val}
   else{data.losses++;data.totalLoss+=val;data.current=Math.max(0,data.current-val)}
@@ -344,8 +359,7 @@ function renderEntryReport(){
     const cls=win?'win':'loss';
     const sign=win?'+':'-';
     const period=e.period||getPeriod(Number((e.time||'00:00').split(':')[0]));
-    const handTag=e.hand?`<span>✋ Mão ${e.hand}°</span>`:'';
-    return `<div class="entry-item"><div class="entry-top"><span class="entry-result ${cls}">${label}</span><span class="entry-value ${cls}">${sign}${money(e.value)}</span><div class="item-actions"><button class="item-action-btn delete" onclick="deleteEntry(${e.id})">✕</button></div></div><div class="entry-meta"><span>📅 ${e.date}</span><span>🕐 ${period}</span><span>⏰ ${e.time}</span>${handTag}</div></div>`;
+    return `<div class="entry-item"><div class="entry-top"><span class="entry-result ${cls}">${label}</span><span class="entry-value ${cls}">${sign}${money(e.value)}</span><div class="item-actions"><button class="item-action-btn delete" onclick="deleteEntry(${e.id})">✕</button></div></div><div class="entry-meta"><span>📅 ${e.date}</span><span>🕐 ${period}</span><span>⏰ ${e.time}</span></div></div>`;
   }).join('');
 }
 
