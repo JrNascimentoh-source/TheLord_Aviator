@@ -210,18 +210,49 @@ function handStatusChange(n,which){
 }
 function registerEntry(){
   if(!data.started){alert('Primeiro confirme sua banca na Calculadora para iniciar a gestão.');return}
-  const type=document.getElementById('resultType').value;
-  const val=parseFloat(document.getElementById('resultValue').value)||0;
-  if(val<=0){alert('Informe um valor válido.');return}
   const now=new Date();
   const today=now.toLocaleDateString('pt-BR');
+  const time=now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  const period=getPeriod(now.getHours());
   if(data.alerts.date!==today){data.alerts={win:false,loss:false,gordura:0,date:today}}
-  const entry={id:Date.now(),type,value:val,date:today,time:now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),period:getPeriod(now.getHours())};
-  data.entries.push(entry);
-  if(type==='WIN'){data.wins++;data.totalWin+=val;data.current+=val}
-  else{data.losses++;data.totalLoss+=val;data.current=Math.max(0,data.current-val)}
+
+  const toRegister=[];
+  [1,2].forEach(n=>{
+    const entradaVal=parseFloat(document.getElementById('hand'+n+'Value').value)||0;
+    const mult=parseFloat(document.getElementById('hand'+n+'Mult').value)||0;
+    const isWin=document.getElementById('hand'+n+'Win').checked;
+    const isLoss=document.getElementById('hand'+n+'Loss').checked;
+    if(entradaVal>0 && isWin){
+      const liquido=Math.max(0,(entradaVal*mult)-entradaVal);
+      toRegister.push({hand:n,type:'WIN',value:liquido,entradaValue:entradaVal,multiplier:mult});
+    } else if(entradaVal>0 && isLoss){
+      toRegister.push({hand:n,type:'LOSS',value:entradaVal,entradaValue:entradaVal,multiplier:mult});
+    }
+  });
+
+  if(!toRegister.length){
+    alert('Preencha a Entrada (R$) e marque Win ou Loss em pelo menos uma das mãos antes de registrar.');
+    return;
+  }
+
+  toRegister.forEach(r=>{
+    const entry={id:Date.now()+r.hand,type:r.type,value:r.value,hand:r.hand,entradaValue:r.entradaValue,multiplier:r.multiplier,date:today,time,period};
+    data.entries.push(entry);
+    if(r.type==='WIN'){data.wins++;data.totalWin+=r.value;data.current+=r.value}
+    else{data.losses++;data.totalLoss+=r.value;data.current=Math.max(0,data.current-r.value)}
+  });
   data.days=new Set(data.entries.map(e=>e.date)).size;
   save();updateOverview();renderEntryReport();calc();
+
+  [1,2].forEach(n=>{
+    document.getElementById('hand'+n+'Value').value=0;
+    document.getElementById('hand'+n+'Mult').value=0;
+    document.getElementById('hand'+n+'Win').checked=false;
+    document.getElementById('hand'+n+'Loss').checked=false;
+    document.getElementById('hand'+n+'WinLabel').classList.remove('win-active');
+    document.getElementById('hand'+n+'LossLabel').classList.remove('loss-active');
+    computeHandResult(n);
+  });
 
   const todayWin=data.entries.filter(e=>e.type==='WIN' && e.date===today).reduce((a,e)=>a+Number(e.value||0),0);
   const todayLoss=data.entries.filter(e=>e.type==='LOSS' && e.date===today).reduce((a,e)=>a+Number(e.value||0),0);
@@ -240,7 +271,7 @@ function registerEntry(){
     data.alerts.loss=true;save();
     alert('🔴 STOP LOSS ALCANÇADO!\n\nPerda do dia: '+money(todayLoss)+'\nLimite de Stop Loss: '+money(stopTarget)+'\n\nEncerre a gestão do dia para respeitar o limite.');
   } else {
-    alert('Entrada registrada com sucesso.');
+    alert('Entrada(s) registrada(s) com sucesso.');
   }
   renderGoalIndicators();
 }
@@ -355,11 +386,20 @@ function renderEntryReport(){
   if(!data.entries.length){list.innerHTML='<div class="entry-empty">Nenhuma entrada registrada ainda.</div>';return}
   list.innerHTML=[...data.entries].reverse().map(e=>{
     const win=e.type==='WIN';
-    const label=win?'🟢 STOP WIN':'🔴 STOP LOSS';
     const cls=win?'win':'loss';
     const sign=win?'+':'-';
     const period=e.period||getPeriod(Number((e.time||'00:00').split(':')[0]));
-    return `<div class="entry-item"><div class="entry-top"><span class="entry-result ${cls}">${label}</span><span class="entry-value ${cls}">${sign}${money(e.value)}</span><div class="item-actions"><button class="item-action-btn delete" onclick="deleteEntry(${e.id})">✕</button></div></div><div class="entry-meta"><span>📅 ${e.date}</span><span>🕐 ${period}</span><span>⏰ ${e.time}</span></div></div>`;
+    let label,valueLine;
+    if(e.hand){
+      label=(win?`Mão ${e.hand}° Ganho líquido`:`Mão ${e.hand}° Valor de Perda`);
+      const tag=win?'[Win ✅]':'[Loss ❌]';
+      valueLine=`<div class="entry-left"><span class="entry-result ${cls}">${label} = ${sign}${money(e.value)}</span><span class="entry-hand-tag ${cls}">${tag}</span></div>`;
+    } else {
+      label=win?'🟢 STOP WIN':'🔴 STOP LOSS';
+      valueLine=`<div class="entry-left"><span class="entry-result ${cls}">${label}</span><span class="entry-value ${cls}">${sign}${money(e.value)}</span></div>`;
+    }
+    const netNote=(e.hand && win)?`<div class="entry-net-note">💡 Resultado líquido — o valor da entrada não conta como ganho.</div>`:'';
+    return `<div class="entry-item"><div class="entry-top">${valueLine}<div class="item-actions"><button class="item-action-btn delete" onclick="deleteEntry(${e.id})">✕</button></div></div>${netNote}<div class="entry-meta"><span>📅 ${e.date}</span><span>🕐 ${period}</span><span>⏰ ${e.time}</span></div></div>`;
   }).join('');
 }
 
@@ -679,7 +719,6 @@ function newMonth(){
   const bank=document.getElementById('bank');
   bank.value='';
   bank.classList.remove('example');
-  document.getElementById('resultValue').value=0;
   freeManagementChecked=false;
   const free30Check=document.getElementById('free30Check');
   if(free30Check) free30Check.checked=false;
@@ -895,7 +934,6 @@ if(data.started){
 }else{
   document.getElementById('bank').value='';
   document.getElementById('bank').classList.remove('example');
-  document.getElementById('resultValue').value=0;
 }
 calc();updateOverview();renderWithdrawalReport();
 if(!storageIsLocal){

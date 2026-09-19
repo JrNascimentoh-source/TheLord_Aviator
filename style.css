@@ -73,6 +73,11 @@ h1{font-size:1.18rem;margin-top:3px}
 .withdrawal-item.breach{border-color:rgba(255,30,67,.5);background:rgba(255,30,67,.08)}
 .withdrawal-item.breach .withdrawal-label,.withdrawal-item.breach .withdrawal-value{color:#ff5a6e}
 .entry-report{margin-top:14px}.entry-report-title{font-size:.68rem;color:var(--gold);font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}.entry-list{display:flex;flex-direction:column;gap:8px}.entry-item{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.09);border-radius:13px;padding:11px 12px}.entry-top{display:flex;justify-content:space-between;align-items:center;gap:8px}.entry-result{font-size:.72rem;font-weight:950}.entry-result.win{color:var(--green)}.entry-result.loss{color:var(--red)}.entry-value{font-size:.85rem;font-weight:950}.entry-meta{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:5px;color:var(--muted);font-size:.65rem;font-weight:750}.entry-empty{padding:12px;border:1px dashed rgba(255,255,255,.12);border-radius:12px;color:var(--muted);font-size:.7rem;text-align:center}
+.entry-left{display:flex;flex-direction:column;gap:3px}
+.entry-hand-tag{font-size:.68rem;font-weight:900}
+.entry-hand-tag.win{color:var(--green)}
+.entry-hand-tag.loss{color:var(--red)}
+.entry-net-note{font-size:.63rem;color:var(--muted);margin-top:5px;line-height:1.4}
 
 /* Projeção de evolução da banca — única adição desta versão */
 .projection{margin-top:16px;padding:16px;border:1px solid rgba(255,192,31,.20);border-radius:18px;background:rgba(255,255,255,.018)}
