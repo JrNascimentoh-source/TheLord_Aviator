@@ -235,8 +235,9 @@ function registerEntry(){
     return;
   }
 
+  const batchId=Date.now();
   toRegister.forEach(r=>{
-    const entry={id:Date.now()+r.hand,type:r.type,value:r.value,hand:r.hand,entradaValue:r.entradaValue,multiplier:r.multiplier,date:today,time,period};
+    const entry={id:Date.now()+r.hand,batchId:batchId,type:r.type,value:r.value,hand:r.hand,entradaValue:r.entradaValue,multiplier:r.multiplier,date:today,time,period};
     data.entries.push(entry);
     if(r.type==='WIN'){data.wins++;data.totalWin+=r.value;data.current+=r.value}
     else{data.losses++;data.totalLoss+=r.value;data.current=Math.max(0,data.current-r.value)}
@@ -384,22 +385,34 @@ function renderEntryReport(){
   const list=document.getElementById('entryList');
   if(!list)return;
   if(!data.entries.length){list.innerHTML='<div class="entry-empty">Nenhuma entrada registrada ainda.</div>';return}
-  list.innerHTML=[...data.entries].reverse().map(e=>{
-    const win=e.type==='WIN';
-    const cls=win?'win':'loss';
-    const sign=win?'+':'-';
-    const period=e.period||getPeriod(Number((e.time||'00:00').split(':')[0]));
-    let label,valueLine;
-    if(e.hand){
-      label=(win?`Mão ${e.hand}° Ganho líquido`:`Mão ${e.hand}° Valor de Perda`);
-      const tag=win?'[Win ✅]':'[Loss ❌]';
-      valueLine=`<div class="entry-left"><span class="entry-result ${cls}">${label} = ${sign}${money(e.value)}</span><span class="entry-hand-tag ${cls}">${tag}</span></div>`;
-    } else {
-      label=win?'🟢 STOP WIN':'🔴 STOP LOSS';
-      valueLine=`<div class="entry-left"><span class="entry-result ${cls}">${label}</span><span class="entry-value ${cls}">${sign}${money(e.value)}</span></div>`;
-    }
-    const netNote=(e.hand && win)?`<div class="entry-net-note">💡 Resultado líquido — o valor da entrada não conta como ganho.</div>`:'';
-    return `<div class="entry-item"><div class="entry-top">${valueLine}<div class="item-actions"><button class="item-action-btn delete" onclick="deleteEntry(${e.id})">✕</button></div></div>${netNote}<div class="entry-meta"><span>📅 ${e.date}</span><span>🕐 ${period}</span><span>⏰ ${e.time}</span></div></div>`;
+
+  const groups=new Map();
+  data.entries.forEach(e=>{
+    const key=e.batchId||e.id;
+    if(!groups.has(key)) groups.set(key,[]);
+    groups.get(key).push(e);
+  });
+
+  list.innerHTML=[...groups.values()].reverse().map(entries=>{
+    const first=entries[0];
+    const period=first.period||getPeriod(Number((first.time||'00:00').split(':')[0]));
+    const lines=entries.map(e=>{
+      const win=e.type==='WIN';
+      const cls=win?'win':'loss';
+      const sign=win?'+':'-';
+      let label,inner;
+      if(e.hand){
+        label=(win?`Mão ${e.hand}° Ganho líquido`:`Mão ${e.hand}° Valor de Perda`);
+        const tag=win?'[Win ✅]':'[Loss ❌]';
+        inner=`<div class="entry-left"><span class="entry-result ${cls}">${label} = ${sign}${money(e.value)}</span><span class="entry-hand-tag ${cls}">${tag}</span></div>`;
+      } else {
+        label=win?'🟢 STOP WIN':'🔴 STOP LOSS';
+        inner=`<div class="entry-left"><span class="entry-result ${cls}">${label}</span><span class="entry-value ${cls}">${sign}${money(e.value)}</span></div>`;
+      }
+      const netNote=(e.hand && win)?`<div class="entry-net-note">💡 Resultado líquido — o valor da entrada não conta como ganho.</div>`:'';
+      return `<div class="entry-line">${inner}<div class="item-actions"><button class="item-action-btn delete" onclick="deleteEntry(${e.id})">✕</button></div></div>${netNote}`;
+    }).join('<div class="entry-divider"></div>');
+    return `<div class="entry-item">${lines}<div class="entry-meta"><span>📅 ${first.date}</span><span>🕐 ${period}</span><span>⏰ ${first.time}</span></div></div>`;
   }).join('');
 }
 
