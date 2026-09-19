@@ -225,7 +225,6 @@
   <section class="card">
     <div class="sala-header">
       <div class="sala-title" id="salaTitle">✈ Aviator</div>
-      <div class="monitor-clock" id="monitorClock">00:00:00</div>
     </div>
     <div class="monitor-disclaimer" style="margin-top:8px">💡 Estatísticas calculadas apenas com as rodadas que você mesmo registrou abaixo. Não é um feed ao vivo, e rodadas passadas não preveem as próximas.</div>
 
@@ -284,8 +283,11 @@
     </div>
 
     <div class="contagem-row">
-      <span class="contagem-label">🔢 Contagem de Casas</span>
-      <button type="button" id="contagemToggle" class="badge-active" onclick="toggleContagemCasas()">● Ativada</button>
+      <div class="contagem-left">
+        <span class="contagem-label">🔢 Contagem de Casas</span>
+        <button type="button" id="contagemToggle" class="badge-active" onclick="toggleContagemCasas()">● Ativada</button>
+      </div>
+      <div class="monitor-clock" id="monitorClock">00:00:00</div>
     </div>
     <div id="roundGrid" class="round-grid"></div>
     <button class="btn btn-secondary" style="margin-top:14px" onclick="clearRounds()">🔄 Limpar histórico de rodadas</button>
