@@ -248,7 +248,7 @@ body{background:#08060c;background-image:radial-gradient(circle at 15% 0%,rgba(2
 .badge-active.off{color:#c9c2b4;background:rgba(255,255,255,.08)}
 .round-chip-idx.hidden{display:none}
 .round-chip.streak-end{box-shadow:0 0 0 2px rgba(255,30,67,.6),0 0 14px 2px rgba(255,30,67,.45)}
-.round-chip-fire{position:absolute;bottom:5px;right:7px;font-size:.72rem}
+.round-chip-fire{position:absolute;bottom:4px;right:6px;font-size:1.05rem}
 
 .round-form{display:flex;gap:8px;margin-bottom:14px}
 .round-form .input{padding:12px;font-size:1rem}
@@ -256,17 +256,18 @@ body{background:#08060c;background-image:radial-gradient(circle at 15% 0%,rgba(2
 
 .round-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .round-chip{position:relative;border-radius:13px;padding:10px 8px;text-align:center;border:1px solid rgba(255,255,255,.08)}
-.round-chip-idx{position:absolute;top:5px;left:7px;font-size:.58rem;color:rgba(255,255,255,.55);font-weight:800}
+.round-chip-idx{position:absolute;top:5px;left:6px;font-size:.7rem;color:#ffc01f;font-weight:900;background:#000;border:1px solid rgba(255,192,31,.55);border-radius:6px;padding:1px 6px;line-height:1.4}
+.round-chip-idx.streak-badge{background:#ffc01f;color:#1a1200;border-color:#ffc01f;box-shadow:0 0 8px rgba(255,192,31,.6)}
+.round-chip-time{font-size:.64rem;color:rgba(255,255,255,.92);font-weight:700;margin-top:2px}
 .round-chip-val{font-size:.92rem;font-weight:950;margin-top:8px}
-.round-chip-time{font-size:.6rem;color:rgba(255,255,255,.55);margin-top:2px}
 .chip-blue{background:rgba(58,130,246,.22);border-color:#5aa7ff}
 .chip-blue .round-chip-val{color:#8ec2ff}
 .chip-purple{background:rgba(139,92,246,.32);border-color:#8b5cf6}
 .chip-purple .round-chip-val{color:#c4a9ff}
 .chip-pink{background:rgba(255,47,135,.3);border-color:#ff2f87}
 .chip-pink .round-chip-val{color:#ff8ec1}
-.chip-hot{background:rgba(255,30,67,.3);border-color:#ff1e43}
-.chip-hot .round-chip-val{color:#ff8b98}
+.chip-hot{background:rgba(255,10,20,.45);border-color:#ff0a2e}
+.chip-hot .round-chip-val{color:#ff6b7a}
 .chip-yellow{background:rgba(255,192,31,.32);border-color:#ffc01f}
 .chip-yellow .round-chip-val{color:#ffdb7d}
 .chip-fire{background:linear-gradient(135deg,rgba(255,192,31,.4),rgba(255,58,26,.4));border-color:#ff6a1a}

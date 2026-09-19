@@ -782,14 +782,17 @@ function renderMonitor(){
     grid.innerHTML='<div class="round-empty">Nenhuma rodada encontrada com esse filtro.</div>';
   }else{
     const {labelById,streakEndById}=computeStreakLabels(rounds);
+    const iconForTier={yellow:'🔥',hot:'💥',fire:'😮‍💨'};
     grid.innerHTML=filtered.slice(0,60).map((r)=>{
       const cls=classifyRound(r.value).key;
       const valLabel=(r.value!==null && r.value!==undefined)?r.value.toFixed(2)+'x':colorMeta[cls].label;
       const isStreakEnd=streakEndById[r.id];
       const showBadge=contagemCasasEnabled;
       const streakClass=(showBadge && isStreakEnd)?' streak-end':'';
-      const idxHtml=showBadge?`<span class="round-chip-idx">${labelById[r.id]}</span>`:'';
-      const fireHtml=(showBadge && isStreakEnd)?`<span class="round-chip-fire">🔥</span>`:'';
+      const badgeClass=(showBadge && isStreakEnd)?' streak-badge':'';
+      const idxHtml=showBadge?`<span class="round-chip-idx${badgeClass}">${labelById[r.id]}</span>`:'';
+      const icon=iconForTier[cls]||'';
+      const fireHtml=(showBadge && isStreakEnd && icon)?`<span class="round-chip-fire">${icon}</span>`:'';
       return `<div class="round-chip chip-${cls}${streakClass}">${idxHtml}${fireHtml}<div class="round-chip-val">${valLabel}</div><div class="round-chip-time">${nowTimeStr(new Date(r.ts))}</div></div>`;
     }).join('');
   }
@@ -818,7 +821,7 @@ function renderMonitor(){
   const counts={blue:0,purple:0,pink:0,yellow:0,hot:0,fire:0};
   rounds.forEach(r=>counts[classifyRound(r.value).key]++);
   const total=rounds.length;
-  const colors={blue:'#5aa7ff',purple:'#8b5cf6',pink:'#ff2f87',yellow:'#ffc01f',hot:'#ff1e43',fire:'#ff5a1a'};
+  const colors={blue:'#5aa7ff',purple:'#8b5cf6',pink:'#ff2f87',yellow:'#ffc01f',hot:'#ff0a2e',fire:'#ff5a1a'};
   document.getElementById('donutCenter').textContent=total;
   let acc=0;
   const stops=[];
