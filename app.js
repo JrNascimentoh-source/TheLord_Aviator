@@ -246,8 +246,8 @@ function registerEntry(){
   save();updateOverview();renderEntryReport();calc();
 
   [1,2].forEach(n=>{
-    document.getElementById('hand'+n+'Value').value=0;
-    document.getElementById('hand'+n+'Mult').value=0;
+    document.getElementById('hand'+n+'Value').value='';
+    document.getElementById('hand'+n+'Mult').value='';
     document.getElementById('hand'+n+'Win').checked=false;
     document.getElementById('hand'+n+'Loss').checked=false;
     document.getElementById('hand'+n+'WinLabel').classList.remove('win-active');

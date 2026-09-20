@@ -32,6 +32,8 @@ h1{font-size:1.18rem;margin-top:3px}
 }
 .input:focus{border-color:var(--gold);box-shadow:0 0 12px rgba(255,192,31,.25)}
 #bank::placeholder{color:var(--gold);opacity:.38;font-weight:800}
+.hand-input::placeholder{color:var(--gold);opacity:.38;font-weight:800}
+#hand1Value::placeholder,#hand2Value::placeholder{color:var(--gold);opacity:.38;font-weight:800}
 .example{opacity:.42}
 .hint{font-size:.67rem;color:var(--muted);margin-top:6px}
 .btn{
