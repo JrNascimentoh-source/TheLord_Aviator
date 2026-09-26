@@ -375,9 +375,9 @@ body{background:#08060c;background-image:radial-gradient(circle at 15% 0%,rgba(2
    O link abre diretamente a tela de login. O app só fica
    visível depois que o Supabase confirma uma sessão.
 ====================================================== */
-body.auth-login{padding-top:22px}
-body.auth-login .app{max-width:940px}
-body.auth-login .header{min-height:190px;padding:24px 34px;border-radius:28px;gap:22px}
+body.auth-login{padding:22px 22px 40px}
+body.auth-login .app{max-width:1040px}
+body.auth-login .header{min-height:188px;padding:24px 34px;border-radius:28px;gap:22px;margin-bottom:30px}
 body.auth-login .logo{width:118px;height:118px;min-width:118px;font-size:54px}
 body.auth-login .header h1{font-size:2rem;line-height:1.15}
 body.auth-login .eyebrow{font-size:.78rem;letter-spacing:.16em}
@@ -386,15 +386,15 @@ body.auth-login #login{display:block}
 body.auth-login #login .card{padding:42px 38px 40px;border-radius:28px}
 body.auth-login #login .title{font-size:1.55rem;margin-bottom:30px!important}
 body.auth-login #login .input-label{font-size:1.05rem;margin-bottom:12px}
-body.auth-login #login .input{min-height:74px;padding:18px 22px;border-radius:20px;font-size:1.25rem}
-body.auth-login #login .password-field input{padding-right:58px}
-body.auth-login #login .password-toggle{right:18px;font-size:1.35rem}
-body.auth-login #login .btn{min-height:72px;margin-top:20px;border-radius:18px;font-size:1.05rem}
-body.auth-login #login .login-divider{margin:30px 0 28px;font-size:1rem}
-body.auth-login #login .btn.btn-google{min-height:70px;font-size:1.05rem;border-radius:18px}
+body.auth-login #login .input{min-height:116px;padding:22px 32px;border-radius:28px;font-size:1.75rem}
+body.auth-login #login .password-field input{padding-right:72px}
+body.auth-login #login .password-toggle{right:24px;font-size:1.65rem}
+body.auth-login #login .btn{min-height:100px;margin-top:22px;border-radius:28px;font-size:1.35rem}
+body.auth-login #login .login-divider{margin:30px 0 28px;font-size:1.05rem}
+body.auth-login #login .btn.btn-google{min-height:100px;font-size:1.35rem;border-radius:28px}
 body.auth-login #login .login-links{margin-top:30px;gap:20px}
-body.auth-login #login .login-links button{font-size:1rem}
-body.auth-login #login .login-footnote{margin-top:34px;font-size:.88rem}
+body.auth-login #login .login-links button{font-size:1.05rem}
+body.auth-login #login .login-footnote{margin-top:34px;font-size:.92rem}
 body.auth-login #login .login-back{display:none!important}
 body.auth-login .login-preview-link{display:none!important}
 @media(max-width:700px){
