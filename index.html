@@ -27,9 +27,9 @@
   </div>
 </header>
 
-<div class="login-preview-link"><button type="button" id="loginLinkBtn" onclick="openLoginPreview()">🔒 Entrar / Criar conta</button></div>
+<div class="login-preview-link"><button type="button" id="loginLinkBtn" onclick="doLogout()">🔓 Sair</button></div>
 
-<main id="login" class="hidden">
+<main id="login">
   <section class="card">
     <div class="title" style="margin-bottom:18px">ENTRAR</div>
     <label class="input-label">E-mail</label>
@@ -49,10 +49,10 @@
     </div>
     <div class="login-footnote">Dados sincronizados na nuvem · Instale como app na tela inicial</div>
   </section>
-  <div class="login-back"><button type="button" onclick="closeLoginPreview()">Voltar</button></div>
+  <div class="login-back hidden"><button type="button" onclick="closeLoginPreview()">Voltar</button></div>
 </main>
 
-<main id="overview">
+<main id="overview" class="hidden">
   <section class="card">
     <div class="title">📊 Visão Geral</div>
     <div class="grid">
@@ -368,7 +368,7 @@
 
 </div>
 
-<nav class="bottom">
+<nav class="bottom hidden">
   <button class="nav active" onclick="showPage('overview',this)"><span>📊</span>Visão Geral</button>
   <button class="nav" onclick="showPage('calculator',this)"><span>🧮</span>Calculadora</button>
   <button class="nav" onclick="showPage('monitor',this)"><span>📈</span>Monitor</button>

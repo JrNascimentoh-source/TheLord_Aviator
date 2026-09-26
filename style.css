@@ -370,6 +370,49 @@ body{background:#08060c;background-image:radial-gradient(circle at 15% 0%,rgba(2
 .radio-option span{font-size:.76rem;color:#ebdcb0;font-weight:800;line-height:1.4}
 .radio-option.picked{border-color:var(--gold);background:rgba(255,192,31,.1)}
 
+/* ======================================================
+   PORTA DE AUTENTICAÇÃO
+   O link abre diretamente a tela de login. O app só fica
+   visível depois que o Supabase confirma uma sessão.
+====================================================== */
+body.auth-login{padding-top:22px}
+body.auth-login .app{max-width:940px}
+body.auth-login .header{min-height:190px;padding:24px 34px;border-radius:28px;gap:22px}
+body.auth-login .logo{width:118px;height:118px;min-width:118px;font-size:54px}
+body.auth-login .header h1{font-size:2rem;line-height:1.15}
+body.auth-login .eyebrow{font-size:.78rem;letter-spacing:.16em}
+body.auth-login .subtitle{font-size:1rem;margin-top:7px}
+body.auth-login #login{display:block}
+body.auth-login #login .card{padding:42px 38px 40px;border-radius:28px}
+body.auth-login #login .title{font-size:1.55rem;margin-bottom:30px!important}
+body.auth-login #login .input-label{font-size:1.05rem;margin-bottom:12px}
+body.auth-login #login .input{min-height:74px;padding:18px 22px;border-radius:20px;font-size:1.25rem}
+body.auth-login #login .password-field input{padding-right:58px}
+body.auth-login #login .password-toggle{right:18px;font-size:1.35rem}
+body.auth-login #login .btn{min-height:72px;margin-top:20px;border-radius:18px;font-size:1.05rem}
+body.auth-login #login .login-divider{margin:30px 0 28px;font-size:1rem}
+body.auth-login #login .btn.btn-google{min-height:70px;font-size:1.05rem;border-radius:18px}
+body.auth-login #login .login-links{margin-top:30px;gap:20px}
+body.auth-login #login .login-links button{font-size:1rem}
+body.auth-login #login .login-footnote{margin-top:34px;font-size:.88rem}
+body.auth-login #login .login-back{display:none!important}
+body.auth-login .login-preview-link{display:none!important}
+@media(max-width:700px){
+  body.auth-login{padding:12px 12px 28px}
+  body.auth-login .app{max-width:560px}
+  body.auth-login .header{min-height:auto;padding:18px;border-radius:24px;gap:15px}
+  body.auth-login .logo{width:72px;height:72px;min-width:72px;font-size:34px}
+  body.auth-login .header h1{font-size:1.18rem}
+  body.auth-login .eyebrow{font-size:.62rem}
+  body.auth-login .subtitle{font-size:.72rem}
+  body.auth-login #login .card{padding:26px 20px 28px;border-radius:24px}
+  body.auth-login #login .title{font-size:1.05rem;margin-bottom:22px!important}
+  body.auth-login #login .input-label{font-size:.82rem}
+  body.auth-login #login .input{min-height:60px;padding:15px 16px;font-size:1rem;border-radius:16px}
+  body.auth-login #login .btn{min-height:58px;font-size:.95rem;border-radius:16px}
+  body.auth-login #login .btn.btn-google{min-height:58px;font-size:.95rem;border-radius:16px}
+}
+
 /* Área de impressão (Relatório PDF) — só aparece ao imprimir */
 #printReport{display:none}
 @media print{

@@ -4,6 +4,7 @@
    localStorage esteja bloqueado) + estrutura de dados.
 ====================================================== */
 const STORAGE_KEY='lord_demo_data_oficial_zerada_v1';
+const LOCAL_OWNER_KEY=STORAGE_KEY+'_owner';
 const memoryFallback={};
 let storageIsLocal=true;
 function storageGet(key){
@@ -40,7 +41,13 @@ if(data.contagemAtivada===undefined) data.contagemAtivada=true;
 const money=v=>'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const pct=v=>Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%';
 
-function save(){storageSet(STORAGE_KEY,JSON.stringify(data));pushToCloud();}
+function save(){
+  storageSet(STORAGE_KEY,JSON.stringify(data));
+  if(currentUser){
+    storageSet(LOCAL_OWNER_KEY,currentUser.id);
+    void pushToCloud();
+  }
+}
 
 /* ======================================================
    CALCULADORA & GESTÃO DE BANCA
@@ -945,29 +952,65 @@ const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 let supabaseClient=null;
 let currentUser=null;
 
+let syncingUserId=null;
+
 function initSupabase(){
   if(typeof window.supabase==='undefined'){setTimeout(initSupabase,200);return}
-  supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{
+    auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+  });
   supabaseClient.auth.onAuthStateChange((event,session)=>{
     currentUser=session?session.user:null;
-    updateLoginLinkUI();
-    if(currentUser && event==='SIGNED_IN') syncAfterLogin();
+    setAuthView(!!currentUser);
+    if(currentUser && (event==='SIGNED_IN' || event==='INITIAL_SESSION')){
+      setTimeout(()=>syncAfterLogin(),0);
+    }
   });
-  supabaseClient.auth.getSession().then(({data:sd})=>{
+  supabaseClient.auth.getSession().then(({data:sd,error})=>{
+    if(error){console.error('Erro ao recuperar sessão:',error);setAuthView(false);return}
     currentUser=sd.session?sd.session.user:null;
-    updateLoginLinkUI();
-  });
+    setAuthView(!!currentUser);
+    if(currentUser) setTimeout(()=>syncAfterLogin(),0);
+  }).catch(e=>{console.error('Erro ao recuperar sessão:',e);setAuthView(false)});
 }
 initSupabase();
 
+/* A página nasce na tela de login. O conteúdo interno só é liberado
+   quando existe uma sessão autenticada confirmada pelo Supabase. */
+function setAuthView(isAuthenticated){
+  const login=document.getElementById('login');
+  const appPages=['overview','calculator','monitor','timing'];
+  const nav=document.querySelector('.bottom');
+  if(!login)return;
+  document.body.classList.toggle('auth-login',!isAuthenticated);
+  login.classList.toggle('hidden',isAuthenticated);
+  appPages.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.classList.toggle('hidden',!isAuthenticated || id!=='overview');
+  });
+  if(nav) nav.classList.toggle('hidden',!isAuthenticated);
+  updateLoginLinkUI();
+  if(isAuthenticated){
+    document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));
+    const first=document.querySelector('.nav');
+    if(first) first.classList.add('active');
+    window.scrollTo(0,0);
+  }else{
+    showLoginStatus('','hidden');
+    window.scrollTo(0,0);
+  }
+}
+
 function updateLoginLinkUI(){
+  const wrap=document.querySelector('.login-preview-link');
   const btn=document.getElementById('loginLinkBtn');
-  if(!btn)return;
+  if(!wrap||!btn)return;
   if(currentUser){
-    btn.textContent='🔓 '+currentUser.email+' · Sair';
+    wrap.classList.remove('hidden');
+    btn.textContent='🔓 '+(currentUser.email||'Conta')+' · Sair';
     btn.onclick=doLogout;
-  } else {
-    btn.textContent='🔒 Entrar / Criar conta';
+  }else{
+    wrap.classList.add('hidden');
     btn.onclick=openLoginPreview;
   }
 }
@@ -998,7 +1041,7 @@ async function doLogin(){
   const {error}=await supabaseClient.auth.signInWithPassword({email,password});
   if(error){showLoginStatus('Erro: '+translateAuthError(error.message),'error');return}
   showLoginStatus('Login realizado! Sincronizando seus dados...','ok');
-  setTimeout(closeLoginPreview,900);
+  setAuthView(true);
 }
 
 async function doSignUp(){
@@ -1014,14 +1057,14 @@ async function doSignUp(){
     showLoginStatus('Conta criada! Confira seu e-mail para confirmar antes de entrar.','ok');
   } else {
     showLoginStatus('Conta criada e login realizado!','ok');
-    setTimeout(closeLoginPreview,900);
+    setAuthView(true);
   }
 }
 
 async function doGoogleLogin(){
   if(!supabaseClient){showLoginStatus('Erro: não foi possível carregar o serviço de login. Verifique sua internet e recarregue a página.','error');return}
   showLoginStatus('Abrindo login do Google...','info');
-  const {error}=await supabaseClient.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.href}});
+  const {error}=await supabaseClient.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.origin+window.location.pathname}});
   if(error) showLoginStatus('Erro: '+translateAuthError(error.message),'error');
 }
 
@@ -1030,61 +1073,101 @@ async function doPasswordReset(){
   const email=document.getElementById('loginEmail').value.trim();
   if(!email){showLoginStatus('Digite seu e-mail no campo acima primeiro.','error');return}
   showLoginStatus('Enviando e-mail de recuperação...','info');
-  const {error}=await supabaseClient.auth.resetPasswordForEmail(email);
+  const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+window.location.pathname});
   if(error){showLoginStatus('Erro: '+translateAuthError(error.message),'error');return}
   showLoginStatus('E-mail de recuperação enviado! Confira sua caixa de entrada.','ok');
 }
 
 async function doLogout(){
   if(!confirm('Deseja sair da sua conta? Seus dados continuam salvos na nuvem.'))return;
-  await supabaseClient.auth.signOut();
+  if(supabaseClient){
+    const {error}=await supabaseClient.auth.signOut();
+    if(error){showLoginStatus('Erro ao sair: '+translateAuthError(error.message),'error');return}
+  }
   currentUser=null;
-  updateLoginLinkUI();
-  alert('Você saiu da conta. O app voltou a usar os dados salvos neste aparelho.');
+  setAuthView(false);
+  alert('Você saiu da conta.');
 }
 
 async function syncAfterLogin(){
+  if(!currentUser||!supabaseClient)return;
+  const userId=currentUser.id;
+  if(syncingUserId===userId)return;
+  syncingUserId=userId;
   try{
-    const {data:row,error}=await supabaseClient.from('gestoes').select('data').eq('user_id',currentUser.id).maybeSingle();
-    if(error){console.error(error);return}
+    const {data:row,error}=await supabaseClient.from('gestoes').select('data').eq('user_id',userId).maybeSingle();
+    if(error){
+      console.error('Erro ao carregar gestão da nuvem:',error);
+      showLoginStatus('Login realizado, mas não foi possível sincronizar os dados da nuvem.','error');
+      return;
+    }
+
+    const localOwner=storageGet(LOCAL_OWNER_KEY);
     if(row && row.data && Object.keys(row.data).length){
-      const useCloud=confirm('Encontramos uma gestão salva na sua conta. Deseja carregar os dados da nuvem?\n\nOK = carregar da nuvem (substitui os dados deste aparelho)\nCancelar = manter os dados deste aparelho e enviá-los para a nuvem');
-      if(useCloud){
-        data=row.data;
-        storageSet(STORAGE_KEY,JSON.stringify(data));
-        calc();updateOverview();renderEntryReport();renderWithdrawalReport();renderChart();renderPeriodSummary();renderWithdrawalBalances();applyScenarioLock();
-      } else {
-        await pushToCloud();
-      }
-    } else {
+      data=row.data;
+      normalizeLoadedData();
+      storageSet(STORAGE_KEY,JSON.stringify(data));
+      storageSet(LOCAL_OWNER_KEY,userId);
+      calc();updateOverview();renderEntryReport();renderWithdrawalReport();renderChart();renderPeriodSummary();renderWithdrawalBalances();applyScenarioLock();
+      return;
+    }
+
+    // Sem dados na nuvem: só reutiliza dados locais se eles pertencerem ao mesmo usuário.
+    // Isso impede que os dados de uma conta sejam enviados acidentalmente para outra.
+    if(localOwner===userId){
+      await pushToCloud();
+    }else{
+      data=createEmptyData();
+      storageSet(STORAGE_KEY,JSON.stringify(data));
+      storageSet(LOCAL_OWNER_KEY,userId);
+      calc();updateOverview();renderEntryReport();renderWithdrawalReport();renderChart();renderPeriodSummary();renderWithdrawalBalances();applyScenarioLock();
       await pushToCloud();
     }
-  }catch(e){console.error(e)}
+  }catch(e){
+    console.error('Erro na sincronização:',e);
+    showLoginStatus('Login realizado, mas ocorreu um erro ao sincronizar seus dados.','error');
+  }finally{
+    syncingUserId=null;
+  }
+}
+
+function createEmptyData(){
+  return {started:false,initial:0,current:0,wins:0,losses:0,totalWin:0,totalLoss:0,days:0,entries:[],withdrawals:[],alerts:{win:false,loss:false,date:''},scenario:null,managementDays:null,freeManagement:false,roundsByGame:{aviator:[],aviator2:[]},activeGame:'aviator'};
+}
+
+function normalizeLoadedData(){
+  if(!data || typeof data!=='object') data=createEmptyData();
+  if(!Array.isArray(data.entries)) data.entries=[];
+  if(!Array.isArray(data.withdrawals)) data.withdrawals=[];
+  if(!data.alerts || typeof data.alerts!=='object') data.alerts={win:false,loss:false,date:''};
+  if(!Array.isArray(data.rounds)) data.rounds=[];
+  if(!data.roundsByGame || typeof data.roundsByGame!=='object') data.roundsByGame={aviator:data.rounds.length?data.rounds:[],aviator2:[]};
+  if(!Array.isArray(data.roundsByGame.aviator)) data.roundsByGame.aviator=[];
+  if(!Array.isArray(data.roundsByGame.aviator2)) data.roundsByGame.aviator2=[];
+  if(!data.activeGame || !data.roundsByGame[data.activeGame]) data.activeGame='aviator';
+  if(data.scenario===undefined) data.scenario=null;
+  if(data.managementDays===undefined) data.managementDays=null;
+  if(data.freeManagement===undefined) data.freeManagement=false;
+  if(data.contagemAtivada===undefined) data.contagemAtivada=true;
 }
 
 async function pushToCloud(){
-  if(!currentUser||!supabaseClient)return;
+  if(!currentUser||!supabaseClient)return false;
   try{
-    await supabaseClient.from('gestoes').upsert({user_id:currentUser.id,data:data,updated_at:new Date().toISOString()});
-  }catch(e){console.error('Erro ao sincronizar com a nuvem:',e)}
+    const {error}=await supabaseClient.from('gestoes').upsert({user_id:currentUser.id,data:data,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+    if(error){console.error('Erro ao sincronizar com a nuvem:',error);return false}
+    storageSet(LOCAL_OWNER_KEY,currentUser.id);
+    return true;
+  }catch(e){console.error('Erro ao sincronizar com a nuvem:',e);return false}
 }
 
 function openLoginPreview(){
-  ['overview','calculator','monitor','timing'].forEach(x=>document.getElementById(x).classList.add('hidden'));
-  document.getElementById('login').classList.remove('hidden');
-  document.querySelector('.bottom').classList.add('hidden');
-  document.querySelector('.login-preview-link').classList.add('hidden');
-  showLoginStatus('','hidden');
-  window.scrollTo(0,0);
+  setAuthView(false);
 }
 function closeLoginPreview(){
-  document.getElementById('login').classList.add('hidden');
-  document.querySelector('.bottom').classList.remove('hidden');
-  document.querySelector('.login-preview-link').classList.remove('hidden');
-  document.getElementById('overview').classList.remove('hidden');
-  document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));
-  document.querySelector('.nav').classList.add('active');
-  window.scrollTo(0,0);
+  /* Nunca abre o app sem uma sessão autenticada. */
+  if(currentUser) setAuthView(true);
+  else setAuthView(false);
 }
 function toggleLoginPassword(){
   const field=document.getElementById('loginPassword');
@@ -1103,6 +1186,7 @@ if(data.started){
   document.getElementById('bank').classList.remove('example');
 }
 calc();updateOverview();renderWithdrawalReport();
+setAuthView(false);
 if(!storageIsLocal){
   const bar=document.createElement('div');
   bar.className='notice';
