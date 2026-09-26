@@ -1002,16 +1002,17 @@ function setAuthView(isAuthenticated){
 }
 
 function updateLoginLinkUI(){
-  const wrap=document.querySelector('.login-preview-link');
-  const btn=document.getElementById('loginLinkBtn');
-  if(!wrap||!btn)return;
+  const action=document.getElementById('headerAuthAction');
+  const btn=document.getElementById('headerLogoutBtn');
+  if(!action||!btn)return;
   if(currentUser){
-    wrap.classList.remove('hidden');
-    btn.textContent='🔓 '+(currentUser.email||'Conta')+' · Sair';
+    action.classList.remove('hidden');
     btn.onclick=doLogout;
+    btn.title='Sair da conta';
+    btn.setAttribute('aria-label','Sair da conta');
   }else{
-    wrap.classList.add('hidden');
-    btn.onclick=openLoginPreview;
+    action.classList.add('hidden');
+    btn.onclick=doLogout;
   }
 }
 

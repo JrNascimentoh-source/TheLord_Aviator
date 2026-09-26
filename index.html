@@ -20,14 +20,21 @@
 
 <header class="header">
   <div class="logo">✈️</div>
-  <div>
+  <div class="header-main">
     <div class="eyebrow">Gestão Oficial</div>
     <h1>TheLord_Aviator | Gestão &amp; Análise</h1>
     <div class="subtitle">Gestão de banca · acompanhamento pessoal</div>
   </div>
+  <div class="header-auth-action hidden" id="headerAuthAction">
+    <button type="button" id="headerLogoutBtn" class="header-logout-btn" onclick="doLogout()" aria-label="Sair da conta">
+      <svg class="header-logout-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M10 4H5.8A1.8 1.8 0 0 0 4 5.8v12.4A1.8 1.8 0 0 0 5.8 20H10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M13 8l4 4-4 4M17 12H9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <span class="header-logout-label">Sair</span>
+  </div>
 </header>
-
-<div class="login-preview-link"><button type="button" id="loginLinkBtn" onclick="doLogout()">🔓 Sair</button></div>
 
 <main id="login">
   <section class="card">
