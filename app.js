@@ -694,7 +694,7 @@ function updateOverview(){
   if(!data.started){
     ['ovInitial','ovCurrent'].forEach(id=>document.getElementById(id).textContent='R$ 0,00');
     document.getElementById('ovResult').textContent='R$ 0,00';
-    document.getElementById('ovVariation').textContent='0,00%';
+    document.getElementById('ovGordura').textContent='R$ 0,00';
     document.getElementById('ovMessage').textContent='🔒 Nenhuma gestão iniciada. Preencha a banca na Calculadora e confirme para começar.';
     ['days','entries','wins','losses'].forEach(id=>document.getElementById(id).textContent='0');
     document.getElementById('totalWin').textContent='+R$ 0,00';
@@ -709,12 +709,15 @@ function updateOverview(){
     return;
   }
   const result=data.current-data.initial;
-  const variation=data.initial?result/data.initial*100:0;
+  const today=new Date().toLocaleDateString('pt-BR');
+  const todayWin=data.entries.filter(e=>e.type==='WIN' && e.date===today).reduce((a,e)=>a+Number(e.value||0),0);
+  const stopTarget=data.initial*0.20;
+  const gordura=Math.max(0,todayWin-stopTarget);
   const total=data.wins+data.losses;
   document.getElementById('ovInitial').textContent=money(data.initial);
   document.getElementById('ovCurrent').textContent=money(data.current);
   document.getElementById('ovResult').textContent=(result>=0?'+':'')+money(result);
-  document.getElementById('ovVariation').textContent=(variation>=0?'+':'')+pct(variation);
+  document.getElementById('ovGordura').textContent=money(gordura);
   document.getElementById('ovMessage').textContent='✅ Gestão ativa. Acompanhe sua banca e registre cada entrada.';
   document.getElementById('days').textContent=data.days;
   document.getElementById('entries').textContent=total;
