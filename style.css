@@ -59,6 +59,26 @@ h1{font-size:1.18rem;margin-top:3px}
 .hand-result{margin-top:12px;text-align:center;font-size:1.15rem;font-weight:950;color:#fff}
 .hand-result.green{color:var(--green)}
 .hand-result.red{color:var(--red)}
+
+/* Tela de login (pré-visualização) */
+.login-preview-link{text-align:center;margin-bottom:14px}
+.login-preview-link button{background:none;border:1px solid rgba(255,192,31,.35);color:var(--gold);font-size:.7rem;font-weight:800;padding:7px 14px;border-radius:20px;cursor:pointer}
+.password-field{position:relative}
+.password-field input{padding-right:46px}
+.password-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:0;font-size:1.1rem;cursor:pointer;opacity:.8}
+.login-divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--muted);font-size:.72rem;font-weight:800}
+.login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.15)}
+.btn.btn-google{width:100%;padding:15px;border-radius:13px;margin-top:0;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.18);color:#fff;font-weight:850;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-size:.9rem;box-shadow:none;text-transform:none}
+.google-g{font-weight:950;font-size:1.05rem;background:linear-gradient(135deg,#4285F4,#EA4335 35%,#FBBC05 65%,#34A853);-webkit-background-clip:text;background-clip:text;color:transparent}
+.login-links{text-align:center;margin-top:18px;display:flex;flex-direction:column;gap:14px}
+.login-links button{background:none;border:0;color:var(--gold);font-weight:800;font-size:.85rem;cursor:pointer}
+.login-footnote{text-align:center;margin-top:18px;color:var(--muted);font-size:.68rem;font-weight:700}
+.login-back{text-align:center;margin-top:18px}
+.login-back button{background:none;border:0;color:#ebdcb0;font-weight:800;font-size:.9rem;cursor:pointer}
+.login-status{margin-top:12px;padding:10px 12px;border-radius:12px;font-size:.72rem;font-weight:800;text-align:center;line-height:1.5}
+.login-status.error{background:rgba(255,30,67,.12);border:1px solid rgba(255,30,67,.4);color:#ff8b98}
+.login-status.ok{background:rgba(0,230,118,.12);border:1px solid rgba(0,230,118,.4);color:#7cffb0}
+.login-status.info{background:rgba(255,192,31,.1);border:1px solid rgba(255,192,31,.35);color:var(--gold)}
 .box{
   background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.09);
   border-radius:15px;padding:14px

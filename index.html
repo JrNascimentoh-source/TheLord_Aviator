@@ -13,6 +13,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#070509">
 <link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 </head>
 <body>
 <div class="app">
@@ -25,6 +26,31 @@
     <div class="subtitle">Gestão de banca · acompanhamento pessoal</div>
   </div>
 </header>
+
+<div class="login-preview-link"><button type="button" id="loginLinkBtn" onclick="openLoginPreview()">🔒 Entrar / Criar conta</button></div>
+
+<main id="login" class="hidden">
+  <section class="card">
+    <div class="title" style="margin-bottom:18px">ENTRAR</div>
+    <label class="input-label">E-mail</label>
+    <input id="loginEmail" class="input" type="email" placeholder="voce@email.com">
+    <label class="input-label" style="margin-top:12px">Senha</label>
+    <div class="password-field">
+      <input id="loginPassword" class="input" type="password" placeholder="••••••••">
+      <button type="button" class="password-toggle" onclick="toggleLoginPassword()">👁️</button>
+    </div>
+    <button class="btn" onclick="doLogin()">ENTRAR</button>
+    <div id="loginStatus" class="login-status hidden"></div>
+    <div class="login-divider"><span>ou</span></div>
+    <button class="btn btn-google" onclick="doGoogleLogin()"><span class="google-g">G</span> Continuar com Google</button>
+    <div class="login-links">
+      <button type="button" onclick="doSignUp()">Não tenho conta — criar agora</button>
+      <button type="button" onclick="doPasswordReset()">Esqueci minha senha</button>
+    </div>
+    <div class="login-footnote">Dados sincronizados na nuvem · Instale como app na tela inicial</div>
+  </section>
+  <div class="login-back"><button type="button" onclick="closeLoginPreview()">Voltar</button></div>
+</main>
 
 <main id="overview">
   <section class="card">

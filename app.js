@@ -40,7 +40,7 @@ if(data.contagemAtivada===undefined) data.contagemAtivada=true;
 const money=v=>'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const pct=v=>Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%';
 
-function save(){storageSet(STORAGE_KEY,JSON.stringify(data))}
+function save(){storageSet(STORAGE_KEY,JSON.stringify(data));pushToCloud();}
 
 /* ======================================================
    CALCULADORA & GESTÃO DE BANCA
@@ -935,6 +935,160 @@ function showPage(id,btn){
     document.getElementById('gameBtnAviator2').classList.toggle('active',data.activeGame==='aviator2');
     renderMonitor();
   }
+}
+
+/* ======================================================
+   LOGIN + SINCRONIZAÇÃO NA NUVEM (Supabase)
+====================================================== */
+const SUPABASE_URL='https://aypjaqmmlurlqeotbepp.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5cGphcW1tbHVybHFlb3RiZXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAzMDU2MTAsImV4cCI6MjEwNTg4MTYxMH0.IeAT6gwsAfzfw2N4BIxg9gc5pRqZH0ELn3Xo9fogHnY';
+let supabaseClient=null;
+let currentUser=null;
+
+function initSupabase(){
+  if(typeof window.supabase==='undefined'){setTimeout(initSupabase,200);return}
+  supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  supabaseClient.auth.onAuthStateChange((event,session)=>{
+    currentUser=session?session.user:null;
+    updateLoginLinkUI();
+    if(currentUser && event==='SIGNED_IN') syncAfterLogin();
+  });
+  supabaseClient.auth.getSession().then(({data:sd})=>{
+    currentUser=sd.session?sd.session.user:null;
+    updateLoginLinkUI();
+  });
+}
+initSupabase();
+
+function updateLoginLinkUI(){
+  const btn=document.getElementById('loginLinkBtn');
+  if(!btn)return;
+  if(currentUser){
+    btn.textContent='🔓 '+currentUser.email+' · Sair';
+    btn.onclick=doLogout;
+  } else {
+    btn.textContent='🔒 Entrar / Criar conta';
+    btn.onclick=openLoginPreview;
+  }
+}
+
+function showLoginStatus(msg,type){
+  const el=document.getElementById('loginStatus');
+  if(!el)return;
+  el.textContent=msg;
+  el.className='login-status '+type;
+}
+
+function translateAuthError(msg){
+  const map={
+    'Invalid login credentials':'E-mail ou senha incorretos.',
+    'User already registered':'Já existe uma conta com esse e-mail.',
+    'Email not confirmed':'Confirme seu e-mail antes de entrar (verifique sua caixa de entrada).',
+    'Password should be at least 6 characters.':'A senha precisa ter pelo menos 6 caracteres.'
+  };
+  return map[msg]||msg;
+}
+
+async function doLogin(){
+  if(!supabaseClient){showLoginStatus('Erro: não foi possível carregar o serviço de login. Verifique sua internet e recarregue a página.','error');return}
+  const email=document.getElementById('loginEmail').value.trim();
+  const password=document.getElementById('loginPassword').value;
+  if(!email||!password){showLoginStatus('Preencha e-mail e senha.','error');return}
+  showLoginStatus('Entrando...','info');
+  const {error}=await supabaseClient.auth.signInWithPassword({email,password});
+  if(error){showLoginStatus('Erro: '+translateAuthError(error.message),'error');return}
+  showLoginStatus('Login realizado! Sincronizando seus dados...','ok');
+  setTimeout(closeLoginPreview,900);
+}
+
+async function doSignUp(){
+  if(!supabaseClient){showLoginStatus('Erro: não foi possível carregar o serviço de login. Verifique sua internet e recarregue a página.','error');return}
+  const email=document.getElementById('loginEmail').value.trim();
+  const password=document.getElementById('loginPassword').value;
+  if(!email||!password){showLoginStatus('Preencha e-mail e senha para criar a conta.','error');return}
+  if(password.length<6){showLoginStatus('A senha precisa ter pelo menos 6 caracteres.','error');return}
+  showLoginStatus('Criando conta...','info');
+  const {data:sd,error}=await supabaseClient.auth.signUp({email,password});
+  if(error){showLoginStatus('Erro: '+translateAuthError(error.message),'error');return}
+  if(sd.user && !sd.session){
+    showLoginStatus('Conta criada! Confira seu e-mail para confirmar antes de entrar.','ok');
+  } else {
+    showLoginStatus('Conta criada e login realizado!','ok');
+    setTimeout(closeLoginPreview,900);
+  }
+}
+
+async function doGoogleLogin(){
+  if(!supabaseClient){showLoginStatus('Erro: não foi possível carregar o serviço de login. Verifique sua internet e recarregue a página.','error');return}
+  showLoginStatus('Abrindo login do Google...','info');
+  const {error}=await supabaseClient.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.href}});
+  if(error) showLoginStatus('Erro: '+translateAuthError(error.message),'error');
+}
+
+async function doPasswordReset(){
+  if(!supabaseClient){showLoginStatus('Erro: não foi possível carregar o serviço de login. Verifique sua internet e recarregue a página.','error');return}
+  const email=document.getElementById('loginEmail').value.trim();
+  if(!email){showLoginStatus('Digite seu e-mail no campo acima primeiro.','error');return}
+  showLoginStatus('Enviando e-mail de recuperação...','info');
+  const {error}=await supabaseClient.auth.resetPasswordForEmail(email);
+  if(error){showLoginStatus('Erro: '+translateAuthError(error.message),'error');return}
+  showLoginStatus('E-mail de recuperação enviado! Confira sua caixa de entrada.','ok');
+}
+
+async function doLogout(){
+  if(!confirm('Deseja sair da sua conta? Seus dados continuam salvos na nuvem.'))return;
+  await supabaseClient.auth.signOut();
+  currentUser=null;
+  updateLoginLinkUI();
+  alert('Você saiu da conta. O app voltou a usar os dados salvos neste aparelho.');
+}
+
+async function syncAfterLogin(){
+  try{
+    const {data:row,error}=await supabaseClient.from('gestoes').select('data').eq('user_id',currentUser.id).maybeSingle();
+    if(error){console.error(error);return}
+    if(row && row.data && Object.keys(row.data).length){
+      const useCloud=confirm('Encontramos uma gestão salva na sua conta. Deseja carregar os dados da nuvem?\n\nOK = carregar da nuvem (substitui os dados deste aparelho)\nCancelar = manter os dados deste aparelho e enviá-los para a nuvem');
+      if(useCloud){
+        data=row.data;
+        storageSet(STORAGE_KEY,JSON.stringify(data));
+        calc();updateOverview();renderEntryReport();renderWithdrawalReport();renderChart();renderPeriodSummary();renderWithdrawalBalances();applyScenarioLock();
+      } else {
+        await pushToCloud();
+      }
+    } else {
+      await pushToCloud();
+    }
+  }catch(e){console.error(e)}
+}
+
+async function pushToCloud(){
+  if(!currentUser||!supabaseClient)return;
+  try{
+    await supabaseClient.from('gestoes').upsert({user_id:currentUser.id,data:data,updated_at:new Date().toISOString()});
+  }catch(e){console.error('Erro ao sincronizar com a nuvem:',e)}
+}
+
+function openLoginPreview(){
+  ['overview','calculator','monitor','timing'].forEach(x=>document.getElementById(x).classList.add('hidden'));
+  document.getElementById('login').classList.remove('hidden');
+  document.querySelector('.bottom').classList.add('hidden');
+  document.querySelector('.login-preview-link').classList.add('hidden');
+  showLoginStatus('','hidden');
+  window.scrollTo(0,0);
+}
+function closeLoginPreview(){
+  document.getElementById('login').classList.add('hidden');
+  document.querySelector('.bottom').classList.remove('hidden');
+  document.querySelector('.login-preview-link').classList.remove('hidden');
+  document.getElementById('overview').classList.remove('hidden');
+  document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));
+  document.querySelector('.nav').classList.add('active');
+  window.scrollTo(0,0);
+}
+function toggleLoginPassword(){
+  const field=document.getElementById('loginPassword');
+  field.type=field.type==='password'?'text':'password';
 }
 
 /* ======================================================
