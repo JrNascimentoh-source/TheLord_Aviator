@@ -166,6 +166,8 @@ function showAppDialog({title='Aviso',message='',confirmText='OK',cancelText='',
   confirmBtn.textContent=confirmText;
   cancelBtn.textContent=cancelText||'Cancelar';
   cancelBtn.classList.toggle('hidden',!cancelText);
+  const actionsEl=document.querySelector('.app-dialog-actions');
+  if(actionsEl) actionsEl.classList.toggle('single-action',!cancelText);
   appDialogAction=onConfirm;
   overlay.classList.remove('hidden');
 }

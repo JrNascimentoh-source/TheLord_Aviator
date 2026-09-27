@@ -184,7 +184,7 @@ h1{font-size:1.18rem;margin-top:3px}
 
 /* Interface visual — padrão Lovable aprovado */
 body{background:#08060c;background-image:radial-gradient(circle at 15% 0%,rgba(255,30,67,.18),transparent 42%),radial-gradient(circle at 85% 20%,rgba(120,0,45,.16),transparent 40%);padding:12px 12px 105px}
-.app{max-width:560px}
+.app{max-width:860px}
 .header{padding:16px 18px;border-radius:24px;background:rgba(14,9,20,.94);border-color:rgba(255,30,67,.45);box-shadow:0 8px 30px rgba(0,0,0,.55),0 0 28px rgba(255,30,67,.06)}
 .logo{width:64px;height:64px;min-width:64px;font-size:28px}
 .header h1{font-size:1.16rem;font-weight:950}
@@ -198,7 +198,7 @@ body{background:#08060c;background-image:radial-gradient(circle at 15% 0%,rgba(2
 .btn{border-radius:16px;padding:15px;background:linear-gradient(135deg,#ffc72c,#f1a900);box-shadow:0 5px 18px rgba(255,192,31,.16)}
 .btn-secondary{background:rgba(255,30,67,.09);box-shadow:none}
 .notice{border-color:rgba(255,192,31,.32);background:rgba(255,192,31,.018);border-radius:15px}
-.bottom{bottom:10px;width:min(560px,calc(100% - 20px));border-radius:24px;background:rgba(20,14,24,.42);border-color:rgba(255,30,67,.5);padding:7px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.bottom{bottom:10px;width:min(860px,calc(100% - 20px));border-radius:24px;background:rgba(20,14,24,.42);border-color:rgba(255,30,67,.5);padding:7px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
 .nav{padding:8px 2px;font-size:.64rem;border-radius:17px}.nav.active{background:rgba(255,192,31,.12);color:var(--gold)}
 .dev-notice{min-height:270px}.dev-icon{font-size:2rem}.dev-title{font-size:1.42rem}.dev-subtitle{font-size:.88rem}
 .mode-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
@@ -405,7 +405,7 @@ body.auth-login #login .login-footnote{margin-top:34px;font-size:.92rem}
 body.auth-login #login .login-back{display:none!important}
 @media(max-width:700px){
   body.auth-login{padding:12px 12px 28px}
-  body.auth-login .app{max-width:560px}
+  body.auth-login .app{max-width:860px}
   body.auth-login .header{min-height:auto;padding:18px;border-radius:24px;gap:15px}
   body.auth-login .header-auth-action{display:none!important}
   body.auth-login .logo{width:72px;height:72px;min-width:72px;font-size:34px}
@@ -450,6 +450,8 @@ body.auth-login #login .login-back{display:none!important}
 /* Ação de sair no cabeçalho — somente após autenticação */
 body:not(.auth-login) .header-auth-action{display:flex}
 @media(max-width:700px){
+  body:not(.auth-login) .app{max-width:560px}
+  body:not(.auth-login) .bottom{width:min(560px,calc(100% - 20px))}
   body:not(.auth-login) .header{padding:16px 14px}
   body:not(.auth-login) .header-auth-action{margin-left:6px}
   body:not(.auth-login) .header-logout-btn{width:44px;height:44px;border-radius:9px}
@@ -474,7 +476,7 @@ body:not(.auth-login) .header-auth-action{display:flex}
 .app-dialog-icon{display:none}
 .app-dialog-title{position:relative;font-size:1rem;color:var(--gold);margin:0 0 12px;font-weight:950;letter-spacing:0}
 .app-dialog-message{position:relative;white-space:pre-line;text-align:center;color:#ebdcb0;background:rgba(255,192,31,.08);border:1px solid rgba(255,192,31,.3);border-radius:12px;padding:10px 12px;margin-bottom:14px;line-height:1.5;font-size:.72rem;box-shadow:none}
-.app-dialog-actions{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.app-dialog-actions{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.app-dialog-actions.single-action{grid-template-columns:minmax(180px,260px);justify-content:center}
 .app-dialog-actions .btn,.app-dialog-actions .btn-secondary{min-height:0;border-radius:13px;padding:15px;font-weight:950;font-size:.82rem;letter-spacing:.03em}
 .app-dialog-actions .btn{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1200;border:0;box-shadow:0 5px 18px rgba(255,192,31,.16)}
 .app-dialog-actions .btn-secondary{background:rgba(255,30,67,.09);color:var(--red);border:1px solid rgba(255,30,67,.4);box-shadow:none}
@@ -486,6 +488,7 @@ body:not(.auth-login) .header-auth-action{display:flex}
 @media(max-width:700px){
   .app-dialog-box{max-width:calc(100vw - 30px);padding:20px 16px 18px;border-radius:20px}
   .app-dialog-actions{gap:10px}
+  .app-dialog-actions.single-action{grid-template-columns:minmax(180px,1fr);justify-content:center}
   .app-dialog-actions .btn,.app-dialog-actions .btn-secondary{min-height:0;font-size:.78rem}
 }
 
