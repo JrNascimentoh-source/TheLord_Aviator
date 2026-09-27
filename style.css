@@ -14,14 +14,7 @@ body{
   background:rgba(15,11,24,.96);border:1px solid var(--border);border-radius:22px;
   box-shadow:0 8px 32px rgba(0,0,0,.45);margin-bottom:16px
 }
-.header{padding:18px;display:flex;align-items:center;gap:15px;position:relative}
-.header-main{min-width:0;flex:1}
-.header-auth-action{margin-left:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;flex:0 0 auto}
-.header-logout-btn{width:48px;height:48px;border-radius:10px;border:1px solid rgba(255,192,31,.28);background:rgba(255,255,255,.025);color:#ebdcb0;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s ease}
-.header-logout-btn:hover{border-color:rgba(255,192,31,.7);color:var(--gold);background:rgba(255,192,31,.06)}
-.header-logout-btn:active{transform:scale(.97)}
-.header-logout-icon{width:24px;height:24px}
-.header-logout-label{font-size:.58rem;color:var(--muted);font-weight:900;line-height:1;text-transform:uppercase;letter-spacing:.04em}
+.header{padding:18px;display:flex;align-items:center;gap:15px}
 .logo{
   width:72px;height:72px;min-width:72px;border-radius:50%;border:2px solid var(--red);
   box-shadow:0 0 18px rgba(255,30,67,.55);display:flex;align-items:center;justify-content:center;
@@ -68,14 +61,15 @@ h1{font-size:1.18rem;margin-top:3px}
 .hand-result.red{color:var(--red)}
 
 /* Tela de login (pré-visualização) */
+.login-preview-link{text-align:center;margin-bottom:14px}
+.login-preview-link button{background:none;border:1px solid rgba(255,192,31,.35);color:var(--gold);font-size:.7rem;font-weight:800;padding:7px 14px;border-radius:20px;cursor:pointer}
 .password-field{position:relative}
 .password-field input{padding-right:46px}
 .password-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:0;font-size:1.1rem;cursor:pointer;opacity:.8}
 .login-divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--muted);font-size:.72rem;font-weight:800}
 .login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.15)}
-.btn.btn-google{width:100%;padding:15px 28px;border-radius:13px;margin-top:0;background:rgba(255,255,255,.025);border:2px solid rgba(255,255,255,.16);color:#fff;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:17px;font-size:.9rem;line-height:1;box-shadow:none;text-transform:none}
-.google-icon{width:29px;height:29px;display:block;flex:0 0 29px}
-.btn.btn-google span{display:block}
+.btn.btn-google{width:100%;padding:15px;border-radius:13px;margin-top:0;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.18);color:#fff;font-weight:850;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-size:.9rem;box-shadow:none;text-transform:none}
+.google-g{font-weight:950;font-size:1.05rem;background:linear-gradient(135deg,#4285F4,#EA4335 35%,#FBBC05 65%,#34A853);-webkit-background-clip:text;background-clip:text;color:transparent}
 .login-links{text-align:center;margin-top:18px;display:flex;flex-direction:column;gap:14px}
 .login-links button{background:none;border:0;color:var(--gold);font-weight:800;font-size:.85rem;cursor:pointer}
 .login-footnote{text-align:center;margin-top:18px;color:var(--muted);font-size:.68rem;font-weight:700}
@@ -376,51 +370,6 @@ body{background:#08060c;background-image:radial-gradient(circle at 15% 0%,rgba(2
 .radio-option span{font-size:.76rem;color:#ebdcb0;font-weight:800;line-height:1.4}
 .radio-option.picked{border-color:var(--gold);background:rgba(255,192,31,.1)}
 
-/* ======================================================
-   PORTA DE AUTENTICAÇÃO
-   O link abre diretamente a tela de login. O app só fica
-   visível depois que o Supabase confirma uma sessão.
-====================================================== */
-body.auth-login{padding:22px 22px 40px}
-body.auth-login .app{max-width:1040px}
-body.auth-login .header{min-height:188px;padding:24px 34px;border-radius:28px;gap:22px;margin-bottom:30px}
-body.auth-login .logo{width:118px;height:118px;min-width:118px;font-size:54px}
-body.auth-login .header h1{font-size:2rem;line-height:1.15}
-body.auth-login .eyebrow{font-size:.78rem;letter-spacing:.16em}
-body.auth-login .subtitle{font-size:1rem;margin-top:7px}
-body.auth-login #login{display:block}
-body.auth-login #login .card{padding:42px 38px 40px;border-radius:28px}
-body.auth-login #login .title{font-size:1.55rem;margin-bottom:30px!important}
-body.auth-login #login .input-label{font-size:1.05rem;margin-bottom:12px}
-body.auth-login #login .input{min-height:116px;padding:22px 32px;border-radius:28px;font-size:1.75rem}
-body.auth-login #login .password-field input{padding-right:72px}
-body.auth-login #login .password-toggle{right:24px;font-size:1.65rem}
-body.auth-login #login .btn{min-height:100px;margin-top:22px;border-radius:28px;font-size:1.35rem}
-body.auth-login #login .login-divider{margin:30px 0 28px;font-size:1.05rem}
-body.auth-login #login .btn.btn-google{min-height:100px;padding:0 30px;font-size:1.35rem;font-weight:800;letter-spacing:-.02em;border-radius:28px;gap:18px;background:#15121d;border:2px solid rgba(255,255,255,.17);box-shadow:none}
-body.auth-login #login .btn.btn-google .google-icon{width:30px;height:30px;flex-basis:30px}
-body.auth-login #login .login-links{margin-top:30px;gap:20px}
-body.auth-login #login .login-links button{font-size:1.05rem}
-body.auth-login #login .login-footnote{margin-top:34px;font-size:.92rem}
-body.auth-login #login .login-back{display:none!important}
-@media(max-width:700px){
-  body.auth-login{padding:12px 12px 28px}
-  body.auth-login .app{max-width:560px}
-  body.auth-login .header{min-height:auto;padding:18px;border-radius:24px;gap:15px}
-  body.auth-login .header-auth-action{display:none!important}
-  body.auth-login .logo{width:72px;height:72px;min-width:72px;font-size:34px}
-  body.auth-login .header h1{font-size:1.18rem}
-  body.auth-login .eyebrow{font-size:.62rem}
-  body.auth-login .subtitle{font-size:.72rem}
-  body.auth-login #login .card{padding:26px 20px 28px;border-radius:24px}
-  body.auth-login #login .title{font-size:1.05rem;margin-bottom:22px!important}
-  body.auth-login #login .input-label{font-size:.82rem}
-  body.auth-login #login .input{min-height:60px;padding:15px 16px;font-size:1rem;border-radius:16px}
-  body.auth-login #login .btn{min-height:58px;font-size:.95rem;border-radius:16px}
-  body.auth-login #login .btn.btn-google{min-height:58px;padding:0 18px;font-size:.95rem;border-radius:16px;gap:11px}
-  body.auth-login #login .btn.btn-google .google-icon{width:22px;height:22px;flex-basis:22px}
-}
-
 /* Área de impressão (Relatório PDF) — só aparece ao imprimir */
 #printReport{display:none}
 @media print{
@@ -447,12 +396,6 @@ body.auth-login #login .login-back{display:none!important}
   .pr-footer{margin-top:26px;font-size:.68rem;color:#888;line-height:1.6;border-top:1px solid #eee;padding-top:10px}
 }
 
-/* Ação de sair no cabeçalho — somente após autenticação */
-body:not(.auth-login) .header-auth-action{display:flex}
-@media(max-width:700px){
-  body:not(.auth-login) .header{padding:16px 14px}
-  body:not(.auth-login) .header-auth-action{margin-left:6px}
-  body:not(.auth-login) .header-logout-btn{width:44px;height:44px;border-radius:9px}
-  body:not(.auth-login) .header-logout-icon{width:22px;height:22px}
-  body:not(.auth-login) .header-logout-label{font-size:.55rem}
-}
+/* Confirmação de sangria antes de efetivar */
+.withdrawal-confirm-value{font-size:1.55rem;font-weight:900;color:var(--gold);text-align:center;margin:14px 0 8px}
+.withdrawal-confirm-balance{font-size:.78rem;color:#ebdcb0;text-align:center;margin-bottom:4px}
