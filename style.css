@@ -546,3 +546,72 @@ body:not(.auth-login) .header-auth-action{display:flex}
 .hand-example-main .value{font-size:1.55rem;margin-top:5px;font-weight:950}.protection-card .value{color:#19ff91}.profit-card .value{color:#ffe044}
 .hand-example-rule{min-width:132px;padding-left:13px;border-left:2px solid rgba(255,255,255,.24);font-size:.78rem;font-weight:900;color:#fff;line-height:1.35;display:flex;flex-direction:column;gap:5px}.protection-card .hand-example-rule strong{color:#19ff91;font-size:1.02rem}.profit-card .hand-example-rule span{color:#fff1a2}
 @media(max-width:620px){.calculator-attention-box{grid-template-columns:30px 1fr;font-size:.72rem;padding:11px 12px}.calculator-attention-title{font-size:.94rem;padding:12px 14px 9px}.distribution .dist-title{font-size:.88rem}.distribution-content{padding:11px 12px}.distribution .dist-line{font-size:.7rem}.distribution-note{font-size:.66rem}.hands-example-grid{grid-template-columns:1fr}.hand-example-inner{grid-template-columns:1fr}.hand-example-rule{border-left:0;border-top:2px solid rgba(255,255,255,.18);padding-left:0;padding-top:9px;min-width:0;flex-direction:row;justify-content:space-between;align-items:center}.hand-example-main .value{font-size:1.45rem}}
+
+/* ======================================================
+   AJUSTE RESPONSIVO FINAL — MOBILE PRESERVA O VISUAL DESKTOP
+   Mantém Proteção + Lucro lado a lado e reduz somente escala.
+====================================================== */
+.app-dialog-actions.single-action{
+  grid-template-columns:minmax(180px,360px);
+  justify-content:center;
+  width:100%;
+  margin-left:auto;
+  margin-right:auto;
+}
+.app-dialog-actions.single-action .btn{
+  width:100%;
+  justify-self:center;
+}
+
+@media(max-width:620px){
+  .hands-example-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:9px;
+  }
+  .hand-example-card{
+    padding:10px;
+    border-radius:16px;
+  }
+  .hand-example-heading{
+    font-size:.78rem;
+    gap:6px;
+    margin:0 1px 8px;
+  }
+  .hand-example-heading span{font-size:1.15rem}
+  .hand-example-inner{
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:7px;
+    min-height:76px;
+    padding:9px 9px;
+    border-radius:13px;
+  }
+  .hand-example-label{font-size:.62rem;line-height:1.2}
+  .hand-example-main .value{font-size:1.22rem;margin-top:4px}
+  .hand-example-rule{
+    min-width:0;
+    max-width:92px;
+    padding-left:8px;
+    padding-top:0;
+    border-left:1px solid rgba(255,255,255,.22);
+    border-top:0;
+    flex-direction:column;
+    justify-content:center;
+    align-items:flex-start;
+    font-size:.6rem;
+    gap:3px;
+  }
+  .protection-card .hand-example-rule strong{font-size:.78rem}
+  .profit-card .hand-example-rule span{line-height:1.2}
+}
+
+@media(max-width:390px){
+  .hands-example-grid{gap:7px}
+  .hand-example-card{padding:8px;border-radius:14px}
+  .hand-example-heading{font-size:.7rem}
+  .hand-example-heading span{font-size:1rem}
+  .hand-example-inner{padding:8px 7px;gap:5px}
+  .hand-example-label{font-size:.56rem}
+  .hand-example-main .value{font-size:1.05rem}
+  .hand-example-rule{max-width:78px;font-size:.54rem;padding-left:6px}
+  .protection-card .hand-example-rule strong{font-size:.68rem}
+}
