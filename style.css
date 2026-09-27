@@ -488,3 +488,22 @@ body:not(.auth-login) .header-auth-action{display:flex}
   .app-dialog-actions{gap:9px}
   .app-dialog-actions .btn,.app-dialog-actions .btn-secondary{min-height:48px;font-size:.75rem}
 }
+
+/* Exemplo para seguir — blocos de Proteção e Lucro */
+.hands-example{margin-top:14px;padding:14px;border:1px solid rgba(255,30,167,.55);border-radius:18px;background:linear-gradient(135deg,rgba(12,8,28,.96),rgba(20,10,40,.88));box-shadow:0 0 18px rgba(255,30,167,.12)}
+.hands-example-title{font-size:.9rem;font-weight:950;letter-spacing:.02em;color:var(--gold);margin:2px 2px 12px;text-transform:uppercase}
+.hands-example-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.hand-example-card{border-radius:16px;padding:12px;background:rgba(10,8,28,.76);box-shadow:inset 0 0 18px rgba(255,255,255,.025)}
+.protection-card{border:2px solid rgba(0,230,118,.9);box-shadow:0 0 18px rgba(0,230,118,.18),inset 0 0 18px rgba(0,230,118,.06)}
+.profit-card{border:2px solid rgba(255,200,0,.92);box-shadow:0 0 18px rgba(255,200,0,.18),inset 0 0 18px rgba(255,200,0,.06)}
+.hand-example-heading{font-size:.86rem;font-weight:950;letter-spacing:.03em;margin-bottom:10px}
+.protection-card .hand-example-heading{color:#00f08a}.profit-card .hand-example-heading{color:#ffd42a}
+.hand-example-inner{border:1px solid rgba(255,255,255,.18);border-radius:13px;padding:11px 12px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;min-height:78px}
+.protection-card .hand-example-inner{border-color:rgba(0,230,118,.75);background:rgba(0,230,118,.045)}
+.profit-card .hand-example-inner{border-color:rgba(255,200,0,.78);background:rgba(255,200,0,.045)}
+.hand-example-label{font-size:.7rem;font-weight:900;color:#fff;line-height:1.25}.hand-example-label span{color:#d8d4e7;font-weight:750}
+.hand-example-main .value{font-size:1.45rem;margin-top:5px;font-weight:950}
+.protection-card .value{color:#00f08a}.profit-card .value{color:#ffd42a}
+.hand-example-rule{min-width:120px;padding-left:12px;border-left:1px solid rgba(255,255,255,.2);font-size:.76rem;font-weight:900;color:#fff;line-height:1.35;display:flex;flex-direction:column;gap:5px}
+.protection-card .hand-example-rule strong{color:#00f08a;font-size:1rem}.profit-card .hand-example-rule span{color:#ffe06a}
+@media(max-width:620px){.hands-example-grid{grid-template-columns:1fr}.hand-example-inner{grid-template-columns:1fr}.hand-example-rule{border-left:0;border-top:1px solid rgba(255,255,255,.16);padding-left:0;padding-top:9px;min-width:0;flex-direction:row;justify-content:space-between;align-items:center}}
