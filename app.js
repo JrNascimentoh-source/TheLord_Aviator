@@ -293,13 +293,29 @@ function registerEntry(){
 let pendingWithdrawal=null;
 let breachChoice=null;
 
+function getTodayWinTotal(){
+  const today=new Date().toLocaleDateString('pt-BR');
+  return data.entries.filter(e=>e.type==='WIN' && e.date===today).reduce((sum,e)=>sum+Number(e.value||0),0);
+}
+
+function getGorduraDisponivel(){
+  if(!data.started || !data.initial)return 0;
+  const stopTarget=data.initial*0.20;
+  return Math.max(0,getTodayWinTotal()-stopTarget);
+}
+
+function getSaldoDisponivelSangria(){
+  if(!data.started)return 0;
+  return Math.max(0,data.current-data.initial);
+}
+
 function makeWithdrawal(){
   if(!data.started){alert('Primeiro confirme sua banca na Calculadora para iniciar a gestão.');return}
   const val=parseFloat(document.getElementById('withdrawalValue').value)||0;
   if(val<=0){alert('Informe um valor de sangria válido.');return}
   if(val>data.current){alert('O valor da sangria não pode ser maior que a Banca Atual de '+money(data.current)+'.');return}
 
-  const available=Math.max(0,data.current-data.initial);
+  const available=getSaldoDisponivelSangria();
   if(val>available){
     pendingWithdrawal=val;
     breachChoice=null;
@@ -366,8 +382,7 @@ function renderWithdrawalBalances(){
   if(!wi||!wc||!wa)return;
   wi.textContent=money(data.initial);
   wc.textContent=money(data.current);
-  const available=Math.max(0,data.current-data.initial);
-  wa.textContent=money(available);
+  wa.textContent=money(getSaldoDisponivelSangria());
 }
 
 function renderWithdrawalReport(){
@@ -709,10 +724,7 @@ function updateOverview(){
     return;
   }
   const result=data.current-data.initial;
-  const today=new Date().toLocaleDateString('pt-BR');
-  const todayWin=data.entries.filter(e=>e.type==='WIN' && e.date===today).reduce((a,e)=>a+Number(e.value||0),0);
-  const stopTarget=data.initial*0.20;
-  const gordura=Math.max(0,todayWin-stopTarget);
+  const gordura=getGorduraDisponivel();
   const total=data.wins+data.losses;
   document.getElementById('ovInitial').textContent=money(data.initial);
   document.getElementById('ovCurrent').textContent=money(data.current);

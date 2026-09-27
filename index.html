@@ -98,7 +98,7 @@
 
   <section class="card">
     <div class="title">💰 Sangria</div>
-    <div class="notice">Retire parte do saldo disponível da banca. A sangria não é registrada como WIN ou LOSS.</div>
+    <div class="notice">Retire apenas do lucro acumulado acima da banca inicial. A sangria não é registrada como WIN ou LOSS.</div>
     <div class="withdrawal-form">
       <label class="input-label" for="withdrawalValue">Valor da retirada (R$)</label>
       <input id="withdrawalValue" class="input" type="number" min="0" step="0.01" value="0" inputmode="decimal" placeholder="0,00">
@@ -111,9 +111,9 @@
       <div class="box"><div class="label">Saldo Banca Atual</div><div class="value" id="wdCurrent">R$ 0,00</div></div>
     </div>
     <div class="box section">
-      <div class="label">Saldo Disponível para Retirada</div>
+      <div class="label">Saldo Disponível para Sangria</div>
       <div class="value green" id="wdAvailable">R$ 0,00</div>
-      <div class="small">Não inclui a banca inicial — apenas o ganho já obtido (Stop Win).</div>
+      <div class="small">Lucro acumulado acima da banca inicial. A Gordura disponível é um indicador separado da meta diária.</div>
     </div>
 
     <div class="withdrawal-report">
@@ -407,7 +407,7 @@
 <div id="breachModalOverlay" class="modal-overlay hidden">
   <div class="modal-box">
     <div class="modal-title">⚠️ Sem saldo positivo para retirada</div>
-    <div class="modal-warning">Você não tem saldo positivo disponível para essa retirada. Se continuar, o valor sairá da <b>banca inicial</b>, o que quebra a gestão e o gerenciamento que você definiu.</div>
+    <div class="modal-warning">O valor solicitado ultrapassa o <b>Saldo Disponível para Sangria</b>. Se continuar, o valor sairá da <b>banca inicial</b>, o que quebra a gestão e o gerenciamento que você definiu.</div>
     <label class="radio-option" id="radioKeep">
       <input type="radio" name="breachChoice" value="keep" onchange="selectBreachChoice('keep')">
       <span>Manter o gerenciamento (cancelar esta retirada)</span>
