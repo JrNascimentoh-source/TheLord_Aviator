@@ -20,16 +20,23 @@
 
 <header class="header">
   <div class="logo">✈️</div>
-  <div>
+  <div class="header-main">
     <div class="eyebrow">Gestão Oficial</div>
     <h1>TheLord_Aviator | Gestão &amp; Análise</h1>
     <div class="subtitle">Gestão de banca · acompanhamento pessoal</div>
   </div>
+  <div class="header-auth-action hidden" id="headerAuthAction">
+    <button type="button" id="headerLogoutBtn" class="header-logout-btn" onclick="doLogout()" aria-label="Sair da conta">
+      <svg class="header-logout-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M10 4H5.8A1.8 1.8 0 0 0 4 5.8v12.4A1.8 1.8 0 0 0 5.8 20H10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M13 8l4 4-4 4M17 12H9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <span class="header-logout-label">Sair</span>
+  </div>
 </header>
 
-<div class="login-preview-link"><button type="button" id="loginLinkBtn" onclick="openLoginPreview()">🔒 Entrar / Criar conta</button></div>
-
-<main id="login" class="hidden">
+<main id="login">
   <section class="card">
     <div class="title" style="margin-bottom:18px">ENTRAR</div>
     <label class="input-label">E-mail</label>
@@ -42,24 +49,32 @@
     <button class="btn" onclick="doLogin()">ENTRAR</button>
     <div id="loginStatus" class="login-status hidden"></div>
     <div class="login-divider"><span>ou</span></div>
-    <button class="btn btn-google" onclick="doGoogleLogin()"><span class="google-g">G</span> Continuar com Google</button>
+    <button class="btn btn-google" onclick="doGoogleLogin()" aria-label="Continuar com Google">
+      <svg class="google-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path fill="#4285F4" d="M21.35 12.27c0-.71-.06-1.4-.18-2.06H12v3.9h5.23a4.46 4.46 0 0 1-1.94 2.93v2.43h3.14c1.84-1.7 2.92-4.21 2.92-7.2Z"/>
+        <path fill="#34A853" d="M12 21.75c2.63 0 4.84-.87 6.45-2.37l-3.14-2.43c-.87.58-1.98.92-3.31.92-2.54 0-4.69-1.72-5.46-4.03H3.3v2.5A9.75 9.75 0 0 0 12 21.75Z"/>
+        <path fill="#FBBC05" d="M6.54 13.84A5.86 5.86 0 0 1 6.23 12c0-.64.11-1.26.31-1.84v-2.5H3.3A9.75 9.75 0 0 0 2.25 12c0 1.57.38 3.06 1.05 4.34l3.24-2.5Z"/>
+        <path fill="#EA4335" d="M12 6.13c1.43 0 2.72.49 3.73 1.46l2.8-2.8C16.84 3.23 14.63 2.25 12 2.25A9.75 9.75 0 0 0 3.3 7.66l3.24 2.5C7.31 7.85 9.46 6.13 12 6.13Z"/>
+      </svg>
+      <span>Continuar com Google</span>
+    </button>
     <div class="login-links">
       <button type="button" onclick="doSignUp()">Não tenho conta — criar agora</button>
       <button type="button" onclick="doPasswordReset()">Esqueci minha senha</button>
     </div>
     <div class="login-footnote">Dados sincronizados na nuvem · Instale como app na tela inicial</div>
   </section>
-  <div class="login-back"><button type="button" onclick="closeLoginPreview()">Voltar</button></div>
+  <div class="login-back hidden"><button type="button" onclick="closeLoginPreview()">Voltar</button></div>
 </main>
 
-<main id="overview">
+<main id="overview" class="hidden">
   <section class="card">
     <div class="title">📊 Visão Geral</div>
     <div class="grid">
       <div class="box"><div class="label">Banca Inicial</div><div class="value gold" id="ovInitial">R$ 0,00</div></div>
       <div class="box"><div class="label">Banca Atual</div><div class="value" id="ovCurrent">R$ 0,00</div></div>
       <div class="box"><div class="label">Resultado</div><div class="value" id="ovResult">R$ 0,00</div></div>
-      <div class="box"><div class="label">Variação</div><div class="value" id="ovVariation">0,00%</div></div>
+      <div class="box"><div class="label">Gordura disponível</div><div class="value gold" id="ovGordura">R$ 0,00</div></div>
     </div>
     <div class="notice" id="ovMessage">🔒 Nenhuma gestão iniciada. Preencha a banca na Calculadora e confirme para começar.</div>
   </section>
@@ -83,7 +98,7 @@
 
   <section class="card">
     <div class="title">💰 Sangria</div>
-    <div class="notice">Retire parte do saldo disponível da banca. A sangria não é registrada como WIN ou LOSS.</div>
+    <div class="notice">Retire apenas do lucro acumulado acima da banca inicial. A sangria não é registrada como WIN ou LOSS.</div>
     <div class="withdrawal-form">
       <label class="input-label" for="withdrawalValue">Valor da retirada (R$)</label>
       <input id="withdrawalValue" class="input" type="number" min="0" step="0.01" value="0" inputmode="decimal" placeholder="0,00">
@@ -96,9 +111,9 @@
       <div class="box"><div class="label">Saldo Banca Atual</div><div class="value" id="wdCurrent">R$ 0,00</div></div>
     </div>
     <div class="box section">
-      <div class="label">Saldo Disponível para Retirada</div>
+      <div class="label">Saldo Disponível para Sangria</div>
       <div class="value green" id="wdAvailable">R$ 0,00</div>
-      <div class="small">Não inclui a banca inicial — apenas o ganho já obtido (Stop Win).</div>
+      <div class="small">Lucro acumulado acima da banca inicial. A Gordura disponível é um indicador separado da meta diária.</div>
     </div>
 
     <div class="withdrawal-report">
@@ -368,7 +383,7 @@
 
 </div>
 
-<nav class="bottom">
+<nav class="bottom hidden">
   <button class="nav active" onclick="showPage('overview',this)"><span>📊</span>Visão Geral</button>
   <button class="nav" onclick="showPage('calculator',this)"><span>🧮</span>Calculadora</button>
   <button class="nav" onclick="showPage('monitor',this)"><span>📈</span>Monitor</button>
@@ -390,9 +405,9 @@
 </div>
 
 <div id="withdrawalConfirmModalOverlay" class="modal-overlay hidden">
-  <div class="modal-box">
+  <div class="modal-box withdrawal-confirm-modal">
     <div class="modal-title">💰 Confirmar Sangria</div>
-    <div class="modal-warning">Confira o valor da retirada antes de confirmar. A sangria só será realizada se você tocar em <b>OK</b>.</div>
+    <div class="modal-warning">Confira o valor da retirada antes de confirmar. A sangria só será realizada ao tocar em <b>OK</b>.</div>
     <div class="withdrawal-confirm-value" id="withdrawalConfirmValue">R$ 0,00</div>
     <div class="withdrawal-confirm-balance">Banca atual após a retirada: <b id="withdrawalConfirmBalance">R$ 0,00</b></div>
     <div class="modal-actions">
@@ -405,7 +420,7 @@
 <div id="breachModalOverlay" class="modal-overlay hidden">
   <div class="modal-box">
     <div class="modal-title">⚠️ Sem saldo positivo para retirada</div>
-    <div class="modal-warning">Você não tem saldo positivo disponível para essa retirada. Se continuar, o valor sairá da <b>banca inicial</b>, o que quebra a gestão e o gerenciamento que você definiu.</div>
+    <div class="modal-warning">O valor solicitado ultrapassa o <b>Saldo Disponível para Sangria</b>. Se continuar, o valor sairá da <b>banca inicial</b>, o que quebra a gestão e o gerenciamento que você definiu.</div>
     <label class="radio-option" id="radioKeep">
       <input type="radio" name="breachChoice" value="keep" onchange="selectBreachChoice('keep')">
       <span>Manter o gerenciamento (cancelar esta retirada)</span>
