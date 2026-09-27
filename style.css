@@ -463,3 +463,28 @@ body:not(.auth-login) .header-auth-action{display:flex}
 .withdrawal-confirm-balance{font-size:.78rem;color:var(--muted);margin-bottom:18px}
 .withdrawal-confirm-balance b{color:#fff}
 @media(max-width:700px){.withdrawal-confirm-value{font-size:1.35rem}}
+
+/* ======================================================
+   SISTEMA UNIFICADO DE AVISOS
+   Mesmo acabamento visual da confirmação de sangria.
+====================================================== */
+.app-dialog-overlay{background:rgba(6,2,18,.72);backdrop-filter:blur(5px);z-index:90}
+.app-dialog-box{position:relative;max-width:560px;text-align:center;padding:26px 28px 24px;background:linear-gradient(145deg,rgba(50,25,86,.98),rgba(30,12,55,.99));border:2px solid rgba(255,73,164,.72);border-radius:24px;box-shadow:0 0 0 1px rgba(255,192,31,.08),0 22px 70px rgba(0,0,0,.75),0 0 34px rgba(255,47,135,.16)}
+.app-dialog-box:before{content:"";position:absolute;inset:0;border-radius:22px;pointer-events:none;background:linear-gradient(135deg,rgba(255,255,255,.07),transparent 34%,rgba(255,47,135,.05))}
+.app-dialog-icon{position:relative;margin:0 auto 7px;width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.35rem;font-weight:950;color:var(--gold);border:1px solid rgba(255,192,31,.55);background:rgba(255,192,31,.08);box-shadow:0 0 18px rgba(255,192,31,.12)}
+.app-dialog-title{position:relative;font-size:1.12rem;color:#ffe18a;margin:0 0 14px;font-weight:950;letter-spacing:.01em}
+.app-dialog-message{position:relative;white-space:pre-line;text-align:center;color:#f5eaff;background:rgba(255,255,255,.10);border:2px solid rgba(255,239,145,.72);border-radius:15px;padding:13px 15px;margin-bottom:18px;line-height:1.55;font-size:.78rem;box-shadow:inset 0 0 18px rgba(255,255,255,.03)}
+.app-dialog-actions{position:relative;gap:12px;margin-top:0}
+.app-dialog-actions .btn,.app-dialog-actions .btn-secondary{min-height:52px;border-radius:17px;font-weight:950;font-size:.82rem;letter-spacing:.03em}
+.app-dialog-actions .btn{background:linear-gradient(180deg,#fffbd0 0%,#ffd12b 48%,#ffb800 100%);color:#5a3700;border:1px solid rgba(255,244,170,.9);box-shadow:0 0 24px rgba(255,192,31,.22)}
+.app-dialog-actions .btn-secondary{background:linear-gradient(180deg,rgba(255,47,135,.14),rgba(157,26,112,.25));color:#ff70ba;border:2px solid rgba(255,74,164,.75);box-shadow:0 0 20px rgba(255,47,135,.12)}
+.app-dialog-actions .btn:hover{filter:brightness(1.04)}
+.app-dialog-actions .btn-secondary:hover{background:rgba(255,47,135,.22)}
+.app-dialog-overlay.dialog-success .app-dialog-icon{color:#7fffd1;border-color:rgba(0,255,170,.45);background:rgba(0,255,170,.08)}
+.app-dialog-overlay.dialog-error .app-dialog-icon{color:#ff7590;border-color:rgba(255,75,110,.55);background:rgba(255,75,110,.09)}
+.app-dialog-overlay.dialog-warning .app-dialog-icon{color:var(--gold)}
+@media(max-width:700px){
+  .app-dialog-box{max-width:calc(100vw - 30px);padding:22px 18px 18px;border-radius:22px}
+  .app-dialog-actions{gap:9px}
+  .app-dialog-actions .btn,.app-dialog-actions .btn-secondary{min-height:48px;font-size:.75rem}
+}

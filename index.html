@@ -390,6 +390,18 @@
   <button class="nav" onclick="showPage('timing',this)"><span>⏱️</span>Minutagem</button>
 </nav>
 
+<div id="appDialogOverlay" class="modal-overlay app-dialog-overlay hidden">
+  <div class="modal-box app-dialog-box">
+    <div class="app-dialog-icon" id="appDialogIcon">ℹ</div>
+    <div class="modal-title app-dialog-title" id="appDialogTitle">Aviso</div>
+    <div class="modal-warning app-dialog-message" id="appDialogMessage"></div>
+    <div class="modal-actions app-dialog-actions">
+      <button id="appDialogCancel" class="btn btn-secondary" style="margin-top:0" onclick="closeAppDialog()">Cancelar</button>
+      <button id="appDialogConfirm" class="btn" style="margin-top:0" onclick="handleAppDialogConfirm()">OK</button>
+    </div>
+  </div>
+</div>
+
 <div id="reportModalOverlay" class="modal-overlay hidden">
   <div class="modal-box">
     <div class="modal-title">📄 Relatório de Gerenciamento / Mês</div>

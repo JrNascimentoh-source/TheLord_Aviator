@@ -137,21 +137,69 @@ function renderGoalIndicators(){
   if(winIcon) winIcon.classList.toggle('hidden',!winHit);
   if(lossIcon) lossIcon.classList.toggle('hidden',!lossHit);
 }
+/* ======================================================
+   AVISOS E CONFIRMAÇÕES PERSONALIZADOS
+   Mantém todos os alertas/confirmas no mesmo padrão visual
+   da confirmação de sangria.
+====================================================== */
+let appDialogAction=null;
+
+function closeAppDialog(){
+  const overlay=document.getElementById('appDialogOverlay');
+  if(overlay) overlay.classList.add('hidden');
+  appDialogAction=null;
+}
+
+function showAppDialog({title='Aviso',message='',confirmText='OK',cancelText='',onConfirm=null,kind='info'}){
+  const overlay=document.getElementById('appDialogOverlay');
+  if(!overlay)return;
+  const titleEl=document.getElementById('appDialogTitle');
+  const messageEl=document.getElementById('appDialogMessage');
+  const confirmBtn=document.getElementById('appDialogConfirm');
+  const cancelBtn=document.getElementById('appDialogCancel');
+  const iconEl=document.getElementById('appDialogIcon');
+  titleEl.textContent=title;
+  messageEl.textContent=message;
+  iconEl.textContent=kind==='success'?'✓':(kind==='error'?'!':(kind==='warning'?'⚠':'ℹ'));
+  overlay.classList.remove('dialog-success','dialog-error','dialog-warning');
+  if(kind!=='info') overlay.classList.add('dialog-'+kind);
+  confirmBtn.textContent=confirmText;
+  cancelBtn.textContent=cancelText||'Cancelar';
+  cancelBtn.classList.toggle('hidden',!cancelText);
+  appDialogAction=onConfirm;
+  overlay.classList.remove('hidden');
+}
+
+function showAppNotice(message,title='Aviso',kind='info'){
+  showAppDialog({title,message,confirmText:'OK',cancelText:'',kind});
+}
+
+function showAppConfirm(message,onConfirm,title='Confirmar ação',confirmText='OK'){
+  showAppDialog({title,message,confirmText,cancelText:'Cancelar',onConfirm,kind:'warning'});
+}
+
+function handleAppDialogConfirm(){
+  const action=appDialogAction;
+  closeAppDialog();
+  if(typeof action==='function') action();
+}
+
 function startManagement(){
   const b=parseFloat(document.getElementById('bank').value)||0;
-  if(b<=0){alert('Digite um valor de banca válido.');return}
+  if(b<=0){showAppNotice('Digite um valor de banca válido.','Banca inválida','error');return}
   const scenarioNames={0.1:'Conservador ✅',0.2:'Moderado 📊',0.3:'Agressivo 🔥'};
   const chosenLabel=scenarioNames[projectionRate]||'Moderado 📊';
   const chosenDays=freeManagementChecked?30:projectionDays;
   const daysMsg=freeManagementChecked?(chosenDays+' dias (Gestão livre)'):(chosenDays+' dias');
-  const confirmMsg='Confirme sua gestão:\n\n• Cenário: '+chosenLabel+' ('+(projectionRate*100).toFixed(0)+'%/dia)\n• Tempo de Gestão: '+daysMsg+'\n\nEssas escolhas ficarão FIXAS durante toda a gestão atual — só é possível trocar finalizando esta gestão e iniciando um novo mês.\n\nDeseja confirmar e iniciar a gestão?';
-  if(!confirm(confirmMsg)) return;
-  const keepRounds=data.roundsByGame;
-  const keepGame=data.activeGame;
-  data={started:true,initial:b,current:b,wins:0,losses:0,totalWin:0,totalLoss:0,days:0,entries:[],withdrawals:[],alerts:{win:false,loss:false,gordura:0,date:new Date().toLocaleDateString('pt-BR')},scenario:projectionRate,managementDays:chosenDays,freeManagement:freeManagementChecked,roundsByGame:keepRounds,activeGame:keepGame};
-  document.getElementById('bank').classList.remove('example');
-  save(); updateOverview(); applyScenarioLock();
-  alert('Gestão iniciada com '+money(b)+' — Cenário '+chosenLabel+' ('+(projectionRate*100).toFixed(0)+'%/dia) — '+daysMsg+'.');
+  const confirmMsg='Cenário: '+chosenLabel+' ('+(projectionRate*100).toFixed(0)+'%/dia)\nTempo de Gestão: '+daysMsg+'\n\nEssas escolhas ficarão FIXAS durante toda a gestão atual — só é possível trocar finalizando esta gestão e iniciando um novo mês.\n\nDeseja confirmar e iniciar a gestão?';
+  showAppConfirm(confirmMsg,()=>{
+    const keepRounds=data.roundsByGame;
+    const keepGame=data.activeGame;
+    data={started:true,initial:b,current:b,wins:0,losses:0,totalWin:0,totalLoss:0,days:0,entries:[],withdrawals:[],alerts:{win:false,loss:false,gordura:0,date:new Date().toLocaleDateString('pt-BR')},scenario:projectionRate,managementDays:chosenDays,freeManagement:freeManagementChecked,roundsByGame:keepRounds,activeGame:keepGame};
+    document.getElementById('bank').classList.remove('example');
+    save(); updateOverview(); applyScenarioLock();
+    showAppNotice('Gestão iniciada com '+money(b)+' — Cenário '+chosenLabel+' ('+(projectionRate*100).toFixed(0)+'%/dia) — '+daysMsg+'.','Gestão iniciada','success');
+  },'Confirmar gestão','Iniciar gestão');
 }
 function applyScenarioLock(){
   const note=document.getElementById('scenarioLockNote');
@@ -216,7 +264,7 @@ function handStatusChange(n,which){
   computeHandResult(n);
 }
 function registerEntry(){
-  if(!data.started){alert('Primeiro confirme sua banca na Calculadora para iniciar a gestão.');return}
+  if(!data.started){showAppNotice('Primeiro confirme sua banca na Calculadora para iniciar a gestão.','Atenção','warning');return}
   const now=new Date();
   const today=now.toLocaleDateString('pt-BR');
   const time=now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
@@ -238,7 +286,7 @@ function registerEntry(){
   });
 
   if(!toRegister.length){
-    alert('Preencha a Entrada (R$) e marque Win ou Loss em pelo menos uma das mãos antes de registrar.');
+    showAppNotice('Preencha a Entrada (R$) e marque Win ou Loss em pelo menos uma das mãos antes de registrar.','Entrada incompleta','warning');
     return;
   }
 
@@ -270,16 +318,16 @@ function registerEntry(){
     data.alerts.win=true;
     data.alerts.gordura=gordura;
     save();
-    alert('🟢 STOP WIN ALCANÇADO!\n\nResultado positivo do dia: '+money(todayWin)+'\nMeta mínima de Stop Win: '+money(stopTarget)+'\n💰 Gordura acima da meta: '+money(gordura)+'\n\nGestão diária concluída.');
+    showAppNotice('Resultado positivo do dia: '+money(todayWin)+'\nMeta mínima de Stop Win: '+money(stopTarget)+'\n💰 Gordura acima da meta: '+money(gordura)+'\n\nGestão diária concluída.','STOP WIN ALCANÇADO','success');
   } else if(todayWin>stopTarget && data.alerts.win && gordura>(Number(data.alerts.gordura)||0)){
     data.alerts.gordura=gordura;
     save();
-    alert('💰 GORDURA DA META!\n\nMeta de Stop Win: '+money(stopTarget)+'\nResultado do dia: '+money(todayWin)+'\nGordura acumulada acima da meta: '+money(gordura)+'\n\nEsse valor está acima da meta diária.');
+    showAppNotice('Meta de Stop Win: '+money(stopTarget)+'\nResultado do dia: '+money(todayWin)+'\n💰 Gordura acumulada acima da meta: '+money(gordura)+'\n\nEsse valor está acima da meta diária.','GORDURA DA META','success');
   } else if(todayLoss>=stopTarget && !data.alerts.loss){
     data.alerts.loss=true;save();
-    alert('🔴 STOP LOSS ALCANÇADO!\n\nPerda do dia: '+money(todayLoss)+'\nLimite de Stop Loss: '+money(stopTarget)+'\n\nEncerre a gestão do dia para respeitar o limite.');
+    showAppNotice('Perda do dia: '+money(todayLoss)+'\nLimite de Stop Loss: '+money(stopTarget)+'\n\nEncerre a gestão do dia para respeitar o limite.','STOP LOSS ALCANÇADO','error');
   } else {
-    alert('Entrada(s) registrada(s) com sucesso.');
+    showAppNotice('Entrada(s) registrada(s) com sucesso.','Entrada registrada','success');
   }
   renderGoalIndicators();
 }
@@ -310,10 +358,10 @@ function getSaldoDisponivelSangria(){
 }
 
 function makeWithdrawal(){
-  if(!data.started){alert('Primeiro confirme sua banca na Calculadora para iniciar a gestão.');return}
+  if(!data.started){showAppNotice('Primeiro confirme sua banca na Calculadora para iniciar a gestão.','Atenção','warning');return}
   const val=parseFloat(document.getElementById('withdrawalValue').value)||0;
-  if(val<=0){alert('Informe um valor de sangria válido.');return}
-  if(val>data.current){alert('O valor da sangria não pode ser maior que a Banca Atual de '+money(data.current)+'.');return}
+  if(val<=0){showAppNotice('Informe um valor de sangria válido.','Sangria inválida','error');return}
+  if(val>data.current){showAppNotice('O valor da sangria não pode ser maior que a Banca Atual de '+money(data.current)+'.','Sangria inválida','error');return}
 
   const available=getSaldoDisponivelSangria();
   if(val>available){
@@ -357,9 +405,9 @@ function executeWithdrawal(val,breach){
   updateOverview();
   renderWithdrawalReport();
   if(breach){
-    alert('⚠️ Retirada realizada quebrando o gerenciamento.\n\nValor retirado: '+money(val)+'\nBanca atual: '+money(data.current));
+    showAppNotice('Valor retirado: '+money(val)+'\nBanca atual: '+money(data.current),'Sangria realizada — quebra de gerenciamento','warning');
   } else {
-    alert('💰 Sangria realizada com sucesso.\n\nValor retirado: '+money(val)+'\nBanca atual: '+money(data.current));
+    showAppNotice('Valor retirado: '+money(val)+'\nBanca atual: '+money(data.current),'Sangria realizada com sucesso','success');
   }
 }
 
@@ -418,14 +466,15 @@ function renderWithdrawalReport(){
 }
 
 function deleteWithdrawal(id){
-  if(!confirm('Excluir esta retirada? A banca atual será ajustada de volta.')) return;
-  const w=data.withdrawals.find(x=>x.id===id);
-  if(!w)return;
-  data.current+=Number(w.value||0);
-  data.withdrawals=data.withdrawals.filter(x=>x.id!==id);
-  save();
-  updateOverview();
-  renderWithdrawalReport();
+  showAppConfirm('Excluir esta retirada? A banca atual será ajustada de volta.',()=>{
+    const w=data.withdrawals.find(x=>x.id===id);
+    if(!w)return;
+    data.current+=Number(w.value||0);
+    data.withdrawals=data.withdrawals.filter(x=>x.id!==id);
+    save();
+    updateOverview();
+    renderWithdrawalReport();
+  },'Excluir retirada','Excluir');
 }
 
 function renderEntryReport(){
@@ -464,18 +513,20 @@ function renderEntryReport(){
 }
 
 function deleteEntry(id){
-  if(!confirm('Excluir esta entrada? Os totais serão recalculados.')) return;
-  const e=data.entries.find(x=>x.id===id);
-  if(!e)return;
-  if(e.type==='WIN'){data.wins=Math.max(0,data.wins-1);data.totalWin=Math.max(0,data.totalWin-Number(e.value||0));data.current=Math.max(0,data.current-Number(e.value||0))}
-  else{data.losses=Math.max(0,data.losses-1);data.totalLoss=Math.max(0,data.totalLoss-Number(e.value||0));data.current+=Number(e.value||0)}
-  data.entries=data.entries.filter(x=>x.id!==id);
-  data.days=new Set(data.entries.map(x=>x.date)).size;
-  save();
-  updateOverview();
-  renderEntryReport();
-  calc();
+  showAppConfirm('Excluir esta entrada? Os totais serão recalculados.',()=>{
+    const e=data.entries.find(x=>x.id===id);
+    if(!e)return;
+    if(e.type==='WIN'){data.wins=Math.max(0,data.wins-1);data.totalWin=Math.max(0,data.totalWin-Number(e.value||0));data.current=Math.max(0,data.current-Number(e.value||0))}
+    else{data.losses=Math.max(0,data.losses-1);data.totalLoss=Math.max(0,data.totalLoss-Number(e.value||0));data.current+=Number(e.value||0)}
+    data.entries=data.entries.filter(x=>x.id!==id);
+    data.days=new Set(data.entries.map(x=>x.date)).size;
+    save();
+    updateOverview();
+    renderEntryReport();
+    calc();
+  },'Excluir entrada','Excluir');
 }
+
 
 
 /* ======================================================
@@ -483,7 +534,7 @@ function deleteEntry(id){
    Geração do relatório via impressão do navegador.
 ====================================================== */
 function openReportModal(){
-  if(!data.entries.length){alert('Ainda não há entradas registradas nesta gestão para gerar um relatório.');return}
+  if(!data.entries.length){showAppNotice('Ainda não há entradas registradas nesta gestão para gerar um relatório.','Relatório','warning');return}
   document.getElementById('reportPlatform').value='';
   document.getElementById('reportModalError').classList.add('hidden');
   document.getElementById('reportModalOverlay').classList.remove('hidden');
@@ -771,7 +822,7 @@ function updateOverview(){
   renderWithdrawalBalances();
 }
 function newMonth(){
-  if(!confirm('Deseja limpar o histórico deste mês e começar uma nova gestão?')) return;
+  showAppConfirm('Deseja limpar o histórico deste mês e começar uma nova gestão?',()=>{
   const keepRounds=data.roundsByGame;
   const keepGame=data.activeGame;
   data={started:false,initial:0,current:0,wins:0,losses:0,totalWin:0,totalLoss:0,days:0,entries:[],withdrawals:[],alerts:{win:false,loss:false,date:''},scenario:null,managementDays:null,freeManagement:false,roundsByGame:keepRounds,activeGame:keepGame};
@@ -783,7 +834,8 @@ function newMonth(){
   const free30Check=document.getElementById('free30Check');
   if(free30Check) free30Check.checked=false;
   calc();updateOverview();renderEntryReport();renderWithdrawalReport();applyScenarioLock();
-  alert('Novo mês iniciado. Todos os valores foram zerados. Você já pode escolher um novo cenário e tempo de gestão, e digitar sua nova banca para começar.');
+  showAppNotice('Todos os valores foram zerados. Você já pode escolher um novo cenário e tempo de gestão, e digitar sua nova banca para começar.','Novo mês iniciado','success');
+  },'Novo mês','Iniciar novo mês');
 }
 
 
@@ -827,16 +879,17 @@ function pushRound(entry){
 function registerRound(){
   const input=document.getElementById('roundValue');
   const v=parseFloat((input.value||'').replace(',','.'));
-  if(!v || v<=0){alert('Informe um multiplicador válido, ex: 2.35');return}
+  if(!v || v<=0){showAppNotice('Informe um multiplicador válido, ex: 2.35','Multiplicador inválido','error');return}
   pushRound({id:Date.now(),value:v,color:classifyRound(v).key,ts:Date.now()});
   input.value='';
 }
 function clearRounds(){
-  if(!currentRounds().length){alert('Não há rodadas registradas.');return}
-  if(!confirm('Limpar todo o histórico de rodadas deste jogo?'))return;
-  data.roundsByGame[data.activeGame]=[];
-  save();
-  renderMonitor();
+  if(!currentRounds().length){showAppNotice('Não há rodadas registradas.','Histórico vazio','warning');return}
+  showAppConfirm('Limpar todo o histórico de rodadas deste jogo?',()=>{
+    data.roundsByGame[data.activeGame]=[];
+    save();
+    renderMonitor();
+  },'Limpar histórico','Limpar');
 }
 function timeAgo(ts){
   const diff=Math.max(0,Date.now()-ts);
@@ -1120,14 +1173,15 @@ async function doPasswordReset(){
 }
 
 async function doLogout(){
-  if(!confirm('Deseja sair da sua conta? Seus dados continuam salvos na nuvem.'))return;
-  if(supabaseClient){
-    const {error}=await supabaseClient.auth.signOut();
-    if(error){showLoginStatus('Erro ao sair: '+translateAuthError(error.message),'error');return}
-  }
-  currentUser=null;
-  setAuthView(false);
-  alert('Você saiu da conta.');
+  showAppConfirm('Deseja sair da sua conta? Seus dados continuam salvos na nuvem.',async()=>{
+    if(supabaseClient){
+      const {error}=await supabaseClient.auth.signOut();
+      if(error){showLoginStatus('Erro ao sair: '+translateAuthError(error.message),'error');return}
+    }
+    currentUser=null;
+    setAuthView(false);
+    showAppNotice('Você saiu da conta.','Sessão encerrada','success');
+  },'Sair da conta','Sair');
 }
 
 async function syncAfterLogin(){
