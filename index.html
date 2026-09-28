@@ -12,6 +12,7 @@
 <meta name="apple-mobile-web-app-title" content="TheLord_Aviator">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#070509">
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="stylesheet" href="style.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 </head>
@@ -541,5 +542,14 @@
 </div>
 
 <script src="app.js" defer></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./sw.js', {scope: './'}).catch(function (err) {
+      console.warn('Service Worker não registrado:', err);
+    });
+  });
+}
+</script>
 </body>
 </html>
