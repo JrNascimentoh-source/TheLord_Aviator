@@ -615,3 +615,65 @@ body:not(.auth-login) .header-auth-action{display:flex}
   .hand-example-rule{max-width:78px;font-size:.54rem;padding-left:6px}
   .protection-card .hand-example-rule strong{font-size:.68rem}
 }
+
+
+/* Ajustes seguros de acessibilidade: foco visível e preferência por menos movimento. */
+:where(button, a, input, select, textarea, [tabindex]):focus-visible{
+  outline:2px solid var(--gold);
+  outline-offset:3px;
+}
+:where(button, a, input, select, textarea):focus:not(:focus-visible){
+  outline:none;
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    scroll-behavior:auto!important;
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.01ms!important;
+  }
+}
+
+
+/* Atualização visual compatível: não altera estrutura, IDs ou lógica do app. */
+.header{
+  background:linear-gradient(135deg,rgba(20,12,27,.98),rgba(15,11,24,.96));
+  border-color:rgba(255,30,67,.42);
+}
+.card{
+  background:linear-gradient(155deg,rgba(18,13,27,.98),rgba(12,9,19,.98));
+  border-color:rgba(255,30,67,.30);
+  transition:border-color .18s ease,box-shadow .18s ease;
+}
+.card:focus-within{
+  border-color:rgba(255,192,31,.36);
+}
+.btn{
+  box-shadow:0 5px 16px rgba(255,192,31,.10);
+  transition:filter .18s ease,transform .18s ease,box-shadow .18s ease;
+}
+.btn:hover{
+  filter:brightness(1.05);
+  box-shadow:0 7px 20px rgba(255,192,31,.17);
+}
+.btn:active{
+  transform:translateY(1px) scale(.995);
+}
+.btn-secondary{
+  box-shadow:none;
+}
+.btn-secondary:hover{
+  box-shadow:0 6px 18px rgba(255,30,67,.12);
+}
+.input,select,textarea{
+  transition:border-color .18s ease,box-shadow .18s ease,background-color .18s ease;
+}
+.box{
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.018);
+}
+@media(max-width:620px){
+  body{padding-left:12px;padding-right:12px}
+  .card{padding:17px;border-radius:19px}
+  .header{padding:15px;border-radius:19px;gap:12px}
+  .logo{width:60px;height:60px;min-width:60px;font-size:29px}
+}
