@@ -1142,12 +1142,14 @@ async function doLogin(){
 
 async function doSignUp(){
   if(!supabaseClient){showLoginStatus('Erro: não foi possível carregar o serviço de login. Verifique sua internet e recarregue a página.','error');return}
+  const name=(document.getElementById('loginName')?.value||'').trim();
   const email=document.getElementById('loginEmail').value.trim();
   const password=document.getElementById('loginPassword').value;
+  if(!name){showLoginStatus('Informe seu nome para criar a conta.','error');return}
   if(!email||!password){showLoginStatus('Preencha e-mail e senha para criar a conta.','error');return}
   if(password.length<6){showLoginStatus('A senha precisa ter pelo menos 6 caracteres.','error');return}
   showLoginStatus('Criando conta...','info');
-  const {data:sd,error}=await supabaseClient.auth.signUp({email,password});
+  const {data:sd,error}=await supabaseClient.auth.signUp({email,password,options:{data:{full_name:name,name}}});
   if(error){showLoginStatus('Erro: '+translateAuthError(error.message),'error');return}
   if(sd.user && !sd.session){
     showLoginStatus('Conta criada! Confira seu e-mail para confirmar antes de entrar.','ok');
