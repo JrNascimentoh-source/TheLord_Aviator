@@ -71,6 +71,7 @@ h1{font-size:1.18rem;margin-top:3px}
 .password-field{position:relative}
 .password-field input{padding-right:46px}
 .password-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:0;font-size:1.1rem;cursor:pointer;opacity:.8}
+.password-toggle svg{display:block;width:22px;height:22px}
 .login-divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--muted);font-size:.72rem;font-weight:800}
 .login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.15)}
 .btn.btn-google{width:100%;padding:15px 28px;border-radius:13px;margin-top:0;background:rgba(255,255,255,.025);border:2px solid rgba(255,255,255,.16);color:#fff;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:17px;font-size:.9rem;line-height:1;box-shadow:none;text-transform:none}
