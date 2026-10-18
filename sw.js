@@ -1,4 +1,4 @@
-const CACHE_NAME = 'thelord-aviator-oficial-v3';
+const CACHE_NAME = 'thelord-aviator-oficial-v4';
 const APP_SHELL = [
   './',
   './index.html',
