@@ -38,17 +38,36 @@
 </header>
 
 <main id="login">
-  <section class="card">
-    <div class="title" style="margin-bottom:18px">ENTRAR</div>
-    <label class="input-label">E-mail</label>
-    <input id="loginEmail" class="input" type="email" placeholder="voce@email.com">
-    <label class="input-label" style="margin-top:12px">Senha</label>
-    <div class="password-field">
-      <input id="loginPassword" class="input" type="password" placeholder="••••••••">
-      <button type="button" class="password-toggle" onclick="toggleLoginPassword()">👁️</button>
+  <section class="card auth-card">
+    <div class="auth-tabs" role="tablist" aria-label="Acesso à conta">
+      <button type="button" id="authLoginTab" class="auth-tab active" role="tab" aria-selected="true" onclick="switchAuthMode('login')">Entrar</button>
+      <button type="button" id="authSignupTab" class="auth-tab" role="tab" aria-selected="false" onclick="switchAuthMode('signup')">Cadastrar</button>
     </div>
-    <button class="btn" onclick="doLogin()">ENTRAR</button>
-    <div id="loginStatus" class="login-status hidden"></div>
+    <div id="authNameGroup" class="auth-field hidden">
+      <label class="input-label" for="loginName">Nome</label>
+      <div class="auth-input-wrap">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/></svg>
+        <input id="loginName" class="input" type="text" autocomplete="name" placeholder="Seu nome">
+      </div>
+    </div>
+    <div class="auth-field">
+      <label class="input-label" for="loginEmail">Email</label>
+      <div class="auth-input-wrap">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>
+        <input id="loginEmail" class="input" type="email" autocomplete="email" placeholder="voce@email.com">
+      </div>
+    </div>
+    <div class="auth-field">
+      <label class="input-label" for="loginPassword">Senha</label>
+      <div class="password-field auth-input-wrap">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+        <input id="loginPassword" class="input" type="password" autocomplete="current-password" placeholder="••••••">
+        <button type="button" class="password-toggle" onclick="toggleLoginPassword()" aria-label="Mostrar ou ocultar senha">◉</button>
+      </div>
+    </div>
+    <button id="authSubmitBtn" class="btn auth-submit" type="button" onclick="doLogin()">ENTRAR</button>
+    <div id="loginStatus" class="login-status hidden" role="status" aria-live="polite"></div>
+    <div id="authForgotRow" class="auth-forgot"><button type="button" onclick="doPasswordReset()">Esqueci minha senha</button></div>
     <div class="login-divider"><span>ou</span></div>
     <button class="btn btn-google" onclick="doGoogleLogin()" aria-label="Continuar com Google">
       <svg class="google-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -59,10 +78,6 @@
       </svg>
       <span>Continuar com Google</span>
     </button>
-    <div class="login-links">
-      <button type="button" onclick="doSignUp()">Não tenho conta — criar agora</button>
-      <button type="button" onclick="doPasswordReset()">Esqueci minha senha</button>
-    </div>
     <div class="login-footnote">Dados sincronizados na nuvem · Instale como app na tela inicial</div>
   </section>
   <div class="login-back hidden"><button type="button" onclick="closeLoginPreview()">Voltar</button></div>
@@ -551,5 +566,31 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+
+<script>
+function switchAuthMode(mode){
+  const signup=mode==='signup';
+  const nameGroup=document.getElementById('authNameGroup');
+  const nameInput=document.getElementById('loginName');
+  const loginTab=document.getElementById('authLoginTab');
+  const signupTab=document.getElementById('authSignupTab');
+  const submit=document.getElementById('authSubmitBtn');
+  const forgot=document.getElementById('authForgotRow');
+  if(!nameGroup||!loginTab||!signupTab||!submit)return;
+  nameGroup.classList.toggle('hidden',!signup);
+  if(nameInput)nameInput.required=signup;
+  loginTab.classList.toggle('active',!signup);
+  signupTab.classList.toggle('active',signup);
+  loginTab.setAttribute('aria-selected',String(!signup));
+  signupTab.setAttribute('aria-selected',String(signup));
+  submit.textContent=signup?'CRIAR CONTA':'ENTRAR';
+  submit.onclick=signup?doSignUp:doLogin;
+  if(forgot)forgot.classList.toggle('hidden',signup);
+  const password=document.getElementById('loginPassword');
+  if(password)password.autocomplete=signup?'new-password':'current-password';
+  showLoginStatus('','hidden');
+}
+</script>
+
 </body>
 </html>
