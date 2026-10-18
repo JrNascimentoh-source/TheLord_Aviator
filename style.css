@@ -615,3 +615,21 @@ body:not(.auth-login) .header-auth-action{display:flex}
   .hand-example-rule{max-width:78px;font-size:.54rem;padding-left:6px}
   .protection-card .hand-example-rule strong{font-size:.68rem}
 }
+
+
+/* Ajustes seguros de acessibilidade: foco visível e preferência por menos movimento. */
+:where(button, a, input, select, textarea, [tabindex]):focus-visible{
+  outline:2px solid var(--gold);
+  outline-offset:3px;
+}
+:where(button, a, input, select, textarea):focus:not(:focus-visible){
+  outline:none;
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    scroll-behavior:auto!important;
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.01ms!important;
+  }
+}
