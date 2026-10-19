@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         TheLord Coletor de Velas
-// @version      1.2
+// @version      1.3
 // @description  Le as velas do Aviator (7a7) e envia para o app TheLord
 // @match        *://*/*
 // @match        *://*.spribegaming.com/*
@@ -10,7 +10,21 @@
 // @run-at       document-idle
 // ==/UserScript==
 (function(){
-  const GAME='aviator';
+  // Permite selecionar explicitamente o jogo com ?thelord_game=aviator ou
+  // ?thelord_game=aviator2. Sem parâmetro, tenta identificar o G2 pelo contexto da página.
+  function detectGame(){
+    const params=new URLSearchParams(location.search);
+    const forced=(params.get('thelord_game')||'').toLowerCase();
+    if(['aviator','aviator2'].includes(forced))return forced;
+    const context=[location.href,document.title,location.hostname];
+    try{
+      if(window.frameElement){
+        context.push(window.frameElement.src||'',window.frameElement.title||'',window.frameElement.getAttribute('name')||'');
+      }
+    }catch(e){}
+    return /aviator\\s*2|aviator2|\\bg2\\b|game[_-]?2/i.test(context.join(' '))?'aviator2':'aviator';
+  }
+  const GAME=detectGame();
   const URL='https://aypjaqmmlurlqeotbepp.supabase.co/rest/v1/velas';
   const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5cGphcW1tbHVybHFlb3RiZXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAzMDU2MTAsImV4cCI6MjEwNTg4MTYxMH0.IeAT6gwsAfzfw2N4BIxg9gc5pRqZH0ELn3Xo9fogHnY';
   const host=location.hostname;

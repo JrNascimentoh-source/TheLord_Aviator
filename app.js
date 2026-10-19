@@ -896,30 +896,59 @@ function renderCollectorStatus(){
   el.classList.toggle('on',!!on);el.classList.toggle('off',!on);
   lb.textContent=on?'Coletando velas':'Off-Line';
 }
+const VELAS_PAGE_SIZE=1000;
+let lastSyncedVelaId=0;
+let initialVelasLoaded=false;
 async function syncVelas(){
   if(typeof supabaseClient==='undefined'||!supabaseClient){lastSyncOk=false;renderCollectorStatus();return;}
   try{
     const since=new Date(Date.now()-ROUND_MAX_AGE_MS).toISOString();
-    const {data:rows,error}=await supabaseClient.from('velas').select('id,game,value,created_at').gte('created_at',since).order('id',{ascending:true}).limit(2000);
-    if(error||!rows){lastSyncOk=false;renderCollectorStatus();return;}
+    let offset=0;
+    let rows=[];
+    let page=[];
+    // Na primeira sincronização, carrega todo o histórico das últimas 24h em páginas.
+    // Nas próximas, busca somente IDs novos para não baixar as mesmas 24h a cada 3 segundos.
+    do{
+      let query=supabaseClient.from('velas').select('id,game,value,created_at').gte('created_at',since).order('id',{ascending:true});
+      if(initialVelasLoaded) query=query.gt('id',lastSyncedVelaId);
+      const result=await query.range(offset,offset+VELAS_PAGE_SIZE-1);
+      if(result.error||!result.data){lastSyncOk=false;renderCollectorStatus();return;}
+      page=result.data;
+      rows=rows.concat(page);
+      offset+=page.length;
+    }while(page.length===VELAS_PAGE_SIZE);
     lastSyncOk=true;
-    rows.forEach(r=>{if(r.game==='aviator'){const t=new Date(r.created_at).getTime();if(t>lastVelaTs)lastVelaTs=t;}});
-    renderCollectorStatus();
     let changed=false;
     rows.forEach(r=>{
-      if(r.game!=='aviator')return; // velas automáticas só no Aviator (Aviator 2 ainda não coletado)
-      const list=data.roundsByGame[r.game];if(!list)return;
+      const game=String(r.game||'').toLowerCase();
+      if(game!=='aviator'&&game!=='aviator2')return;
+      const t=new Date(r.created_at).getTime();
+      if(Number.isFinite(t)&&t>lastVelaTs)lastVelaTs=t;
+      const idNum=Number(r.id);
+      if(Number.isFinite(idNum)&&idNum>lastSyncedVelaId)lastSyncedVelaId=idNum;
+      const list=data.roundsByGame[game];
+      if(!list)return;
       const id='v'+r.id;
       if(list.some(x=>x.id===id))return;
       const v=Number(r.value);
-      list.push({id,value:v,color:classifyRound(v).key,ts:new Date(r.created_at).getTime()});
+      if(!Number.isFinite(v)||v<1||v>=1000000)return;
+      list.push({id,value:v,color:classifyRound(v).key,ts:t});
       changed=true;
     });
+    initialVelasLoaded=true;
+    renderCollectorStatus();
     if(changed){
-      Object.keys(data.roundsByGame).forEach(g=>{const l=data.roundsByGame[g];l.sort((a,b)=>a.ts-b.ts);if(l.length>2000)data.roundsByGame[g]=l.slice(-2000);});
+      Object.keys(data.roundsByGame).forEach(g=>{
+        const cutoff=Date.now()-ROUND_MAX_AGE_MS;
+        const l=(data.roundsByGame[g]||[]).filter(r=>r.ts>=cutoff);
+        l.sort((a,b)=>a.ts-b.ts);
+        data.roundsByGame[g]=l;
+      });
+      save();renderMonitor();
+    }else if(pruneOldRounds()){
       save();renderMonitor();
     }
-  }catch(e){lastSyncOk=false;renderCollectorStatus();}
+  }catch(e){console.error('Erro ao sincronizar histórico de velas:',e);lastSyncOk=false;renderCollectorStatus();}
 }
 setInterval(syncVelas,3000);
 setInterval(renderCollectorStatus,3000);
