@@ -63,9 +63,12 @@
   #calculator>.card:nth-child(2){grid-column:2;grid-row:1}
   #calculator>.card:nth-child(n+3){grid-column:2}
   #calculator .hands-example-grid{grid-template-columns:1fr}
-  #monitor>.card:first-child{grid-column:1/-1}
-  #monitor>.card:nth-child(4){grid-column:1/-1}
-  #monitor .round-grid{grid-template-columns:repeat(6,minmax(0,1fr))}
+  #monitor>.card{grid-column:1/-1}
+  #monitor .round-grid{grid-template-columns:repeat(10,minmax(0,1fr));gap:8px}
+  #monitor .round-grid .round-chip{padding:22px 6px 10px}
+  #monitor .round-grid .round-chip-val{font-size:1rem}
+  #monitor .round-grid .round-chip-time{font-size:.66rem}
+  #monitor .round-grid .round-chip-idx{font-size:.66rem}
   #timing>.card{grid-column:1/-1}
   .title{letter-spacing:0;font-size:.9rem}
   .hidden{display:none!important}

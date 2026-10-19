@@ -1,3 +1,4 @@
+let roundsVisible=100;
 /* ======================================================
    STORAGE & MODELO DE DADOS
    Leitura/escrita segura (com fallback em memória caso
@@ -887,12 +888,23 @@ function pruneOldRounds(){
   });
   return changed;
 }
+const COLLECTOR_STALE_MS=120000;
+let lastVelaTs=0,lastSyncOk=false;
+function renderCollectorStatus(){
+  const el=document.getElementById('collectorStatus'),lb=document.getElementById('collectorLabel');if(!el||!lb)return;
+  const on=lastSyncOk&&lastVelaTs&&(Date.now()-lastVelaTs)<COLLECTOR_STALE_MS;
+  el.classList.toggle('on',!!on);el.classList.toggle('off',!on);
+  lb.textContent=on?'Coletando velas':'Off-Line';
+}
 async function syncVelas(){
-  if(typeof supabaseClient==='undefined'||!supabaseClient)return;
+  if(typeof supabaseClient==='undefined'||!supabaseClient){lastSyncOk=false;renderCollectorStatus();return;}
   try{
     const since=new Date(Date.now()-ROUND_MAX_AGE_MS).toISOString();
     const {data:rows,error}=await supabaseClient.from('velas').select('id,game,value,created_at').gte('created_at',since).order('id',{ascending:true}).limit(2000);
-    if(error||!rows)return;
+    if(error||!rows){lastSyncOk=false;renderCollectorStatus();return;}
+    lastSyncOk=true;
+    rows.forEach(r=>{if(r.game==='aviator'){const t=new Date(r.created_at).getTime();if(t>lastVelaTs)lastVelaTs=t;}});
+    renderCollectorStatus();
     let changed=false;
     rows.forEach(r=>{
       if(r.game!=='aviator')return; // velas automáticas só no Aviator (Aviator 2 ainda não coletado)
@@ -907,9 +919,10 @@ async function syncVelas(){
       Object.keys(data.roundsByGame).forEach(g=>{const l=data.roundsByGame[g];l.sort((a,b)=>a.ts-b.ts);if(l.length>2000)data.roundsByGame[g]=l.slice(-2000);});
       save();renderMonitor();
     }
-  }catch(e){}
+  }catch(e){lastSyncOk=false;renderCollectorStatus();}
 }
-setInterval(syncVelas,5000);
+setInterval(syncVelas,3000);
+setInterval(renderCollectorStatus,3000);
 setTimeout(syncVelas,1500);
 function pushRound(entry){
    const list=currentRounds();
@@ -1000,7 +1013,8 @@ function renderMonitor(){
   }else{
     const {labelById,streakEndById}=computeStreakLabels(rounds);
     const iconForTier={yellow:'🔥',hot:'💥',fire:'😮‍💨'};
-    grid.innerHTML=filtered.slice(0,60).map((r)=>{
+    updateLoadMoreBtn(filtered.length);
+    grid.innerHTML=filtered.slice(0,roundsVisible).map((r)=>{
       const cls=classifyRound(r.value).key;
       const valLabel=(r.value!==null && r.value!==undefined)?r.value.toFixed(2)+'x':colorMeta[cls].label;
       const isStreakEnd=streakEndById[r.id];
@@ -1337,3 +1351,6 @@ if(!storageIsLocal){
   bar.textContent='⚠️ Armazenamento local bloqueado neste preview — os dados não serão salvos ao recarregar. Baixe e abra o arquivo no navegador para salvar sua gestão normalmente.';
   document.body.appendChild(bar);
 }
+
+function loadMoreRounds(){roundsVisible+=500;renderMonitor();}
+function updateLoadMoreBtn(total){const b=document.getElementById('loadMoreRoundsBtn');if(b)b.classList.toggle('hidden',total<=roundsVisible);}

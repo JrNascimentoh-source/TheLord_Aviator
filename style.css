@@ -306,7 +306,12 @@ body{background:#08060c;background-image:radial-gradient(circle at 15% 0%,rgba(2
 .round-form .input{padding:12px;font-size:1rem}
 .round-form .btn{margin-top:0;white-space:nowrap;width:auto;padding:12px 16px}
 
-.round-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.round-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+.round-grid .round-chip{padding:18px 2px 6px;border-radius:10px}
+.round-grid .round-chip-val{font-size:.78rem;margin-top:0}
+.round-grid .round-chip-time{font-size:.54rem}
+.round-grid .round-chip-idx{font-size:.56rem;top:3px;left:3px;padding:0 4px}
+.round-grid .round-chip-fire{font-size:.8rem;bottom:2px;right:3px}
 .round-chip{position:relative;border-radius:13px;padding:10px 8px;text-align:center;border:1px solid rgba(255,255,255,.08)}
 .round-chip-idx{position:absolute;top:5px;left:6px;font-size:.7rem;color:#ffc01f;font-weight:900;background:#000;border:1px solid rgba(255,192,31,.55);border-radius:6px;padding:1px 6px;line-height:1.4}
 .round-chip-idx.streak-badge{background:#ffc01f;color:#1a1200;border-color:#ffc01f;box-shadow:0 0 8px rgba(255,192,31,.6)}
@@ -734,3 +739,12 @@ body.auth-login #login .login-back{display:none!important}
  body.auth-login #login .btn.btn-google .google-icon{width:22px;height:22px;flex-basis:22px}
  body.auth-login #login .login-footnote{margin-top:28px;font-size:.76rem}
 }
+
+.collector-status{display:inline-flex;align-items:center;gap:6px;margin-left:10px;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.06)}
+.collector-dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+.collector-status.on{color:#22c55e}.collector-status.on .collector-dot{background:#22c55e;box-shadow:0 0 8px #22c55e;animation:collectorBlink 1s ease-in-out infinite}
+.collector-status.off{color:#ef4444}.collector-status.off .collector-dot{background:#ef4444;box-shadow:0 0 6px #ef4444}
+@keyframes collectorBlink{0%,100%{opacity:1}50%{opacity:.25}}
+
+.filter-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.filter-right .collector-status{margin-left:0}

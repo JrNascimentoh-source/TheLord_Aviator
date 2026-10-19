@@ -13,8 +13,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#070509">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="style.css?v=20261019">
-<link rel="stylesheet" href="desktop.css?v=20261019">
+<link rel="stylesheet" href="style.css?v=20261019c">
+<link rel="stylesheet" href="desktop.css?v=20261019c">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 </head>
 <body class="auth-login">
@@ -376,7 +376,10 @@
 
     <div class="filter-header">
       <span class="filter-count" id="filterCount">0 rodadas</span>
-      <button type="button" class="filter-clear" id="filterClearBtn" onclick="setRoundFilter(0)">✕ Limpar filtro</button>
+      <div class="filter-right">
+<span id="collectorStatus" class="collector-status off"><span class="collector-dot"></span><span id="collectorLabel">Off-Line</span></span>
+<button type="button" class="filter-clear" id="filterClearBtn" onclick="setRoundFilter(0)">✕ Limpar filtro</button>
+      </div>
     </div>
     <div class="filter-chips" id="filterChips">
       <button type="button" class="filter-chip active" data-min="0" onclick="setRoundFilter(0)">Todos</button>
@@ -396,7 +399,7 @@
       <div class="monitor-clock" id="monitorClock">00:00:00</div>
     </div>
     <div id="roundGrid" class="round-grid"></div>
-    <button class="btn btn-secondary" style="margin-top:14px" onclick="clearRounds()">🔄 Limpar histórico de rodadas</button>
+    <button class="btn btn-secondary" id="loadMoreRoundsBtn" style="margin-top:14px" onclick="loadMoreRounds()">⬇️ Carregar +500 velas</button>
   </section>
 
 
@@ -554,7 +557,7 @@
   <div class="pr-footer">Relatório gerado automaticamente com base nos registros informados pelo usuário. Não representa garantia de resultados futuros — jogos de aposta envolvem risco.</div>
 </div>
 
-<script src="app.js" defer></script>
+<script src="app.js?v=20261019c" defer></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
