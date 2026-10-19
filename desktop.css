@@ -1,0 +1,35 @@
+/* Presentation-only layer. The original mobile stylesheet is untouched. */
+@media screen and (min-width:1024px){
+  :root{
+    --desktop-surface:oklch(.18 .025 315 / .56);
+    --desktop-surface-top:oklch(.28 .022 315 / .42);
+    --desktop-line:oklch(.78 .045 28 / .25);
+    --desktop-highlight:oklch(1 0 0 / .12);
+    --desktop-shadow:oklch(.04 .01 315 / .45);
+    --desktop-navigation:oklch(.14 .025 315 / .72);
+    --desktop-active:oklch(.82 .16 85 / .12);
+    --desktop-background-image:url('aviator-perspectiva.jpg');
+  }
+  body,body.auth-login{padding:28px 28px 40px;background-color:var(--bg);background-image:var(--desktop-background-image);background-size:cover;background-position:center;background-repeat:no-repeat;background-attachment:fixed}
+  .app,body:not(.auth-login) .app{max-width:1440px;padding-left:228px}
+  .header,body.auth-login .header{padding:18px 24px;min-height:96px;margin-bottom:24px;gap:18px;background:linear-gradient(120deg,var(--desktop-surface-top),var(--desktop-surface));border:1px solid var(--desktop-line);border-radius:20px;backdrop-filter:blur(22px) saturate(120%);box-shadow:inset 0 1px 0 var(--desktop-highlight),0 12px 36px var(--desktop-shadow)}
+  .header h1,body.auth-login .header h1{font-size:1.25rem;letter-spacing:0}
+  .logo,body.auth-login .logo{width:58px;height:58px;min-width:58px;font-size:28px}
+  body.auth-login .eyebrow{font-size:.62rem} body.auth-login .subtitle{font-size:.72rem}
+  .bottom{left:max(28px,calc((100vw - 1440px)/2 + 28px));top:28px;bottom:28px;transform:none;width:204px;display:flex;flex-direction:column;gap:8px;padding:28px 14px;border-radius:20px;background:var(--desktop-navigation);backdrop-filter:blur(24px);border:1px solid var(--desktop-line);box-shadow:inset 0 1px 0 var(--desktop-highlight),0 12px 36px var(--desktop-shadow)}
+  .bottom::before{content:'TheLord_Aviator';display:block;color:var(--gold);font-weight:900;font-size:1rem;padding:8px 10px 32px;letter-spacing:0}
+  .bottom::after{content:'Gestão & Análise';margin-top:auto;padding:18px 10px 0;border-top:1px solid var(--desktop-line);color:var(--muted);font-size:.72rem}
+  .nav{display:flex;align-items:center;gap:12px;padding:15px 12px;text-align:left;font-size:.78rem;border-radius:12px;cursor:pointer;min-height:52px}
+  .nav span{display:inline-block;margin:0;font-size:1.15rem}.nav.active{background:var(--desktop-active);box-shadow:inset 0 0 0 1px var(--desktop-line)}
+  main:not(.hidden):not(#login){display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:20px;align-items:start}
+  main>.card{min-width:0;margin:0;padding:24px;border-radius:20px;background:linear-gradient(120deg,var(--desktop-surface-top),var(--desktop-surface));border:1px solid var(--desktop-line);backdrop-filter:blur(22px) saturate(120%);box-shadow:inset 0 1px 0 var(--desktop-highlight),0 12px 36px var(--desktop-shadow)}
+  #overview>.card:first-child{grid-column:1/-1} #overview>.card:first-child>.grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+  #overview>.card:nth-child(2){grid-column:1;grid-row:2} #overview>.card:nth-child(3){grid-column:2;grid-row:2} #overview>.card:nth-child(4){grid-column:2;grid-row:3/6} #overview>.card:nth-child(n+5){grid-column:1}
+  #overview .chart-box{min-height:220px;display:flex;flex-direction:column;justify-content:center} #overview .value{font-size:1.5rem;font-variant-numeric:tabular-nums;overflow-wrap:anywhere} #overview .notice{margin-top:16px}
+  #calculator>.card:first-child{grid-column:1} #calculator>.card:nth-child(2){grid-column:2;grid-row:1} #calculator>.card:nth-child(n+3){grid-column:2}
+  #calculator .hands-example-grid{grid-template-columns:1fr} #monitor>.card:first-child{grid-column:1/-1} #monitor>.card:nth-child(4){grid-column:1/-1} #monitor .round-grid{grid-template-columns:repeat(6,minmax(0,1fr)} #timing>.card{grid-column:1/-1}
+  .title{letter-spacing:0;font-size:.9rem}.hidden{display:none!important}
+  body.auth-login .app{max-width:760px;padding-left:0} body.auth-login #login .card{padding:28px;border-radius:20px} body.auth-login #login .title{font-size:1.1rem}
+  body.auth-login #login .input{min-height:60px;font-size:1.05rem;padding:16px;border-radius:16px} body.auth-login #login .input-label{font-size:.82rem}
+  body.auth-login #login .btn,body.auth-login #login .btn.btn-google{min-height:58px;font-size:.95rem;border-radius:16px} body.auth-login #login .login-links button{font-size:.82rem} body.auth-login #login .login-footnote{font-size:.72rem}
+}
