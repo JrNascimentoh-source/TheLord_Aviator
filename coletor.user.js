@@ -22,7 +22,7 @@
         context.push(window.frameElement.src||'',window.frameElement.title||'',window.frameElement.getAttribute('name')||'');
       }
     }catch(e){}
-    return /aviator\\s*2|aviator2|\\bg2\\b|game[_-]?2/i.test(context.join(' '))?'aviator2':'aviator';
+    return /aviator\s*2|aviator2|\bg2\b|game[_-]?2|game5/i.test(context.join(' '))?'aviator2':'aviator';
   }
   const GAME=detectGame();
   const URL='https://aypjaqmmlurlqeotbepp.supabase.co/rest/v1/velas';
