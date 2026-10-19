@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         TheLord Coletor de Velas
-// @version      1.3
+// @version      1.4
 // @description  Le as velas do Aviator (7a7) e envia para o app TheLord
 // @match        *://*/*
 // @match        *://*.spribegaming.com/*
@@ -30,10 +30,20 @@
   const host=location.hostname;
     const isTop=window.top===window.self;
   let lastSig=null;
-  const badge=document.createElement('div');
-  badge.style.cssText='position:fixed;bottom:4px;left:4px;z-index:2147483647;background:#000c;color:#ffc72c;font:11px sans-serif;padding:3px 6px;border-radius:6px;pointer-events:none';
-  badge.textContent=isTop?'TheLord: ativo, abra o Aviator':'TheLord: aguardando velas...';
-  function show(){if(document.body&&!document.body.contains(badge))document.body.appendChild(badge);}
+  // Exibe um único indicador, somente no documento principal (nunca dentro dos frames do jogo).
+  const BADGE_ID='thelord-collector-status';
+  let badge=isTop?document.getElementById(BADGE_ID):null;
+  if(isTop&&!badge){
+    badge=document.createElement('div');
+    badge.id=BADGE_ID;
+    badge.style.cssText='position:fixed;bottom:4px;left:4px;z-index:2147483647;background:#000c;color:#ffc72c;font:11px sans-serif;padding:3px 6px;border-radius:6px;pointer-events:none;max-width:calc(100vw - 16px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+    badge.textContent='TheLord: ativo, aguardando velas...';
+  }
+  function show(){
+    if(!isTop||!badge||!document.body)return;
+    document.querySelectorAll('#'+BADGE_ID).forEach(el=>{if(el!==badge)el.remove();});
+    if(!document.body.contains(badge))document.body.appendChild(badge);
+  }
   if(isTop)show();
   function read(){
     let els=[...document.querySelectorAll('.payouts-block .payout, app-stats-widget .payout, .payouts-wrapper .bubble-multiplier, .payouts-block .bubble-multiplier, .payouts .payout, app-bubble-multiplier, [class*="payout"] [class*="multiplier"], .result-history .bubble-multiplier')];
@@ -46,15 +56,15 @@
   }
   function send(v){
     fetch(URL,{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({game:GAME,value:v})})
-      .then(r=>{badge.textContent=r.ok?('TheLord: enviada '+v.toFixed(2)+'x'):'TheLord: erro '+r.status})
-      .catch(()=>{badge.textContent='TheLord: sem internet'});
+      .then(r=>{if(isTop&&badge)badge.textContent=r.ok?('TheLord: enviada '+v.toFixed(2)+'x'):'TheLord: erro '+r.status})
+      .catch(()=>{if(isTop&&badge)badge.textContent='TheLord: sem internet'});
   }
   setInterval(()=>{
     const vals=read();
     if(!vals.length)return;
     show();
     const sig=vals.slice(0,8).join('|');
-    if(lastSig===null){lastSig=sig;badge.textContent='TheLord: coletando ✓ ('+host+')';return}
+    if(lastSig===null){lastSig=sig;if(isTop&&badge)badge.textContent='TheLord: coletando ✓ ('+host+')';return}
     if(sig!==lastSig){lastSig=sig;send(vals[0]);}
   },1000);
 })();
