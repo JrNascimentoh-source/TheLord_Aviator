@@ -1,11 +1,12 @@
-const CACHE_NAME = 'thelord-aviator-oficial-v4';
+const CACHE_NAME = 'thelord-aviator-oficial-v5';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './icon-180.png',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  './aviator-perspectiva.jpg'
 ];
 
 self.addEventListener('install', event => {
