@@ -871,10 +871,51 @@ function setActiveGame(game){
   save();
   renderMonitor();
 }
+const AVIATOR_GAME_URL='https://7a711.com/?pid=2619439266&fromPage=AGENCY_ONE';
+function openAviatorGame(){
+  try{window.open(AVIATOR_GAME_URL,'_blank','noopener,noreferrer');}
+  catch(e){window.location.href=AVIATOR_GAME_URL;}
+}
+const ROUND_MAX_AGE_MS=24*60*60*1000;
+function pruneOldRounds(){
+  const cutoff=Date.now()-ROUND_MAX_AGE_MS;
+  let changed=false;
+  Object.keys(data.roundsByGame||{}).forEach(game=>{
+    const list=data.roundsByGame[game]||[];
+    const kept=list.filter(r=>r.ts>=cutoff);
+    if(kept.length!==list.length){data.roundsByGame[game]=kept;changed=true;}
+  });
+  return changed;
+}
+async function syncVelas(){
+  if(typeof supabaseClient==='undefined'||!supabaseClient)return;
+  try{
+    const since=new Date(Date.now()-ROUND_MAX_AGE_MS).toISOString();
+    const {data:rows,error}=await supabaseClient.from('velas').select('id,game,value,created_at').gte('created_at',since).order('id',{ascending:true}).limit(2000);
+    if(error||!rows)return;
+    let changed=false;
+    rows.forEach(r=>{
+      if(r.game!=='aviator')return; // velas automáticas só no Aviator (Aviator 2 ainda não coletado)
+      const list=data.roundsByGame[r.game];if(!list)return;
+      const id='v'+r.id;
+      if(list.some(x=>x.id===id))return;
+      const v=Number(r.value);
+      list.push({id,value:v,color:classifyRound(v).key,ts:new Date(r.created_at).getTime()});
+      changed=true;
+    });
+    if(changed){
+      Object.keys(data.roundsByGame).forEach(g=>{const l=data.roundsByGame[g];l.sort((a,b)=>a.ts-b.ts);if(l.length>2000)data.roundsByGame[g]=l.slice(-2000);});
+      save();renderMonitor();
+    }
+  }catch(e){}
+}
+setInterval(syncVelas,5000);
+setTimeout(syncVelas,1500);
 function pushRound(entry){
-  const list=currentRounds();
+   const list=currentRounds();
   list.push(entry);
   if(list.length>300) data.roundsByGame[data.activeGame]=list.slice(-300);
+  pruneOldRounds();
   save();
   renderMonitor();
 }
@@ -931,11 +972,12 @@ function computeStreakLabels(roundsDesc){
   return {labelById,streakEndById};
 }
 function renderMonitor(){
+  if(pruneOldRounds()) save();
   const clockEl=document.getElementById('monitorClock');
   if(clockEl) clockEl.textContent=nowTimeStr();
   const rounds=[...currentRounds()].sort((a,b)=>b.ts-a.ts);
   const grid=document.getElementById('roundGrid');
-  if(!grid)return;
+  if(grid){
 
   const toggleBtn=document.getElementById('contagemToggle');
   if(toggleBtn){
@@ -952,7 +994,7 @@ function renderMonitor(){
   }
 
   if(!rounds.length){
-    grid.innerHTML='<div class="round-empty">Nenhuma rodada registrada ainda. Use o campo acima para adicionar.</div>';
+    grid.innerHTML='<div class="round-empty">'+(data.activeGame==='aviator2'?'Velas automáticas ainda não ativas para o Aviator 2.':'Nenhuma rodada registrada ainda.')+'</div>';
   }else if(!filtered.length){
     grid.innerHTML='<div class="round-empty">Nenhuma rodada encontrada com esse filtro.</div>';
   }else{
@@ -970,6 +1012,7 @@ function renderMonitor(){
       const fireHtml=(showBadge && isStreakEnd && icon)?`<span class="round-chip-fire">${icon}</span>`:'';
       return `<div class="round-chip chip-${cls}${streakClass}">${idxHtml}${fireHtml}<div class="round-chip-val">${valLabel}</div><div class="round-chip-time">${nowTimeStr(new Date(r.ts))}</div></div>`;
     }).join('');
+  }
   }
 
   const withValue=rounds.filter(r=>r.value!==null && r.value!==undefined);
@@ -1023,6 +1066,7 @@ function toggleDistribution(){
   if(btn) btn.textContent=willShow?'🧭 Distribuição ▴':'🧭 Distribuição ▾';
 }
 setInterval(()=>{const el=document.getElementById('monitorClock');if(el)el.textContent=nowTimeStr();},1000);
+setInterval(()=>{if(pruneOldRounds()){save();renderMonitor();}},60000);
 
 
 /* ======================================================

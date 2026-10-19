@@ -5,7 +5,8 @@ const APP_SHELL = [
   './manifest.webmanifest',
   './icon-180.png',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  './aviator-perspectiva.jpg'
 ];
 
 self.addEventListener('install', event => {

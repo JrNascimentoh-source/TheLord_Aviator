@@ -1,4 +1,4 @@
--- Rode isto uma vez no SQL Editor do seu banco Supabase.
+-- Rode isto uma vez no SQL Editor do seu banco (Supabase)
 create table if not exists public.velas (
   id bigserial primary key,
   game text not null default 'aviator',
