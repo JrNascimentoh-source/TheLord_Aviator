@@ -1123,10 +1123,84 @@ setInterval(()=>{if(pruneOldRounds()){save();renderMonitor();}},60000);
 /* ======================================================
    NAVEGAÇÃO ENTRE ABAS
 ====================================================== */
+
+/* ======================================================
+   MINUTAGEM — análise estatística temporária no navegador
+====================================================== */
+function timingPct(n,d){return d?((n/d)*100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%':'—'}
+function timingMean(arr){return arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0}
+function timingFmt(n){return Number(n).toLocaleString('pt-BR',{maximumFractionDigits:2})}
+function renderTimingAnalysis(){
+  const gameEl=document.getElementById('timingGame'),windowEl=document.getElementById('timingWindow');
+  if(!gameEl||!windowEl)return;
+  const game=gameEl.value,windowValue=windowEl.value;
+  let rounds=[];
+  const games=game==='both'?['aviator','aviator2']:[game==='active'?data.activeGame:game];
+  games.forEach(g=>(data.roundsByGame[g]||[]).forEach(r=>rounds.push({...r,game:g})));
+  rounds=rounds.filter(r=>Number.isFinite(Number(r.value))&&Number.isFinite(Number(r.ts)));
+  if(windowValue!=='all'){
+    const cutoff=Date.now()-Number(windowValue)*60000;
+    rounds=rounds.filter(r=>r.ts>=cutoff);
+  }
+  rounds.sort((a,b)=>a.ts-b.ts);
+  const values=rounds.map(r=>Number(r.value));
+  const total=values.length,above10=values.filter(v=>v>=10),above50=values.filter(v=>v>=50),above100=values.filter(v=>v>=100);
+  const pink=values.filter(v=>v>=10&&v<100);
+  const avg=timingMean(values),pinkAvg=timingMean(pink);
+  const fmtTime=ts=>new Date(ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  const stat=(label,value,detail)=>'<div class="timing-stat"><div class="timing-stat-label">'+label+'</div><div class="timing-stat-value">'+value+'</div><div class="timing-stat-detail">'+detail+'</div></div>';
+  const stats=document.getElementById('timingStats');
+  if(stats)stats.innerHTML=[
+    stat('Rodadas analisadas',timingFmt(total),'no período escolhido'),
+    stat('≥ 10x',timingPct(above10.length,total),above10.length+' ocorrência(s)'),
+    stat('≥ 50x',timingPct(above50.length,total),above50.length+' ocorrência(s)'),
+    stat('≥ 100x',timingPct(above100.length,total),above100.length+' ocorrência(s)'),
+    stat('Média de todos os resultados',total?timingFmt(avg)+'x':'—','média aritmética'),
+    stat('Velas rosas',pink.length,timingPct(pink.length,total)+' do total')
+  ].join('');
+  const updated=document.getElementById('timingUpdated');
+  if(updated)updated.textContent='Atualizado em '+new Date().toLocaleTimeString('pt-BR')+' · '+(games.length===2?'Aviator + Aviator 2':games[0]==='aviator2'?'Aviator 2':'Aviator')+' · '+(windowValue==='all'?'todo o histórico disponível':windowValue==='60'?'últimos 60 minutos':windowValue==='360'?'últimas 6 horas':'últimas 24 horas');
+  const minuteMap=Array.from({length:60},(_,m)=>({minute:m,total:0,high:0}));
+  rounds.forEach(r=>{const m=new Date(r.ts).getMinutes();minuteMap[m].total++;if(Number(r.value)>=10)minuteMap[m].high++;});
+  const minuteRows=document.getElementById('timingMinuteRows');
+  if(minuteRows){
+    const eligible=minuteMap.filter(x=>x.total>0).sort((a,b)=>(b.high/b.total)-(a.high/a.total)||b.high-a.high||b.total-a.total).slice(0,10);
+    minuteRows.innerHTML=eligible.length?eligible.map(x=>'<tr><td><b>:'+String(x.minute).padStart(2,'0')+'</b></td><td>'+x.high+'</td><td>'+x.total+'</td><td>'+timingPct(x.high,x.total)+'</td></tr>').join(''):'<tr><td colspan="4">Ainda não há rodadas suficientes nesse período.</td></tr>';
+  }
+  const gaps10=[],gaps50=[],gaps100=[];
+  let last10=-1,last50=-1,last100=-1,runLow=0,maxLow=0,streak10=0,maxStreak10=0;
+  rounds.forEach((r,i)=>{
+    const v=Number(r.value);
+    if(v>=10){if(last10>=0)gaps10.push(i-last10);last10=i;streak10++;maxStreak10=Math.max(maxStreak10,streak10);}else{runLow++;maxLow=Math.max(maxLow,runLow);streak10=0;}
+    if(v>=50){if(last50>=0)gaps50.push(i-last50);last50=i;}
+    if(v>=100){if(last100>=0)gaps100.push(i-last100);last100=i;}
+  });
+  const meanGap=a=>a.length?timingFmt(timingMean(a))+' rodadas':'Ainda sem ocorrências repetidas';
+  const patterns=document.getElementById('timingPatterns');
+  if(patterns)patterns.innerHTML=[
+    stat('Intervalo médio entre ≥ 10x',meanGap(gaps10),gaps10.length+' intervalo(s) calculado(s)'),
+    stat('Intervalo médio entre ≥ 50x',meanGap(gaps50),gaps50.length+' intervalo(s) calculado(s)'),
+    stat('Intervalo médio entre ≥ 100x',meanGap(gaps100),gaps100.length+' intervalo(s) calculado(s)'),
+    stat('Maior sequência abaixo de 10x',maxLow+' rodada(s)','no histórico selecionado'),
+    stat('Maior sequência consecutiva ≥ 10x',maxStreak10+' rodada(s)','no histórico selecionado')
+  ].join('');
+  const pinkEl=document.getElementById('timingPink');
+  if(pinkEl) pinkEl.innerHTML=pink.length
+    ? '<div class="timing-pink-grid">'+stat('Quantidade',pink.length,'de '+total+' rodadas')+stat('Média',timingFmt(pinkAvg)+'x','média aritmética')+stat('Mediana',timingFmt([...pink].sort((a,b)=>a-b)[Math.floor((pink.length-1)/2)])+'x','valor central da amostra')+stat('Maior rosa',timingFmt(Math.max(...pink))+'x','limite da amostra')+'</div>'
+    : 'Nenhuma vela rosa (10x a 99,99x) encontrada no período selecionado.';
+  const summary=document.getElementById('timingSummary');
+  if(summary){
+    if(!total)summary.textContent='Nenhuma rodada disponível para os filtros escolhidos. Confirme que o coletor está conectado e que o histórico aparece na aba Monitor.';
+    else summary.innerHTML='<p>Foram analisadas <b>'+total+'</b> rodadas. A frequência observada foi de <b>'+timingPct(above10.length,total)+'</b> para resultados ≥ 10x, <b>'+timingPct(above50.length,total)+'</b> para ≥ 50x e <b>'+timingPct(above100.length,total)+'</b> para ≥ 100x.</p><p>Essas proporções descrevem apenas a amostra selecionada. Não são garantia nem previsão da próxima rodada.</p>';
+  }
+}
+setInterval(()=>{const p=document.getElementById('timing');if(p&&!p.classList.contains('hidden'))renderTimingAnalysis();},10000);
+
 function showPage(id,btn){
   ['overview','calculator','monitor','timing'].forEach(x=>document.getElementById(x).classList.toggle('hidden',x!==id));
   document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));btn.classList.add('active');
   if(id==='calculator')calc();
+  if(id==='timing')renderTimingAnalysis();
   if(id==='monitor'){
     document.getElementById('gameBtnAviator').classList.toggle('active',data.activeGame==='aviator');
     document.getElementById('gameBtnAviator2').classList.toggle('active',data.activeGame==='aviator2');
