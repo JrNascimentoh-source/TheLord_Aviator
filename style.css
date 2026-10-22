@@ -818,3 +818,6 @@ body.auth-login #login .login-back{display:none!important}
 .timing-ai-button:disabled{opacity:.65}
 .timing-ai-status{font-size:.76rem;color:#c8b6dc;line-height:1.5;margin-top:9px}
 .timing-ai-result{white-space:pre-wrap;font-size:.86rem;line-height:1.65;color:#f6efff;border:1px solid rgba(192,132,252,.35);background:rgba(38,24,50,.78);border-radius:13px;padding:14px;margin-top:12px}
+
+/* Radar dos finais de minuto: tabela legível em telas pequenas */
+.timing-ending-table{min-width:760px}.timing-ending-table td{vertical-align:middle}.timing-ending-table .timing-radar-tag{display:inline-block;white-space:normal;max-width:145px;line-height:1.35;text-align:center}
