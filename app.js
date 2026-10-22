@@ -1128,6 +1128,46 @@ setInterval(()=>{if(pruneOldRounds()){save();renderMonitor();}},60000);
    MINUTAGEM — análise estatística temporária no navegador
 ====================================================== */
 
+
+async function runTheLordAI(){
+  const status=document.getElementById('timingAIStatus'),result=document.getElementById('timingAIResult');
+  if(!status||!result)return;
+  if(typeof supabaseClient==='undefined'||!supabaseClient){status.textContent='Serviço de conexão indisponível. Recarregue o aplicativo e tente novamente.';return;}
+  const gameEl=document.getElementById('timingGame'),windowEl=document.getElementById('timingWindow');
+  const game=gameEl?gameEl.value:'active',windowValue=windowEl?windowEl.value:'all';
+  const games=game==='both'?['aviator','aviator2']:[game==='active'?data.activeGame:game];
+  let rounds=[];
+  games.forEach(g=>(data.roundsByGame[g]||[]).forEach(r=>rounds.push({value:Number(r.value),ts:Number(r.ts),game:g})));
+  rounds=rounds.filter(r=>Number.isFinite(r.value)&&Number.isFinite(r.ts));
+  if(windowValue!=='all')rounds=rounds.filter(r=>r.ts>=Date.now()-Number(windowValue)*60000);
+  rounds.sort((a,b)=>a.ts-b.ts);
+  if(rounds.length<30){status.textContent='Precisamos de pelo menos 30 rodadas válidas para solicitar uma interpretação útil.';return;}
+  const values=rounds.map(r=>r.value);
+  const counts=threshold=>values.filter(v=>v>=threshold).length;
+  const recent=values.slice(-100);
+  const stats={
+    game:games.join('+'),period:windowValue==='all'?'todo o histórico disponível':windowValue+' minutos',
+    total:values.length,latestRounds:recent.length,
+    thresholds:[10,50,100].map(t=>({threshold:t,total:counts(t),percent:Number((counts(t)/values.length*100).toFixed(3)),recentTotal:recent.filter(v=>v>=t).length,recentPercent:Number((recent.filter(v=>v>=t).length/recent.length*100).toFixed(3))})),
+    mean:Number((values.reduce((a,b)=>a+b,0)/values.length).toFixed(3)),
+    pinkCount:values.filter(v=>v>=10&&v<100).length,
+    pinkMean:values.some(v=>v>=10&&v<100)?Number((values.filter(v=>v>=10&&v<100).reduce((a,b)=>a+b,0)/values.filter(v=>v>=10&&v<100).length).toFixed(3)):null,
+    recentDistribution:recent.map((v,i)=>({index:i+1,value:v}))
+  };
+  status.textContent='Enviando resumo estatístico à IA…';
+  result.classList.remove('hidden');result.textContent='A IA está interpretando a amostra. Aguarde…';
+  const button=document.querySelector('.timing-ai-button');if(button){button.disabled=true;button.textContent='⏳ ANALISANDO…';}
+  try{
+    const {data:response,error}=await supabaseClient.functions.invoke('thelord-ai-analysis',{body:{stats}});
+    if(error)throw error;
+    if(!response||!response.analysis)throw new Error(response?.error||'A IA não retornou uma análise.');
+    result.textContent=response.analysis;
+    status.textContent='Análise concluída agora. O resultado existe apenas nesta sessão.';
+  }catch(e){
+    result.textContent='Não foi possível concluir a análise. Verifique se a função de IA foi configurada com a chave do provedor no Supabase. Detalhe: '+(e?.message||'erro de conexão');
+    status.textContent='A IA não respondeu.';
+  }finally{if(button){button.disabled=false;button.textContent='🧠 PEDIR ANÁLISE À IA';}}
+}
 function timingWilson(success,total){
   if(!total)return {low:0,high:0};
   const z=1.96,p=success/total,den=1+z*z/total;
