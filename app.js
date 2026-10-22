@@ -1309,7 +1309,8 @@ function renderMinuteEndingRadar(rounds){
   msg+='“Acima da média” descreve apenas o histórico observado; não confirma que a próxima rodada será alta nem que esse final tenha poder preditivo.';
   summary.textContent=msg;
 }
-\nfunction timingPct(n,d){return d?((n/d)*100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%':'—'}
+
+function timingPct(n,d){return d?((n/d)*100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%':'—'}
 function timingMean(arr){return arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0}
 function timingFmt(n){return Number(n).toLocaleString('pt-BR',{maximumFractionDigits:2})}
 function renderTimingAnalysis(){
@@ -1326,7 +1327,8 @@ function renderTimingAnalysis(){
   }
   rounds.sort((a,b)=>a.ts-b.ts);
   const values=rounds.map(r=>Number(r.value));
-  renderTimingRadar(rounds);\n  renderMinuteEndingRadar(rounds);
+  renderTimingRadar(rounds);
+  renderMinuteEndingRadar(rounds);
   const total=values.length,above10=values.filter(v=>v>=10),above50=values.filter(v=>v>=50),above100=values.filter(v=>v>=100);
   const pink=values.filter(v=>v>=10&&v<100);
   const avg=timingMean(values),pinkAvg=timingMean(pink);
