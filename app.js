@@ -1317,39 +1317,63 @@ function renderTimingRepeatPatterns(rounds){
   const highs=rounds.map((r,i)=>({r,i})).filter(x=>Number(x.r.value)>=10);
   if(highs.length<2){
     summary.textContent='Precisamos de pelo menos 2 resultados ≥10x para começar a medir os intervalos entre casas. Encontrados: '+highs.length+'.';
-    rowsEl.innerHTML='<tr><td colspan="4">Histórico insuficiente.</td></tr>';
-    timeEl.textContent='Ainda não há intervalos suficientes para analisar recorrência em 5 e 10 minutos.';
+    rowsEl.innerHTML='<tr><td colspan="6">Histórico insuficiente.</td></tr>';
+    timeEl.textContent='Ainda não há intervalos suficientes para analisar recorrências por tempo.';
     return;
   }
   const gaps=[];
-  for(let i=1;i<highs.length;i++)gaps.push({houses:highs[i].i-highs[i-1].i,minutes:Math.max(0,(Number(highs[i].r.ts)-Number(highs[i-1].r.ts))/60000)});
-  const currentLowCount=rounds.length-1-highs[highs.length-1].i;
+  for(let i=1;i<highs.length;i++){
+    gaps.push({
+      houses:highs[i].i-highs[i-1].i,
+      minutes:Math.max(0,(Number(highs[i].r.ts)-Number(highs[i-1].r.ts))/60000)
+    });
+  }
+  const lastHigh=highs[highs.length-1];
+  const currentLowCount=rounds.length-1-lastHigh.i;
   const nextHouse=currentLowCount+1;
-  const maxHouse=Math.min(15,Math.max(10,nextHouse+4));
+  const elapsedMinutes=Math.max(0,(Date.now()-Number(lastHigh.r.ts))/60000);
+  const maxHouse=Math.min(20,Math.max(10,nextHouse+5));
   const rows=[];
   for(let house=1;house<=maxHouse;house++){
-    const opportunities=gaps.filter(g=>g.houses>=house).length;
-    const hits=gaps.filter(g=>g.houses===house).length;
-    const rate=opportunities?hits/opportunities:0;
-    rows.push({house,hits,opportunities,rate});
+    const prior=gaps.filter(g=>g.houses>=house);
+    const exact=gaps.filter(g=>g.houses===house);
+    const rate=prior.length?exact.length/prior.length:0;
+    const times=exact.map(g=>g.minutes).filter(Number.isFinite);
+    const meanTime=times.length?timingMean(times):null;
+    const sortedTimes=[...times].sort((a,b)=>a-b);
+    const medianTime=sortedTimes.length?sortedTimes[Math.floor((sortedTimes.length-1)/2)]:null;
+    rows.push({house,hits:exact.length,opportunities:prior.length,rate,meanTime,medianTime,timeSamples:times.length});
   }
   const likely=rows.filter(x=>x.house>=nextHouse&&x.opportunities>=5).sort((a,b)=>b.rate-a.rate||b.hits-a.hits)[0];
   const houseRows=rows.map(x=>{
     const current=x.house===nextHouse?' class="timing-repeat-current"':'';
-    return '<tr'+current+'><td><b>'+x.house+'ª casa'+(x.house===nextHouse?' · próxima':'')+'</b></td><td>'+x.hits+'</td><td>'+x.opportunities+'</td><td><b>'+(x.opportunities?timingPct(x.hits,x.opportunities):'—')+'</b></td></tr>';
+    const typical=x.timeSamples>=2?timingFmt(x.medianTime)+' min (mediana)':'Poucos dados';
+    let timeStatus='—';
+    if(x.house===nextHouse&&x.timeSamples>=3&&x.medianTime>0){
+      const ratio=elapsedMinutes/x.medianTime;
+      timeStatus=ratio<0.5?'Menos da metade do intervalo mediano':ratio<=1.25?'Dentro da faixa temporal observada':'Acima do intervalo mediano';
+    }else if(x.house===nextHouse&&x.timeSamples>0){
+      timeStatus='Intervalo atual: '+timingFmt(elapsedMinutes)+' min';
+    }
+    return '<tr'+current+'><td><b>'+x.house+'ª casa'+(x.house===nextHouse?' · próxima':'')+'</b></td><td>'+x.hits+'</td><td>'+x.opportunities+'</td><td><b>'+(x.opportunities?timingPct(x.hits,x.opportunities):'—')+'</b></td><td>'+typical+'</td><td>'+timeStatus+'</td></tr>';
   }).join('');
   rowsEl.innerHTML=houseRows;
-  let message='Desde o último resultado ≥10x, passaram '+currentLowCount+' casa(s) abaixo de 10x. A próxima posição é a '+nextHouse+'ª casa.';
-  if(likely)message+=' Entre as posições ainda à frente com pelo menos 5 intervalos comparáveis, a maior taxa histórica foi na '+likely.house+'ª casa ('+timingPct(likely.hits,likely.opportunities)+', '+likely.hits+' ocorrências em '+likely.opportunities+' oportunidades).';
-  else message+=' Ainda não há pelo menos 5 intervalos comparáveis nas próximas posições para destacar uma estimativa com mais suporte.';
+  let message='Desde o último resultado ≥10x, passaram '+currentLowCount+' casa(s) abaixo de 10x; a próxima posição é a '+nextHouse+'ª casa. O tempo decorrido desde o último ≥10x é '+timingFmt(elapsedMinutes)+' min.';
+  if(likely)message+=' Entre as próximas posições com pelo menos 5 intervalos comparáveis, a maior taxa histórica foi na '+likely.house+'ª casa ('+timingPct(likely.hits,likely.opportunities)+', '+likely.hits+' ocorrências em '+likely.opportunities+' oportunidades).';
+  else message+=' Ainda não há pelo menos 5 intervalos comparáveis para destacar uma posição com amostra mínima.';
   summary.textContent=message;
   const timed=gaps.filter(g=>Number.isFinite(g.minutes));
   const within5=timed.filter(g=>g.minutes<=5).length;
   const within10=timed.filter(g=>g.minutes<=10).length;
   const mean=timed.length?timingMean(timed.map(g=>g.minutes)):0;
-  timeEl.textContent='Intervalos entre resultados ≥10x: '+timed.length+'. '+within5+'/'+timed.length+' ('+timingPct(within5,timed.length)+') ocorreram em até 5 min; '+within10+'/'+timed.length+' ('+timingPct(within10,timed.length)+') em até 10 min. Intervalo médio observado: '+(timed.length?timingFmt(mean)+' min':'—')+'. Essas medidas descrevem o histórico, não uma contagem regressiva.';
+  const joint=gaps.filter(g=>g.houses===nextHouse);
+  const jointTimes=joint.map(g=>g.minutes).filter(Number.isFinite);
+  const jointMedian=jointTimes.length?[...jointTimes].sort((a,b)=>a-b)[Math.floor((jointTimes.length-1)/2)]:null;
+  const jointNote=jointTimes.length>=3&&jointMedian>0
+    ?' Para intervalos históricos que terminaram exatamente na '+nextHouse+'ª casa, a mediana temporal foi '+timingFmt(jointMedian)+' min; o tempo atual equivale a '+timingFmt(elapsedMinutes/jointMedian*100)+'% dessa mediana.'
+    :' Ainda há poucos exemplos da combinação entre a '+nextHouse+'ª casa e o intervalo de tempo para estimar essa combinação com estabilidade.';
+  timeEl.textContent='Entre '+timed.length+' intervalos históricos entre resultados ≥10x, '+within5+'/'+timed.length+' ('+timingPct(within5,timed.length)+') ocorreram em até 5 min e '+within10+'/'+timed.length+' ('+timingPct(within10,timed.length)+') em até 10 min. Intervalo médio geral: '+(timed.length?timingFmt(mean)+' min':'—')+'.'+jointNote+' Os tempos são descritivos, não uma contagem regressiva.';
 }
-
 function renderTimingAnalysis(){
   const gameEl=document.getElementById('timingGame'),windowEl=document.getElementById('timingWindow');
   if(!gameEl||!windowEl)return;
