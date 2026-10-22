@@ -1308,6 +1308,55 @@ function renderMinuteEndingRadar(rounds){
 function timingPct(n,d){return d?((n/d)*100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%':'—'}
 function timingMean(arr){return arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0}
 function timingFmt(n){return Number(n).toLocaleString('pt-BR',{maximumFractionDigits:2})}
+
+function renderTimingRepetition(rounds){
+  const root=document.getElementById('timingRepetition');
+  if(!root)return;
+  const minSample=rounds.length;
+  if(minSample<6){
+    root.innerHTML='<div class="timing-note">São necessárias pelo menos 6 rodadas para começar a comparar sequências. Disponíveis: '+minSample+'.</div>';
+    return;
+  }
+  const bucket=v=>v<2?'Baixa (<2x)':v<10?'Média (2–9,99x)':v<100?'Rosa (10–99,99x)':'Alta (≥100x)';
+  const compact=v=>v<2?'Baixa':v<10?'Média':v<100?'Rosa':'Alta';
+  const vals=rounds.map(r=>Number(r.value));
+  const runs=[];
+  let start=0;
+  for(let i=1;i<=vals.length;i++){
+    if(i===vals.length||bucket(vals[i])!==bucket(vals[start])){
+      runs.push({type:bucket(vals[start]),length:i-start});
+      start=i;
+    }
+  }
+  const longest=[...runs].sort((a,b)=>b.length-a.length)[0];
+  const runCounts={};
+  runs.forEach(r=>{const k=r.type+'|'+r.length;runCounts[k]=(runCounts[k]||0)+1;});
+  const repeatedRuns=Object.entries(runCounts).filter(([,n])=>n>1).sort((a,b)=>b[1]-a[1]||b[0].localeCompare(a[0])).slice(0,5);
+  const seqs={};
+  [3,4].forEach(size=>{
+    for(let i=0;i<=vals.length-size;i++){
+      const key=vals.slice(i,i+size).map(compact).join(' → ');
+      if(!seqs[key])seqs[key]={count:0,size};
+      seqs[key].count++;
+    }
+  });
+  const repeatedSeqs=Object.entries(seqs).filter(([,v])=>v.count>1).sort((a,b)=>b[1].count-a[1].count||b[1].size-a[1].size).slice(0,8);
+  const gapStats=[10,50,100].map(threshold=>{
+    const positions=[];
+    vals.forEach((v,i)=>{if(v>=threshold)positions.push(i);});
+    const gaps=[];
+    for(let i=1;i<positions.length;i++)gaps.push(positions[i]-positions[i-1]);
+    const counts={};gaps.forEach(g=>counts[g]=(counts[g]||0)+1);
+    const common=Object.entries(counts).sort((a,b)=>b[1]-a[1]||Number(a[0])-Number(b[0]))[0];
+    return {threshold,gaps,common};
+  });
+  const card=(label,value,detail)=>'<div class="timing-stat"><div class="timing-stat-label">'+label+'</div><div class="timing-stat-value">'+value+'</div><div class="timing-stat-detail">'+detail+'</div></div>';
+  const runsHtml=repeatedRuns.length?'<div class="timing-repeat-list">'+repeatedRuns.map(([key,count])=>{const p=key.split('|');return '<div class="timing-repeat-row"><b>'+p[0]+'</b><span>sequência de '+p[1]+' · repetida '+count+' vezes</span></div>';}).join('')+'</div>':'<div class="timing-note">Ainda não há sequências de categorias repetidas nesta amostra.</div>';
+  const seqHtml=repeatedSeqs.length?'<div class="timing-repeat-list">'+repeatedSeqs.map(([key,v])=>'<div class="timing-repeat-row"><b>'+key+'</b><span>bloco de '+v.size+' rodadas · '+v.count+' ocorrências</span></div>').join('')+'</div>':'<div class="timing-note">Nenhum bloco categórico de 3 ou 4 rodadas apareceu mais de uma vez.</div>';
+  const gapHtml='<div class="timing-repeat-list">'+gapStats.map(g=>'<div class="timing-repeat-row"><b>≥'+g.threshold+'x</b><span>'+g.gaps.length+' intervalo(s) entre ocorrências; '+(g.common?'intervalo mais repetido: '+g.common[0]+' rodadas ('+g.common[1]+' vezes)':'ainda sem intervalo calculável')+'</span></div>').join('')+'</div>';
+  root.innerHTML='<div class="timing-repeat-section"><div class="timing-repeat-subtitle">Sequências consecutivas por categoria</div><div class="timing-stats">'+card('Maior sequência igual',longest.length+' rodada(s)',longest.type)+card('Blocos categóricos',runs.length,'mudanças de categoria: '+Math.max(0,runs.length-1))+'</div>'+runsHtml+'</div><div class="timing-repeat-section"><div class="timing-repeat-subtitle">Blocos de 3 e 4 rodadas que se repetem</div>'+seqHtml+'</div><div class="timing-repeat-section"><div class="timing-repeat-subtitle">Intervalos que mais se repetem</div>'+gapHtml+'</div><div class="timing-note">As categorias resumem multiplicadores; blocos iguais não significam multiplicadores idênticos. São padrões descritivos do histórico, não previsões da próxima rodada.</div>';
+}
+
 function renderTimingAnalysis(){
   const gameEl=document.getElementById('timingGame'),windowEl=document.getElementById('timingWindow');
   if(!gameEl||!windowEl)return;
@@ -1324,6 +1373,7 @@ function renderTimingAnalysis(){
   const values=rounds.map(r=>Number(r.value));
   renderTimingRadar(rounds);
   renderMinuteEndingRadar(rounds);
+  renderTimingRepetition(rounds);
   const total=values.length,above10=values.filter(v=>v>=10),above50=values.filter(v=>v>=50),above100=values.filter(v=>v>=100);
   const pink=values.filter(v=>v>=10&&v<100);
   const avg=timingMean(values),pinkAvg=timingMean(pink);
