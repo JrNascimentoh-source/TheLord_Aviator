@@ -13,8 +13,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#070509">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="style.css?v=20261022c">
-<link rel="stylesheet" href="desktop.css?v=20261022c">
+<link rel="stylesheet" href="style.css?v=20261022d">
+<link rel="stylesheet" href="desktop.css?v=20261022d">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 </head>
 <body class="auth-login">
@@ -451,6 +451,12 @@
     <div class="timing-table-wrap"><table class="timing-table"><thead><tr><th>Minuto</th><th>≥ 10x</th><th>Rodadas</th><th>Frequência</th></tr></thead><tbody id="timingMinuteRows"><tr><td colspan="4">Aguardando dados.</td></tr></tbody></table></div>
     <div class="timing-note">Ordenação pela frequência observada. Cada minuto é comparado usando sua própria quantidade de rodadas; amostras pequenas podem distorcer a classificação.</div>
   </section>
+  <section class="card timing-radar">
+    <div class="title">🧠 RADAR IA · PROBABILIDADES ESTATÍSTICAS</div>
+    <div class="timing-note">Estimativas calculadas a partir do histórico disponível. O radar compara a frequência geral com as últimas rodadas; não prevê resultados com certeza e não garante entradas lucrativas.</div>
+    <div id="timingRadar" class="timing-radar-grid"><div class="timing-note">Calculando estimativas…</div></div>
+    <div id="timingSignal" class="timing-signal">Aguardando dados suficientes para comparar as frequências.</div>
+  </section>
   <section class="card">
     <div class="title">🔁 Intervalos e sequências</div>
     <div id="timingPatterns" class="timing-patterns"></div>
@@ -595,7 +601,7 @@
   <div class="pr-footer">Relatório gerado automaticamente com base nos registros informados pelo usuário. Não representa garantia de resultados futuros — jogos de aposta envolvem risco.</div>
 </div>
 
-<script src="app.js?v=20261022c" defer></script>
+<script src="app.js?v=20261022d" defer></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
