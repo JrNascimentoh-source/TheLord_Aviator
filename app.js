@@ -1165,7 +1165,7 @@ function renderTimingAnalysis(){
   const minuteRows=document.getElementById('timingMinuteRows');
   if(minuteRows){
     const eligible=minuteMap.filter(x=>x.total>0).sort((a,b)=>(b.high/b.total)-(a.high/a.total)||b.high-a.high||b.total-a.total).slice(0,10);
-    minuteRows.innerHTML=eligible.length?eligible.map(x=>'<tr><td><b>:'+String(x.minute).padStart(2,'0')+'</b></td><td>'+x.high+'</td><td>'+x.total+'</td><td>'+timingPct(x.high,x.total)+'</td></tr>').join(''):'<tr><td colspan="4">Ainda não há rodadas suficientes nesse período.</td></tr>';
+    minuteRows.innerHTML=eligible.length?eligible.map(x=>'<tr><td><b>Min '+String(x.minute).padStart(2,'0')+'</b></td><td>'+x.high+'</td><td>'+x.total+'</td><td>'+timingPct(x.high,x.total)+'</td></tr>').join(''):'<tr><td colspan="4">Ainda não há rodadas suficientes nesse período.</td></tr>';
   }
   const gaps10=[],gaps50=[],gaps100=[];
   let last10=-1,last50=-1,last100=-1,runLow=0,maxLow=0,streak10=0,maxStreak10=0;
