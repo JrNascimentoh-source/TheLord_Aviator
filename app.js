@@ -1259,7 +1259,57 @@ function renderTimingRadar(rounds){
     signal.textContent='Não há diferença recente forte o bastante para destacar. Frequências passadas não indicam que uma vela esteja “atrasada” nem garantem a próxima rodada.';
   }
 }
-function timingPct(n,d){return d?((n/d)*100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%':'—'}
+
+function renderMinuteEndingRadar(rounds){
+  const root=document.getElementById('timingMinuteEndingRows');
+  const summary=document.getElementById('timingMinuteEndingSummary');
+  if(!root||!summary)return;
+  const valid=rounds.filter(r=>Number.isFinite(Number(r.value))&&Number(r.value)>0&&Number.isFinite(Number(r.ts)));
+  if(valid.length<30){
+    root.innerHTML='<tr><td colspan="7">Amostra insuficiente: são necessárias pelo menos 30 rodadas válidas.</td></tr>';
+    summary.textContent='Ainda há poucas rodadas para comparar os dez finais de minuto.';
+    return;
+  }
+  const recentSet=new Set(valid.slice(-100));
+  const buckets=Array.from({length:10},(_,digit)=>({digit,total:0,hits10:0,hits50:0,hits100:0,recentTotal:0,recent10:0}));
+  valid.forEach(r=>{
+    const d=new Date(Number(r.ts)).getMinutes()%10;
+    const b=buckets[d],v=Number(r.value);
+    b.total++;
+    if(v>=10)b.hits10++;
+    if(v>=50)b.hits50++;
+    if(v>=100)b.hits100++;
+    if(recentSet.has(r)){
+      b.recentTotal++;
+      if(v>=10)b.recent10++;
+    }
+  });
+  const overall10=valid.filter(r=>Number(r.value)>=10).length/valid.length*100;
+  const overall50=valid.filter(r=>Number(r.value)>=50).length/valid.length*100;
+  const overall100=valid.filter(r=>Number(r.value)>=100).length/valid.length*100;
+  const sorted=[...buckets].sort((a,b)=>(b.hits10/b.total)-(a.hits10/a.total)||b.total-a.total);
+  root.innerHTML=buckets.map(b=>{
+    const rate10=b.total?b.hits10/b.total*100:0;
+    const enough=b.total>=30;
+    const label=!enough?'Poucos dados':rate10>overall10+2?'Acima da média observada':rate10<overall10-2?'Abaixo da média observada':'Próximo da média';
+    const cls=!enough?'neutral':rate10>overall10+2?'up':rate10<overall10-2?'down':'neutral';
+    return '<tr><td><b>…'+b.digit+'</b></td><td>'+b.hits10+'</td><td>'+b.total+'</td><td><b>'+timingPct(b.hits10,b.total)+'</b></td><td>'+timingPct(b.hits50,b.total)+'</td><td>'+timingPct(b.hits100,b.total)+'</td><td><span class="timing-radar-tag '+cls+'">'+label+'</span></td></tr>';
+  }).join('');
+  const recentEligible=buckets.filter(b=>b.recentTotal>=5).sort((a,b)=>(b.recent10/b.recentTotal)-(a.recent10/a.recentTotal));
+  const leader=sorted.find(b=>b.total>=30);
+  const recentLeader=recentEligible[0];
+  let msg='Referência geral: ≥10x '+timingFmt(overall10)+'% · ≥50x '+timingFmt(overall50)+'% · ≥100x '+timingFmt(overall100)+'%. ';
+  if(leader){
+    const rate=leader.hits10/leader.total*100;
+    msg+='Final com maior frequência observada de ≥10x: …'+leader.digit+' ('+timingFmt(rate)+'%; '+leader.hits10+'/'+leader.total+' rodadas). ';
+  }else{
+    msg+='Nenhum final tem 30 rodadas para uma comparação minimamente estável. ';
+  }
+  if(recentLeader)msg+='Nas últimas 100 rodadas, o final com maior frequência de ≥10x entre os que tiveram amostra recente suficiente foi …'+recentLeader.digit+' ('+timingFmt(recentLeader.recent10/recentLeader.recentTotal*100)+'%; '+recentLeader.recent10+'/'+recentLeader.recentTotal+'). ';
+  msg+='“Acima da média” descreve apenas o histórico observado; não confirma que a próxima rodada será alta nem que esse final tenha poder preditivo.';
+  summary.textContent=msg;
+}
+\nfunction timingPct(n,d){return d?((n/d)*100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%':'—'}
 function timingMean(arr){return arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0}
 function timingFmt(n){return Number(n).toLocaleString('pt-BR',{maximumFractionDigits:2})}
 function renderTimingAnalysis(){
@@ -1276,7 +1326,7 @@ function renderTimingAnalysis(){
   }
   rounds.sort((a,b)=>a.ts-b.ts);
   const values=rounds.map(r=>Number(r.value));
-  renderTimingRadar(rounds);
+  renderTimingRadar(rounds);\n  renderMinuteEndingRadar(rounds);
   const total=values.length,above10=values.filter(v=>v>=10),above50=values.filter(v=>v>=50),above100=values.filter(v=>v>=100);
   const pink=values.filter(v=>v>=10&&v<100);
   const avg=timingMean(values),pinkAvg=timingMean(pink);
