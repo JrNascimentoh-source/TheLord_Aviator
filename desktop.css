@@ -164,3 +164,16 @@
   }
   body:not(.auth-login) .app{min-height:calc(100vh - 38px)}
 }
+
+
+/* A variável do cenário também precisa existir abaixo de 1024px:
+   em tela dividida o bloco desktop principal não é aplicado. */
+@media screen and (min-width:701px) and (max-width:1023px){
+  :root{--desktop-background-image:url('aviator-perspectiva.jpg')}
+  body,body.auth-login{
+    background-image:url('aviator-perspectiva.jpg'),radial-gradient(circle at 15% 0%,rgba(255,30,67,.18),transparent 42%),radial-gradient(circle at 85% 20%,rgba(120,0,45,.16),transparent 40%);
+    background-size:cover,cover,cover;
+    background-position:center center,center,center;
+    background-repeat:no-repeat,no-repeat,no-repeat;
+  }
+}
