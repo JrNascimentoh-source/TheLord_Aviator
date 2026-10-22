@@ -821,11 +821,3 @@ body.auth-login #login .login-back{display:none!important}
 
 /* Radar dos finais de minuto: tabela legível em telas pequenas */
 .timing-ending-table{min-width:760px}.timing-ending-table td{vertical-align:middle}.timing-ending-table .timing-radar-tag{display:inline-block;white-space:normal;max-width:145px;line-height:1.35;text-align:center}
-
-/* Análise de padrões de repetição na Minutagem */
-.timing-repeat-section{margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.1)}
-.timing-repeat-subtitle{font-size:.82rem;font-weight:900;color:#ffd34d;margin-bottom:10px}
-.timing-repeat-list{display:grid;gap:7px;margin-top:10px}
-.timing-repeat-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 12px;border:1px solid rgba(255,255,255,.09);border-radius:10px;background:rgba(255,255,255,.025);font-size:.78rem}
-.timing-repeat-row b{color:#fff}.timing-repeat-row span{color:rgba(255,255,255,.72);text-align:right}
-@media(max-width:560px){.timing-repeat-row{align-items:flex-start;flex-direction:column;gap:4px}.timing-repeat-row span{text-align:left}}
