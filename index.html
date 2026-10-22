@@ -451,6 +451,12 @@
     <div class="timing-table-wrap"><table class="timing-table"><thead><tr><th>Minuto</th><th>≥ 10x</th><th>Rodadas</th><th>Frequência</th></tr></thead><tbody id="timingMinuteRows"><tr><td colspan="4">Aguardando dados.</td></tr></tbody></table></div>
     <div class="timing-note">Ordenação pela frequência observada. Cada minuto é comparado usando sua própria quantidade de rodadas; amostras pequenas podem distorcer a classificação.</div>
   </section>
+  <section class="card">
+    <div class="title">🔢 Radar dos finais de minuto · velas ≥ 10x</div>
+    <div class="timing-note">Cada rodada é agrupada pelo último dígito do minuto do relógio: por exemplo, 14:37 entra no final 7. As taxas são calculadas sobre as rodadas registradas em cada grupo.</div>
+    <div class="timing-table-wrap"><table class="timing-table timing-ending-table"><thead><tr><th>Final</th><th>≥10x</th><th>Rodadas</th><th>Taxa ≥10x</th><th>Taxa ≥50x</th><th>Taxa ≥100x</th><th>Comparação histórica</th></tr></thead><tbody id="timingMinuteEndingRows"><tr><td colspan="7">Aguardando dados.</td></tr></tbody></table></div>
+    <div id="timingMinuteEndingSummary" class="timing-signal">Aguardando histórico suficiente para comparar os finais de minuto.</div>
+  </section>
   <section class="card timing-radar">
     <div class="title">📊 RADAR ESTATÍSTICO · PROBABILIDADES OBSERVADAS</div>
     <div class="timing-note">Estimativas calculadas a partir do histórico disponível. O radar compara a frequência geral com as últimas rodadas; não prevê resultados com certeza e não garante entradas lucrativas.</div>
@@ -604,7 +610,7 @@
   <div class="pr-footer">Relatório gerado automaticamente com base nos registros informados pelo usuário. Não representa garantia de resultados futuros — jogos de aposta envolvem risco.</div>
 </div>
 
-<script src="app.js?v=20261022g" defer></script>
+<script src="app.js?v=20261022h" defer></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
