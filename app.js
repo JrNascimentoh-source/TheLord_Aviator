@@ -939,13 +939,8 @@ async function syncVelas(){
     renderCollectorStatus();
     if(changed){
       Object.keys(data.roundsByGame).forEach(g=>{
-        const cutoff=Date.now()-ROUND_MAX_AGE_MS;
-        const l=(data.roundsByGame[g]||[]).filter(r=>r.ts>=cutoff);
-        l.sort((a,b)=>a.ts-b.ts);
-        data.roundsByGame[g]=l;
+        data.roundsByGame[g].sort((a,b)=>a.ts-b.ts);
       });
-      save();renderMonitor();
-    }else if(pruneOldRounds()){
       save();renderMonitor();
     }
   }catch(e){console.error('Erro ao sincronizar histórico de velas:',e);lastSyncOk=false;renderCollectorStatus();}
@@ -1015,7 +1010,6 @@ function computeStreakLabels(roundsDesc){
   return {labelById,streakEndById};
 }
 function renderMonitor(){
-  if(pruneOldRounds()) save();
   const clockEl=document.getElementById('monitorClock');
   if(clockEl) clockEl.textContent=nowTimeStr();
   const rounds=[...currentRounds()].sort((a,b)=>b.ts-a.ts);
@@ -1118,7 +1112,8 @@ function toggleDistribution(){
   if(btn) btn.textContent=willShow?'🧭 Distribuição ▴':'🧭 Distribuição ▾';
 }
 setInterval(()=>{const el=document.getElementById('monitorClock');if(el)el.textContent=nowTimeStr();},1000);
-setInterval(()=>{if(pruneOldRounds()){save();renderMonitor();}},60000);
+/* Não remover rodadas automaticamente: a contagem do monitor e a distribuição
+   devem ser monotônicas durante a sessão. O usuário pode limpar manualmente. */
 
 
 /* ======================================================
