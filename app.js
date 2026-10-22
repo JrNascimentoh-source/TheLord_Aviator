@@ -1309,6 +1309,47 @@ function timingPct(n,d){return d?((n/d)*100).toLocaleString('pt-BR',{minimumFrac
 function timingMean(arr){return arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0}
 function timingFmt(n){return Number(n).toLocaleString('pt-BR',{maximumFractionDigits:2})}
 
+function renderTimingRepeatPatterns(rounds){
+  const summary=document.getElementById('timingRepeatSummary');
+  const rowsEl=document.getElementById('timingRepeatRows');
+  const timeEl=document.getElementById('timingRepeatTime');
+  if(!summary||!rowsEl||!timeEl)return;
+  const highs=rounds.map((r,i)=>({r,i})).filter(x=>Number(x.r.value)>=10);
+  if(highs.length<2){
+    summary.textContent='Precisamos de pelo menos 2 resultados ≥10x para começar a medir os intervalos entre casas. Encontrados: '+highs.length+'.';
+    rowsEl.innerHTML='<tr><td colspan="4">Histórico insuficiente.</td></tr>';
+    timeEl.textContent='Ainda não há intervalos suficientes para analisar recorrência em 5 e 10 minutos.';
+    return;
+  }
+  const gaps=[];
+  for(let i=1;i<highs.length;i++)gaps.push({houses:highs[i].i-highs[i-1].i,minutes:Math.max(0,(Number(highs[i].r.ts)-Number(highs[i-1].r.ts))/60000)});
+  const currentLowCount=rounds.length-1-highs[highs.length-1].i;
+  const nextHouse=currentLowCount+1;
+  const maxHouse=Math.min(15,Math.max(10,nextHouse+4));
+  const rows=[];
+  for(let house=1;house<=maxHouse;house++){
+    const opportunities=gaps.filter(g=>g.houses>=house).length;
+    const hits=gaps.filter(g=>g.houses===house).length;
+    const rate=opportunities?hits/opportunities:0;
+    rows.push({house,hits,opportunities,rate});
+  }
+  const likely=rows.filter(x=>x.house>=nextHouse&&x.opportunities>=5).sort((a,b)=>b.rate-a.rate||b.hits-a.hits)[0];
+  const houseRows=rows.map(x=>{
+    const current=x.house===nextHouse?' class="timing-repeat-current"':'';
+    return '<tr'+current+'><td><b>'+x.house+'ª casa'+(x.house===nextHouse?' · próxima':'')+'</b></td><td>'+x.hits+'</td><td>'+x.opportunities+'</td><td><b>'+(x.opportunities?timingPct(x.hits,x.opportunities):'—')+'</b></td></tr>';
+  }).join('');
+  rowsEl.innerHTML=houseRows;
+  let message='Desde o último resultado ≥10x, passaram '+currentLowCount+' casa(s) abaixo de 10x. A próxima posição é a '+nextHouse+'ª casa.';
+  if(likely)message+=' Entre as posições ainda à frente com pelo menos 5 intervalos comparáveis, a maior taxa histórica foi na '+likely.house+'ª casa ('+timingPct(likely.hits,likely.opportunities)+', '+likely.hits+' ocorrências em '+likely.opportunities+' oportunidades).';
+  else message+=' Ainda não há pelo menos 5 intervalos comparáveis nas próximas posições para destacar uma estimativa com mais suporte.';
+  summary.textContent=message;
+  const timed=gaps.filter(g=>Number.isFinite(g.minutes));
+  const within5=timed.filter(g=>g.minutes<=5).length;
+  const within10=timed.filter(g=>g.minutes<=10).length;
+  const mean=timed.length?timingMean(timed.map(g=>g.minutes)):0;
+  timeEl.textContent='Intervalos entre resultados ≥10x: '+timed.length+'. '+within5+'/'+timed.length+' ('+timingPct(within5,timed.length)+') ocorreram em até 5 min; '+within10+'/'+timed.length+' ('+timingPct(within10,timed.length)+') em até 10 min. Intervalo médio observado: '+(timed.length?timingFmt(mean)+' min':'—')+'. Essas medidas descrevem o histórico, não uma contagem regressiva.';
+}
+
 function renderTimingAnalysis(){
   const gameEl=document.getElementById('timingGame'),windowEl=document.getElementById('timingWindow');
   if(!gameEl||!windowEl)return;
@@ -1325,6 +1366,7 @@ function renderTimingAnalysis(){
   const values=rounds.map(r=>Number(r.value));
   renderTimingRadar(rounds);
   renderMinuteEndingRadar(rounds);
+  renderTimingRepeatPatterns(rounds);
   const total=values.length,above10=values.filter(v=>v>=10),above50=values.filter(v=>v>=50),above100=values.filter(v=>v>=100);
   const pink=values.filter(v=>v>=10&&v<100);
   const avg=timingMean(values),pinkAvg=timingMean(pink);
