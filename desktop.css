@@ -177,3 +177,33 @@
     background-repeat:no-repeat,no-repeat,no-repeat;
   }
 }
+
+
+/* Breakpoints fluidos para que o desktop não se desmonte ao alterar o zoom.
+   A composição muda pela largura útil, com colunas sempre limitadas pelo espaço. */
+@media screen and (min-width:1024px){
+  .app,body:not(.auth-login) .app{width:100%;box-sizing:border-box}
+  main:not(.hidden):not(#login){grid-template-columns:minmax(0,1.4fr) minmax(300px,1fr)}
+  main>.card{min-width:0}
+  #overview>.card:first-child>.grid{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+  #overview>.card:nth-child(2),#overview>.card:nth-child(3),#overview>.card:nth-child(4),#overview>.card:nth-child(n+5){min-width:0}
+  #calculator>.card:first-child,#calculator>.card:nth-child(2),#calculator>.card:nth-child(n+3){min-width:0}
+  #monitor .round-grid{grid-template-columns:repeat(auto-fit,minmax(76px,1fr))}
+  img,svg,canvas,video{max-width:100%}
+}
+@media screen and (min-width:1024px) and (max-width:1500px){
+  .app,body:not(.auth-login) .app{max-width:none;padding-left:190px}
+  .bottom{width:166px;padding:20px 10px}
+  .bottom::before{font-size:.86rem;padding:6px 7px 20px}
+  .nav{gap:8px;padding:12px 8px;font-size:.7rem}
+  body,body.auth-login{padding:18px 18px 28px}
+  main:not(.hidden):not(#login){grid-template-columns:minmax(0,1fr)}
+  main>.card{grid-column:1!important;grid-row:auto!important;padding:18px}
+  #overview>.card:first-child>.grid{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+  #monitor .round-grid{grid-template-columns:repeat(auto-fit,minmax(72px,1fr))}
+}
+@media screen and (min-width:1501px){
+  .app,body:not(.auth-login) .app{max-width:1680px;padding-left:228px}
+  main:not(.hidden):not(#login){grid-template-columns:minmax(0,1.4fr) minmax(320px,1fr)}
+  #overview>.card:first-child>.grid{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+}
