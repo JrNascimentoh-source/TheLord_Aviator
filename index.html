@@ -13,8 +13,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#070509">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="style.css?v=20261022d">
-<link rel="stylesheet" href="desktop.css?v=20261022d">
+<link rel="stylesheet" href="style.css?v=20261022e">
+<link rel="stylesheet" href="desktop.css?v=20261022e">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 </head>
 <body class="auth-login">
@@ -456,6 +456,9 @@
     <div class="timing-note">Estimativas calculadas a partir do histórico disponível. O radar compara a frequência geral com as últimas rodadas; não prevê resultados com certeza e não garante entradas lucrativas.</div>
     <div id="timingRadar" class="timing-radar-grid"><div class="timing-note">Calculando estimativas…</div></div>
     <div id="timingSignal" class="timing-signal">Aguardando dados suficientes para comparar as frequências.</div>
+    <button type="button" class="btn timing-ai-button" onclick="runTheLordAI()">🧠 PEDIR ANÁLISE À IA</button>
+    <div id="timingAIStatus" class="timing-ai-status">A IA interpreta os dados da sessão quando você solicitar. Nenhuma análise é salva.</div>
+    <div id="timingAIResult" class="timing-ai-result hidden" aria-live="polite"></div>
   </section>
   <section class="card">
     <div class="title">🔁 Intervalos e sequências</div>
@@ -601,7 +604,7 @@
   <div class="pr-footer">Relatório gerado automaticamente com base nos registros informados pelo usuário. Não representa garantia de resultados futuros — jogos de aposta envolvem risco.</div>
 </div>
 
-<script src="app.js?v=20261022d" defer></script>
+<script src="app.js?v=20261022e" defer></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
