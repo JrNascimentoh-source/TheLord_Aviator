@@ -1049,7 +1049,7 @@ function renderMonitor(){
       const date=new Date(r.ts);
       const dayKey=date.getFullYear()+'-'+String(date.getMonth()+1).padStart(2,'0')+'-'+String(date.getDate()).padStart(2,'0');
       const dateMarker=previousDay!==null && dayKey!==previousDay
-        ? `<div class="round-day-marker" aria-label="Início do dia ${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}"><div class="round-day-marker-label">INÍCIO</div><div class="round-day-marker-date">${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}</div></div>`
+        ? `<div class="round-chip round-day-marker" aria-label="Início do dia ${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}"><div class="round-day-marker-label">INÍCIO</div><div class="round-day-marker-date">${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}</div></div>`
         : '';
       previousDay=dayKey;
       const cls=classifyRound(r.value).key;
