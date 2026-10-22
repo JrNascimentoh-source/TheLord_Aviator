@@ -1043,7 +1043,15 @@ function renderMonitor(){
     const {labelById,streakEndById}=computeStreakLabels(rounds);
     const iconForTier={yellow:'🔥',hot:'💥',fire:'😮‍💨'};
     updateLoadMoreBtn(filtered.length);
-    grid.innerHTML=filtered.slice(0,roundsVisible).map((r)=>{
+    const visibleRounds=filtered.slice(0,roundsVisible);
+    let previousDay=null;
+    grid.innerHTML=visibleRounds.map((r)=>{
+      const date=new Date(r.ts);
+      const dayKey=date.getFullYear()+'-'+String(date.getMonth()+1).padStart(2,'0')+'-'+String(date.getDate()).padStart(2,'0');
+      const dateMarker=previousDay!==null && dayKey!==previousDay
+        ? `<div class="round-day-marker" aria-label="Início do dia ${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}"><div class="round-day-marker-label">INÍCIO</div><div class="round-day-marker-date">${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}</div></div>`
+        : '';
+      previousDay=dayKey;
       const cls=classifyRound(r.value).key;
       const valLabel=(r.value!==null && r.value!==undefined)?r.value.toFixed(2)+'x':colorMeta[cls].label;
       const isStreakEnd=streakEndById[r.id];
@@ -1053,7 +1061,7 @@ function renderMonitor(){
       const idxHtml=showBadge?`<span class="round-chip-idx${badgeClass}">${labelById[r.id]}</span>`:'';
       const icon=iconForTier[cls]||'';
       const fireHtml=(showBadge && isStreakEnd && icon)?`<span class="round-chip-fire">${icon}</span>`:'';
-      return `<div class="round-chip chip-${cls}${streakClass}">${idxHtml}${fireHtml}<div class="round-chip-val">${valLabel}</div><div class="round-chip-time">${nowTimeStr(new Date(r.ts))}</div></div>`;
+      return dateMarker+`<div class="round-chip chip-${cls}${streakClass}">${idxHtml}${fireHtml}<div class="round-chip-val">${valLabel}</div><div class="round-chip-time">${nowTimeStr(date)}</div></div>`;
     }).join('');
   }
   }
