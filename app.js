@@ -1127,6 +1127,45 @@ setInterval(()=>{if(pruneOldRounds()){save();renderMonitor();}},60000);
 /* ======================================================
    MINUTAGEM — análise estatística temporária no navegador
 ====================================================== */
+
+function timingWilson(success,total){
+  if(!total)return {low:0,high:0};
+  const z=1.96,p=success/total,den=1+z*z/total;
+  const center=(p+z*z/(2*total))/den;
+  const margin=z*Math.sqrt((p*(1-p)+z*z/(4*total))/total)/den;
+  return {low:Math.max(0,center-margin)*100,high:Math.min(1,center+margin)*100};
+}
+function renderTimingRadar(rounds){
+  const root=document.getElementById('timingRadar'),signal=document.getElementById('timingSignal');
+  if(!root||!signal)return;
+  const values=rounds.map(r=>Number(r.value)).filter(Number.isFinite);
+  const recent=values.slice(-100);
+  const thresholds=[{v:10,label:'≥ 10x'},{v:50,label:'≥ 50x'},{v:100,label:'≥ 100x'}];
+  if(values.length<30){
+    root.innerHTML='<div class="timing-note">Precisamos de pelo menos 30 rodadas válidas para mostrar uma estimativa inicial. Atualmente: '+values.length+'.</div>';
+    signal.textContent='Amostra insuficiente: aguarde mais rodadas antes de interpretar qualquer frequência.';
+    return;
+  }
+  root.innerHTML=thresholds.map(t=>{
+    const hits=values.filter(v=>v>=t.v).length,recHits=recent.filter(v=>v>=t.v).length;
+    const p=hits/values.length*100,rp=recent.length?recHits/recent.length*100:0;
+    const ci=timingWilson(hits,values.length);
+    const delta=rp-p;
+    const label=recent.length<30?'Poucos dados recentes':Math.abs(delta)<1?'Próximo da frequência histórica':delta>0?'Acima da frequência histórica recente':'Abaixo da frequência histórica recente';
+    const cls=recent.length<30||Math.abs(delta)<1?'neutral':delta>0?'up':'down';
+    return '<div class="timing-radar-card"><div class="timing-radar-head"><b>Resultado '+t.label+'</b><span class="timing-radar-tag '+cls+'">'+label+'</span></div><div class="timing-radar-prob">'+timingPct(hits,values.length)+'</div><div class="timing-radar-detail">Histórico: '+hits+' de '+values.length+' rodadas</div><div class="timing-radar-detail">Últimas '+recent.length+': '+timingPct(recHits,recent.length)+'</div><div class="timing-radar-detail">Intervalo de confiança 95%: '+timingFmt(ci.low)+'%–'+timingFmt(ci.high)+'%</div><div class="timing-radar-bar"><span style="width:'+Math.max(0,Math.min(100,p))+'%"></span></div></div>';
+  }).join('');
+  const nudge=thresholds.map(t=>{
+    const all=values.filter(v=>v>=t.v).length/values.length*100;
+    const rr=recent.filter(v=>v>=t.v).length/recent.length*100;
+    return {label:t.label,delta:rr-all,all,recent:rr};
+  }).sort((a,b)=>b.delta-a.delta)[0];
+  if(recent.length>=30&&Math.abs(nudge.delta)>=2){
+    signal.innerHTML='<b>Variação observada:</b> nas últimas '+recent.length+' rodadas, a frequência de '+nudge.label+' ficou '+(nudge.delta>0?'acima':'abaixo')+' da frequência do histórico em '+timingFmt(Math.abs(nudge.delta))+' pontos percentuais. Isso descreve o passado recente, não aumenta de forma comprovada a chance da próxima rodada.';
+  }else{
+    signal.textContent='Não há diferença recente forte o bastante para destacar. Frequências passadas não indicam que uma vela esteja “atrasada” nem garantem a próxima rodada.';
+  }
+}
 function timingPct(n,d){return d?((n/d)*100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%':'—'}
 function timingMean(arr){return arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0}
 function timingFmt(n){return Number(n).toLocaleString('pt-BR',{maximumFractionDigits:2})}
@@ -1144,6 +1183,7 @@ function renderTimingAnalysis(){
   }
   rounds.sort((a,b)=>a.ts-b.ts);
   const values=rounds.map(r=>Number(r.value));
+  renderTimingRadar(rounds);
   const total=values.length,above10=values.filter(v=>v>=10),above50=values.filter(v=>v>=50),above100=values.filter(v=>v>=100);
   const pink=values.filter(v=>v>=10&&v<100);
   const avg=timingMean(values),pinkAvg=timingMean(pink);
