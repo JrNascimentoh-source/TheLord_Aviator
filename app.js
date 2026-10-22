@@ -1164,8 +1164,15 @@ async function runTheLordAI(){
     result.textContent=response.analysis;
     status.textContent='Análise concluída agora. O resultado existe apenas nesta sessão.';
   }catch(e){
-    result.textContent='Não foi possível concluir a análise. Verifique se a função de IA foi configurada com a chave do provedor no Supabase. Detalhe: '+(e?.message||'erro de conexão');
-    status.textContent='A IA não respondeu.';
+    let detail=e?.message||'erro de conexão';
+    try{
+      if(e?.context&&typeof e.context.json==='function'){
+        const payload=await e.context.json();
+        detail=[payload?.error,payload?.detail,payload?.provider_code?'Código: '+payload.provider_code:null,payload?.provider_status?'HTTP: '+payload.provider_status:null].filter(Boolean).join(' · ')||detail;
+      }
+    }catch(_ignored){}
+    result.textContent='Não foi possível concluir a análise. '+detail;
+    status.textContent='A IA não respondeu. Use o detalhe acima para corrigir a configuração.';
   }finally{if(button){button.disabled=false;button.textContent='🧠 PEDIR ANÁLISE À IA';}}
 }
 function timingWilson(success,total){
