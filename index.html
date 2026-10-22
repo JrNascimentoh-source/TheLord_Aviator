@@ -13,8 +13,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#070509">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="style.css?v=20261022a">
-<link rel="stylesheet" href="desktop.css?v=20261022a">
+<link rel="stylesheet" href="style.css?v=20261022b">
+<link rel="stylesheet" href="desktop.css?v=20261022b">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 </head>
 <body class="auth-login">
@@ -417,13 +417,51 @@
 </main>
 
 <main id="timing" class="hidden">
-  <section class="card">
-    <div class="title">⏱️ MINUTAGEM</div>
-    <div class="dev-notice">
-      <div class="dev-icon">🚧</div>
-      <div class="dev-title">Aba em desenvolvimento</div>
-      <div class="dev-subtitle">Em breve estará disponível! ✅💥</div>
+  <section class="card timing-hero">
+    <div class="title">⏱️ MINUTAGEM · ANÁLISE ESTATÍSTICA</div>
+    <div class="timing-intro">Analisa as rodadas disponíveis nesta sessão e atualiza os cálculos enquanto o aplicativo estiver aberto. Nenhuma análise é salva separadamente.</div>
+    <div class="timing-toolbar">
+      <label class="timing-field">Jogo
+        <select id="timingGame" onchange="renderTimingAnalysis()">
+          <option value="active">Jogo selecionado no Monitor</option>
+          <option value="aviator">Aviator</option>
+          <option value="aviator2">Aviator 2</option>
+          <option value="both">Ambos os jogos</option>
+        </select>
+      </label>
+      <label class="timing-field">Período
+        <select id="timingWindow" onchange="renderTimingAnalysis()">
+          <option value="60">Últimos 60 minutos</option>
+          <option value="360">Últimas 6 horas</option>
+          <option value="1440" selected>Últimas 24 horas</option>
+          <option value="all">Todo o histórico disponível</option>
+        </select>
+      </label>
+      <button type="button" class="btn timing-refresh" onclick="renderTimingAnalysis()">↻ Atualizar análise</button>
     </div>
+    <div id="timingUpdated" class="timing-updated">Aguardando histórico de rodadas…</div>
+    <div id="timingStats" class="timing-stats"></div>
+  </section>
+  <section class="card">
+    <div class="title">🧠 Resumo estatístico</div>
+    <div id="timingSummary" class="timing-summary">A análise será exibida assim que houver dados disponíveis.</div>
+  </section>
+  <section class="card">
+    <div class="title">🕒 Minutos do relógio com mais resultados ≥ 10x</div>
+    <div class="timing-table-wrap"><table class="timing-table"><thead><tr><th>Minuto</th><th>≥ 10x</th><th>Rodadas</th><th>Frequência</th></tr></thead><tbody id="timingMinuteRows"><tr><td colspan="4">Aguardando dados.</td></tr></tbody></table></div>
+    <div class="timing-note">Ordenação pela frequência observada. Cada minuto é comparado usando sua própria quantidade de rodadas; amostras pequenas podem distorcer a classificação.</div>
+  </section>
+  <section class="card">
+    <div class="title">🔁 Intervalos e sequências</div>
+    <div id="timingPatterns" class="timing-patterns"></div>
+  </section>
+  <section class="card">
+    <div class="title">📊 Distribuição das velas rosas (10x a 99,99x)</div>
+    <div id="timingPink" class="timing-summary">Aguardando dados.</div>
+  </section>
+  <section class="card">
+    <div class="title">⚠️ Como interpretar</div>
+    <div class="timing-note">Estas são frequências históricas, não sinais garantidos de entrada. Se as rodadas forem independentes, horários e resultados anteriores não determinam o próximo multiplicador. O painel não recomenda apostar; mostra contagens, proporções e limitações da amostra.</div>
   </section>
 </main>
 
@@ -557,7 +595,7 @@
   <div class="pr-footer">Relatório gerado automaticamente com base nos registros informados pelo usuário. Não representa garantia de resultados futuros — jogos de aposta envolvem risco.</div>
 </div>
 
-<script src="app.js?v=20261022a" defer></script>
+<script src="app.js?v=20261022b" defer></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
