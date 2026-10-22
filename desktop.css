@@ -81,3 +81,31 @@
   body.auth-login #login .login-links button{font-size:.82rem}
   body.auth-login #login .login-footnote{font-size:.72rem}
 }
+
+/* Layout desktop adaptativo: tela cheia e janela dividida */
+@media screen and (min-width:1024px) and (max-width:1320px){
+  body,body.auth-login{padding:16px 16px 24px}
+  .app,body:not(.auth-login) .app{max-width:none;padding-left:196px}
+  .bottom{left:16px;top:16px;bottom:16px;width:174px;padding:20px 10px;gap:6px}
+  .bottom::before{font-size:.9rem;padding:6px 8px 22px}
+  .nav{gap:8px;padding:12px 9px;font-size:.72rem;min-height:46px}
+  .header,body.auth-login .header{padding:14px 18px;min-height:78px;margin-bottom:16px;gap:12px}
+  .header h1,body.auth-login .header h1{font-size:1.05rem}
+  .logo,body.auth-login .logo{width:48px;height:48px;min-width:48px;font-size:24px}
+  main:not(.hidden):not(#login){grid-template-columns:minmax(0,1fr);gap:14px}
+  main>.card{padding:18px;border-radius:16px}
+  #overview>.card:first-child{grid-column:1}
+  #overview>.card:first-child>.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  #overview>.card:nth-child(2),#overview>.card:nth-child(3),#overview>.card:nth-child(4),#overview>.card:nth-child(n+5){grid-column:1;grid-row:auto}
+  #calculator>.card:first-child,#calculator>.card:nth-child(2),#calculator>.card:nth-child(n+3){grid-column:1;grid-row:auto}
+  #calculator .hands-example-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #monitor>.card,#timing>.card{grid-column:1}
+  #monitor .round-grid{grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+  #monitor .round-grid .round-chip{padding:16px 4px 8px}
+  #monitor .round-grid .round-chip-val{font-size:.88rem}
+  .timing-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media screen and (min-width:1321px){
+  .app,body:not(.auth-login) .app{max-width:1680px;padding-left:228px}
+  .bottom{left:max(28px,calc((100vw - 1680px)/2 + 28px))}
+}
