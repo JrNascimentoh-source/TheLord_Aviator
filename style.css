@@ -821,3 +821,10 @@ body.auth-login #login .login-back{display:none!important}
 
 /* Radar dos finais de minuto: tabela legível em telas pequenas */
 .timing-ending-table{min-width:760px}.timing-ending-table td{vertical-align:middle}.timing-ending-table .timing-radar-tag{display:inline-block;white-space:normal;max-width:145px;line-height:1.35;text-align:center}
+
+/* Padrões de repetição integrados à análise de Minutagem */
+.timing-repeat-panel{margin-top:18px;padding-top:16px;border-top:1px solid rgba(192,132,252,.2)}
+.timing-repeat-title{font-size:.95rem;font-weight:900;color:#f5eaff;margin-bottom:9px}
+.timing-repeat-table{min-width:520px}
+.timing-repeat-current td{background:rgba(192,132,252,.12)}
+.timing-repeat-current td:first-child{border-left:3px solid #c084fc}
