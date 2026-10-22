@@ -952,8 +952,7 @@ setTimeout(syncVelas,1500);
 function pushRound(entry){
    const list=currentRounds();
   list.push(entry);
-  if(list.length>300) data.roundsByGame[data.activeGame]=list.slice(-300);
-  pruneOldRounds();
+
   save();
   renderMonitor();
 }
