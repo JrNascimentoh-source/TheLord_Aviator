@@ -109,3 +109,41 @@
   .app,body:not(.auth-login) .app{max-width:1680px;padding-left:228px}
   .bottom{left:max(28px,calc((100vw - 1680px)/2 + 28px))}
 }
+
+
+/* Desktop compacto: navegador em tela dividida a 100% de zoom.
+   A decisão usa a largura CSS disponível, não o tamanho físico do monitor. */
+@media screen and (min-width:701px) and (max-width:1023px){
+  body,body.auth-login{
+    padding:14px 14px 24px;
+    background-color:var(--bg);
+    background-image:var(--desktop-background-image);
+    background-size:cover;background-position:center;background-repeat:no-repeat;background-attachment:fixed;
+  }
+  .app,body:not(.auth-login) .app{width:auto;max-width:none;margin:0;padding-left:174px}
+  .bottom{
+    left:14px;top:14px;bottom:14px;transform:none;width:146px;
+    display:flex;flex-direction:column;align-items:stretch;gap:6px;
+    padding:18px 8px;border-radius:18px;background:var(--desktop-navigation);
+    border:1px solid var(--desktop-line);backdrop-filter:blur(20px);
+  }
+  .bottom::before{content:'TheLord_Aviator';display:block;color:var(--gold);font-weight:900;font-size:.78rem;padding:6px 5px 18px;overflow-wrap:anywhere}
+  .bottom::after{content:'Gestão & Análise';margin-top:auto;padding:12px 5px 0;border-top:1px solid var(--desktop-line);color:var(--muted);font-size:.62rem}
+  .nav{display:flex;align-items:center;gap:7px;text-align:left;padding:11px 7px;min-height:42px;font-size:.68rem;border-radius:10px}
+  .nav span{display:inline-block;margin:0;font-size:1rem;flex-shrink:0}
+  .header,body.auth-login .header{padding:13px 16px;min-height:72px;margin-bottom:14px;gap:10px;border-radius:16px}
+  .header h1,body.auth-login .header h1{font-size:1rem}
+  .logo,body.auth-login .logo{width:44px;height:44px;min-width:44px;font-size:22px}
+  .subtitle{font-size:.64rem}
+  main:not(.hidden):not(#login){display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+  main>.card{grid-column:1!important;grid-row:auto!important;min-width:0;padding:16px;border-radius:16px}
+  #overview>.card:first-child>.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  #overview>.card:nth-child(2),#overview>.card:nth-child(3),#overview>.card:nth-child(4),#overview>.card:nth-child(n+5){grid-column:1;grid-row:auto}
+  #calculator>.card:first-child,#calculator>.card:nth-child(2),#calculator>.card:nth-child(n+3){grid-column:1;grid-row:auto}
+  #calculator .hands-example-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #monitor .round-grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:5px}
+  #monitor .round-grid .round-chip{padding:13px 3px 7px}
+  #monitor .round-grid .round-chip-val{font-size:.8rem}
+  #monitor .round-grid .round-chip-time,#monitor .round-grid .round-chip-idx{font-size:.58rem}
+  .timing-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
