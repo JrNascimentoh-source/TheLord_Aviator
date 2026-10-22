@@ -1129,51 +1129,97 @@ setInterval(()=>{if(pruneOldRounds()){save();renderMonitor();}},60000);
 ====================================================== */
 
 
-async function runTheLordAI(){
+function runTheLordAI(){
   const status=document.getElementById('timingAIStatus'),result=document.getElementById('timingAIResult');
   if(!status||!result)return;
-  if(typeof supabaseClient==='undefined'||!supabaseClient){status.textContent='Serviço de conexão indisponível. Recarregue o aplicativo e tente novamente.';return;}
   const gameEl=document.getElementById('timingGame'),windowEl=document.getElementById('timingWindow');
   const game=gameEl?gameEl.value:'active',windowValue=windowEl?windowEl.value:'all';
   const games=game==='both'?['aviator','aviator2']:[game==='active'?data.activeGame:game];
   let rounds=[];
   games.forEach(g=>(data.roundsByGame[g]||[]).forEach(r=>rounds.push({value:Number(r.value),ts:Number(r.ts),game:g})));
-  rounds=rounds.filter(r=>Number.isFinite(r.value)&&Number.isFinite(r.ts));
+  rounds=rounds.filter(r=>Number.isFinite(r.value)&&r.value>0&&Number.isFinite(r.ts));
   if(windowValue!=='all')rounds=rounds.filter(r=>r.ts>=Date.now()-Number(windowValue)*60000);
   rounds.sort((a,b)=>a.ts-b.ts);
-  if(rounds.length<30){status.textContent='Precisamos de pelo menos 30 rodadas válidas para solicitar uma interpretação útil.';return;}
-  const values=rounds.map(r=>r.value);
-  const counts=threshold=>values.filter(v=>v>=threshold).length;
-  const recent=values.slice(-100);
-  const stats={
-    game:games.join('+'),period:windowValue==='all'?'todo o histórico disponível':windowValue+' minutos',
-    total:values.length,latestRounds:recent.length,
-    thresholds:[10,50,100].map(t=>({threshold:t,total:counts(t),percent:Number((counts(t)/values.length*100).toFixed(3)),recentTotal:recent.filter(v=>v>=t).length,recentPercent:Number((recent.filter(v=>v>=t).length/recent.length*100).toFixed(3))})),
-    mean:Number((values.reduce((a,b)=>a+b,0)/values.length).toFixed(3)),
-    pinkCount:values.filter(v=>v>=10&&v<100).length,
-    pinkMean:values.some(v=>v>=10&&v<100)?Number((values.filter(v=>v>=10&&v<100).reduce((a,b)=>a+b,0)/values.filter(v=>v>=10&&v<100).length).toFixed(3)):null,
-    recentDistribution:recent.map((v,i)=>({index:i+1,value:v}))
+  const fmt=(n,d=2)=>Number(n).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
+  const pct=(n,total)=>total?fmt(n/total*100)+'%':'—';
+  const duration=ms=>{
+    if(!Number.isFinite(ms)||ms<0)return '—';
+    const mins=Math.round(ms/60000);
+    if(mins<60)return mins+' min';
+    if(mins<1440)return Math.floor(mins/60)+' h '+(mins%60)+' min';
+    return Math.floor(mins/1440)+' d '+Math.floor((mins%1440)/60)+' h';
   };
-  status.textContent='Enviando resumo estatístico à IA…';
-  result.classList.remove('hidden');result.textContent='A IA está interpretando a amostra. Aguarde…';
-  const button=document.querySelector('.timing-ai-button');if(button){button.disabled=true;button.textContent='⏳ ANALISANDO…';}
-  try{
-    const {data:response,error}=await supabaseClient.functions.invoke('thelord-ai-analysis',{body:{stats}});
-    if(error)throw error;
-    if(!response||!response.analysis)throw new Error(response?.error||'A IA não retornou uma análise.');
-    result.textContent=response.analysis;
-    status.textContent='Análise concluída agora. O resultado existe apenas nesta sessão.';
-  }catch(e){
-    let detail=e?.message||'erro de conexão';
-    try{
-      if(e?.context&&typeof e.context.json==='function'){
-        const payload=await e.context.json();
-        detail=[payload?.error,payload?.detail,payload?.provider_code?'Código: '+payload.provider_code:null,payload?.provider_status?'HTTP: '+payload.provider_status:null].filter(Boolean).join(' · ')||detail;
-      }
-    }catch(_ignored){}
-    result.textContent='Não foi possível concluir a análise. '+detail;
-    status.textContent='A IA não respondeu. Use o detalhe acima para corrigir a configuração.';
-  }finally{if(button){button.disabled=false;button.textContent='🧠 PEDIR ANÁLISE À IA';}}
+  result.classList.remove('hidden');
+  if(rounds.length<30){
+    result.textContent='Amostra insuficiente: foram encontradas '+rounds.length+' rodadas válidas neste filtro. Aguarde pelo menos 30 rodadas para gerar o relatório local.';
+    status.textContent='Análise gratuita executada no próprio navegador; nenhuma chamada externa foi feita.';
+    return;
+  }
+  const values=rounds.map(r=>r.value),n=values.length,recent=values.slice(-100);
+  const mean=values.reduce((a,b)=>a+b,0)/n;
+  const sorted=[...values].sort((a,b)=>a-b);
+  const median=n%2?sorted[Math.floor(n/2)]:(sorted[n/2-1]+sorted[n/2])/2;
+  const thresholds=[10,50,100,500,1000].map(t=>{
+    const count=values.filter(v=>v>=t).length;
+    const rc=recent.filter(v=>v>=t).length;
+    return {t,count,rc,all:count/n*100,last:rc/recent.length*100};
+  });
+  const interval=[];
+  let lastPink=null;
+  rounds.forEach((r,i)=>{
+    if(r.value>=10){
+      if(lastPink!==null)interval.push({rounds:i-lastPink,minutes:(r.ts-rounds[lastPink].ts)/60000});
+      lastPink=i;
+    }
+  });
+  const avgInterval=interval.length?interval.reduce((s,x)=>s+x.minutes,0)/interval.length:null;
+  const minInterval=interval.length?Math.min(...interval.map(x=>x.minutes)):null;
+  const maxInterval=interval.length?Math.max(...interval.map(x=>x.minutes)):null;
+  const byHour=Array.from({length:24},(_,hour)=>({hour,count:0,hits:0}));
+  rounds.forEach(r=>{const h=new Date(r.ts).getHours();byHour[h].count++;if(r.value>=10)byHour[h].hits++;});
+  const hourRows=byHour.filter(x=>x.count>=10).map(x=>({...x,rate:x.hits/x.count*100})).sort((a,b)=>b.rate-a.rate);
+  const latest=rounds[rounds.length-1];
+  const max=Math.max(...values);
+  const consecutive=[];
+  let run=0,runStart=0;
+  values.forEach((v,i)=>{
+    if(v<2){if(!run)runStart=i;run++;}
+    else if(run){consecutive.push({length:run,start:runStart,end:i-1});run=0;}
+  });
+  if(run)consecutive.push({length:run,start:runStart,end:n-1});
+  consecutive.sort((a,b)=>b.length-a.length);
+  const lowStreak=consecutive[0];
+  const lines=[];
+  lines.push('RELATÓRIO ESTATÍSTICO LOCAL — GRATUITO');
+  lines.push('Jogo: '+games.join(' + ')+' | Período: '+(windowValue==='all'?'todo o histórico disponível':windowValue+' minutos'));
+  lines.push('Amostra: '+n+' rodadas | Última rodada registrada: '+new Date(latest.ts).toLocaleString('pt-BR'));
+  lines.push('');
+  lines.push('1. VISÃO GERAL');
+  lines.push('• Média: '+fmt(mean)+'x | Mediana: '+fmt(median)+'x | Maior resultado observado: '+fmt(max)+'x');
+  lines.push('• Resultados abaixo de 2x: '+values.filter(v=>v<2).length+' ('+pct(values.filter(v=>v<2).length,n)+')');
+  lines.push('• Resultados de 2x a 9,99x: '+values.filter(v=>v>=2&&v<10).length+' ('+pct(values.filter(v=>v>=2&&v<10).length,n)+')');
+  lines.push('• Resultados de 10x a 99,99x: '+values.filter(v=>v>=10&&v<100).length+' ('+pct(values.filter(v=>v>=10&&v<100).length,n)+')');
+  lines.push('');
+  lines.push('2. FREQUÊNCIAS HISTÓRICAS');
+  thresholds.forEach(t=>lines.push('• ≥ '+t.t+'x: '+t.count+'/'+n+' ('+fmt(t.all)+'%); últimas '+recent.length+': '+t.rc+'/'+recent.length+' ('+fmt(t.last)+'%).'));
+  lines.push('');
+  lines.push('3. INTERVALOS ENTRE RESULTADOS ≥ 10x');
+  if(interval.length)lines.push('• Intervalos calculáveis: '+interval.length+' | média de tempo: '+duration(avgInterval*60000)+' | menor: '+duration(minInterval*60000)+' | maior: '+duration(maxInterval*60000)+'.');
+  else lines.push('• Ainda não há dois resultados ≥ 10x para calcular intervalos.');
+  lines.push('');
+  lines.push('4. HORÁRIOS OBSERVADOS (hora local do dispositivo)');
+  if(hourRows.length)lines.push(...hourRows.slice(0,3).map(x=>'• '+String(x.hour).padStart(2,'0')+'h: '+fmt(x.rate)+'% de resultados ≥ 10x ('+x.hits+'/'+x.count+' rodadas).'));
+  else lines.push('• Não há amostras suficientes por hora (mínimo de 10 rodadas por faixa).');
+  if(lowStreak&&lowStreak.length>=3){
+    lines.push('');
+    lines.push('5. SEQUÊNCIA OBSERVADA');
+    lines.push('• Maior sequência consecutiva de resultados abaixo de 2x nesta amostra: '+lowStreak.length+'. É apenas um registro histórico, não um sinal de que o próximo resultado será alto ou baixo.');
+  }
+  lines.push('');
+  lines.push('LIMITAÇÕES IMPORTANTES');
+  lines.push('Este relatório é calculado por regras estatísticas no seu navegador; não é uma IA generativa nem prevê a próxima rodada. Frequências e intervalos passados não garantem repetição futura, e diferenças por horário podem refletir acaso ou tamanhos de amostra. Use os números como descrição do histórico, não como promessa de lucro.');
+  result.textContent=lines.join('\n');
+  status.textContent='Relatório concluído no dispositivo. 100% gratuito: sem API, sem cobrança e sem envio de dados para análise externa.';
 }
 function timingWilson(success,total){
   if(!total)return {low:0,high:0};
