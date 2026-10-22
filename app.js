@@ -897,20 +897,22 @@ function renderCollectorStatus(){
   lb.textContent=on?'Coletando velas':'Off-Line';
 }
 const VELAS_PAGE_SIZE=1000;
-let lastSyncedVelaId=0;
 let initialVelasLoaded=false;
+let syncVelasRunning=false;
 async function syncVelas(){
+  if(syncVelasRunning)return;
   if(typeof supabaseClient==='undefined'||!supabaseClient){lastSyncOk=false;renderCollectorStatus();return;}
+  syncVelasRunning=true;
   try{
-    const since=new Date(Date.now()-ROUND_MAX_AGE_MS).toISOString();
+    // A primeira carga busca as últimas 24h. Nas seguintes, reconsulta uma janela
+    // recente sobreposta para também capturar registros inseridos com atraso ou IDs
+    // que não sejam maiores que o último sincronizado.
+    const since=new Date(Date.now()-(initialVelasLoaded?10*60*1000:ROUND_MAX_AGE_MS)).toISOString();
     let offset=0;
     let rows=[];
     let page=[];
-    // Na primeira sincronização, carrega todo o histórico das últimas 24h em páginas.
-    // Nas próximas, busca somente IDs novos para não baixar as mesmas 24h a cada 3 segundos.
     do{
-      let query=supabaseClient.from('velas').select('id,game,value,created_at').gte('created_at',since).order('id',{ascending:true});
-      if(initialVelasLoaded) query=query.gt('id',lastSyncedVelaId);
+      const query=supabaseClient.from('velas').select('id,game,value,created_at').gte('created_at',since).order('id',{ascending:true});
       const result=await query.range(offset,offset+VELAS_PAGE_SIZE-1);
       if(result.error||!result.data){lastSyncOk=false;renderCollectorStatus();return;}
       page=result.data;
@@ -924,14 +926,12 @@ async function syncVelas(){
       if(game!=='aviator'&&game!=='aviator2')return;
       const t=new Date(r.created_at).getTime();
       if(Number.isFinite(t)&&t>lastVelaTs)lastVelaTs=t;
-      const idNum=Number(r.id);
-      if(Number.isFinite(idNum)&&idNum>lastSyncedVelaId)lastSyncedVelaId=idNum;
       const list=data.roundsByGame[game];
       if(!list)return;
       const id='v'+r.id;
       if(list.some(x=>x.id===id))return;
       const v=Number(r.value);
-      if(!Number.isFinite(v)||v<1||v>=1000000)return;
+      if(!Number.isFinite(v)||v<1||v>=1000000||!Number.isFinite(t))return;
       list.push({id,value:v,color:classifyRound(v).key,ts:t});
       changed=true;
     });
@@ -949,6 +949,7 @@ async function syncVelas(){
       save();renderMonitor();
     }
   }catch(e){console.error('Erro ao sincronizar histórico de velas:',e);lastSyncOk=false;renderCollectorStatus();}
+  finally{syncVelasRunning=false;}
 }
 setInterval(syncVelas,3000);
 setInterval(renderCollectorStatus,3000);
