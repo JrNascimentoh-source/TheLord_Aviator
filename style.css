@@ -800,3 +800,16 @@ body.auth-login #login .login-back{display:none!important}
 .timing-table th{color:#d6b8ff;font-size:.7rem}
 .timing-table td b{color:#fff}
 @media(max-width:390px){.timing-toolbar{grid-template-columns:1fr}.timing-stats,.timing-patterns,.timing-pink-grid{grid-template-columns:1fr}.timing-stat-value{font-size:1.08rem}}
+
+.timing-radar-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:14px}
+.timing-radar-card{border:1px solid rgba(192,132,252,.25);border-radius:13px;padding:14px;background:rgba(34,20,45,.7)}
+.timing-radar-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;color:#f5eaff}
+.timing-radar-tag{font-size:.67rem;padding:5px 8px;border-radius:999px;background:rgba(255,255,255,.08)}
+.timing-radar-tag.up{color:#86efac;background:rgba(34,197,94,.12)}
+.timing-radar-tag.down{color:#fca5a5;background:rgba(239,68,68,.12)}
+.timing-radar-tag.neutral{color:#d8b4fe}
+.timing-radar-prob{font-size:1.65rem;font-weight:950;margin:12px 0 3px;color:#fff}
+.timing-radar-detail{font-size:.72rem;color:#bbaacb;margin-top:5px;line-height:1.4}
+.timing-radar-bar{height:6px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden;margin-top:12px}
+.timing-radar-bar span{display:block;height:100%;background:#c084fc;border-radius:99px}
+.timing-signal{margin-top:12px;padding:12px;border-radius:12px;background:rgba(255,190,40,.09);border:1px solid rgba(255,190,40,.2);font-size:.8rem;line-height:1.55;color:#f2dfb6}
