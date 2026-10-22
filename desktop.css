@@ -207,3 +207,40 @@
   main:not(.hidden):not(#login){grid-template-columns:minmax(0,1.4fr) minmax(320px,1fr)}
   #overview>.card:first-child>.grid{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
 }
+
+
+/* Alinhamento final: a sidebar ocupa uma faixa própria e o conteúdo começa
+   depois dela em qualquer largura CSS (incluindo zoom de 75% em tela cheia). */
+@media screen and (min-width:1024px){
+  .app,body:not(.auth-login) .app{
+    box-sizing:border-box;
+    width:100%;
+    max-width:1680px;
+    margin-left:auto;
+    margin-right:auto;
+    padding-left:252px;
+  }
+  .bottom{
+    box-sizing:border-box;
+    left:max(16px,calc((100vw - 1680px)/2 + 16px));
+    width:216px;
+  }
+  main:not(.hidden):not(#login){
+    min-width:0;
+    width:100%;
+    box-sizing:border-box;
+    gap:20px;
+  }
+  main>.card{box-sizing:border-box;min-width:0;max-width:100%}
+  #monitor .round-grid{grid-template-columns:repeat(auto-fit,minmax(74px,1fr))}
+}
+@media screen and (min-width:1024px) and (max-width:1320px){
+  .app,body:not(.auth-login) .app{padding-left:194px}
+  .bottom{width:174px}
+  main:not(.hidden):not(#login){grid-template-columns:minmax(0,1fr);gap:14px}
+  main>.card{grid-column:1!important;grid-row:auto!important}
+}
+@media screen and (min-width:1321px) and (max-width:1680px){
+  .app,body:not(.auth-login) .app{padding-left:238px}
+  .bottom{width:204px}
+}
