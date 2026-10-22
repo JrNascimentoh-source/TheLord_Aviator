@@ -147,3 +147,20 @@
   #monitor .round-grid .round-chip-time,#monitor .round-grid .round-chip-idx{font-size:.58rem}
   .timing-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+
+
+/* Corrige fundo no desktop em janela dividida: manter o cenário cobrindo
+   toda a área visível sem depender do zoom do navegador. */
+@media screen and (min-width:701px) and (max-width:1023px){
+  html{min-height:100%;background:#08060c}
+  body,body.auth-login{
+    min-height:100vh;
+    background-color:#08060c;
+    background-image:var(--desktop-background-image),radial-gradient(circle at 15% 0%,rgba(255,30,67,.18),transparent 42%),radial-gradient(circle at 85% 20%,rgba(120,0,45,.16),transparent 40%);
+    background-size:cover,cover,cover;
+    background-position:center top,center,center;
+    background-repeat:no-repeat,no-repeat,no-repeat;
+    background-attachment:fixed,fixed,fixed;
+  }
+  body:not(.auth-login) .app{min-height:calc(100vh - 38px)}
+}
