@@ -1317,7 +1317,7 @@ function renderTimingRepeatPatterns(rounds){
   const highs=rounds.map((r,i)=>({r,i})).filter(x=>Number(x.r.value)>=10);
   if(highs.length<2){
     summary.textContent='Precisamos de pelo menos 2 resultados ≥10x para calcular a taxa histórica por casa. Encontrados: '+highs.length+'.';
-    rowsEl.innerHTML='<tr><td colspan="6">Histórico insuficiente.</td></tr>';
+    rowsEl.innerHTML='<tr><td colspan="5">Histórico insuficiente.</td></tr>';
     timeEl.textContent='Ainda não há intervalos suficientes para analisar recorrências por tempo.';
     return;
   }
@@ -1347,7 +1347,6 @@ function renderTimingRepeatPatterns(rounds){
   const likely=rows.filter(x=>x.house>=nextHouse&&x.opportunities>=5).sort((a,b)=>b.rate-a.rate||b.hits-a.hits)[0];
   const houseRows=rows.map(x=>{
     const current=x.house===nextHouse?' class="timing-repeat-current"':'';
-    const typical='';
     let timeStatus='—';
     if(x.house===nextHouse&&x.timeSamples>=3&&x.medianTime>0){
       const ratio=elapsedMinutes/x.medianTime;
