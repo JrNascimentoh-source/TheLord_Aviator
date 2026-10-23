@@ -1311,29 +1311,33 @@ function renderTimingRepeatPatterns(rounds){
   const values=rounds.map(r=>Number(r.value));
   const isHigh=v=>Number.isFinite(v)&&v>=10;
   const highs=rounds.map((r,i)=>({r,i})).filter(x=>isHigh(Number(x.r.value)));
-  const mirrorOpportunities=values.slice(0,-1).filter(isHigh).length;
-  let mirrorHits=0,chessOpportunities=0,chessHits=0;
+  let mirrorSignals=0,mirrorHits=0,chessSignals=0,chessHits=0;
+  // Backtest walk-forward: cada sinal usa apenas rodadas anteriores/atuais;
+  // o resultado seguinte é usado somente para pontuar o sinal já emitido.
   for(let i=0;i<values.length-1;i++){
-    if(isHigh(values[i])&&isHigh(values[i+1]))mirrorHits++;
-    if(i+2<values.length&&isHigh(values[i])&&!isHigh(values[i+1])){
-      chessOpportunities++;
-      if(isHigh(values[i+2]))chessHits++;
+    if(isHigh(values[i])){
+      mirrorSignals++;
+      if(isHigh(values[i+1]))mirrorHits++;
+    }
+    if(i>=1&&isHigh(values[i-1])&&!isHigh(values[i])){
+      chessSignals++;
+      if(isHigh(values[i+1]))chessHits++;
     }
   }
-  const mirrorRate=mirrorOpportunities?mirrorHits/mirrorOpportunities:0;
+  const mirrorMisses=mirrorSignals-mirrorHits;
+  const chessMisses=chessSignals-chessHits;
   const tail=values.slice(-2);
   const mirrorForming=tail.length>=1&&isHigh(tail[tail.length-1]);
   const chessForming=tail.length===2&&isHigh(tail[0])&&!isHigh(tail[1]);
   const alertParts=[];
   if(mirrorForming){
-    const sample=mirrorOpportunities;
-    alertParts.push((sample>=30?'Espelho em observação':'Espelho: amostra limitada')+' — após um ≥10x, o histórico mostra '+timingPct(mirrorHits,mirrorOpportunities)+' de ≥10x consecutivo ('+mirrorHits+'/'+mirrorOpportunities+').');
+    alertParts.push((mirrorSignals>=30?'Espelho em observação':'Espelho: amostra limitada')+' — após ≥10x, o próximo resultado foi ≥10x em '+timingPct(mirrorHits,mirrorSignals)+' dos casos históricos ('+mirrorHits+' acertos, '+mirrorMisses+' falhas em '+mirrorSignals+' sinais).');
   }
   if(chessForming){
-    alertParts.push((chessOpportunities>=30?'Xadrez em formação':'Xadrez: amostra limitada')+' — sequência ≥10x e depois <10x; historicamente, o próximo ≥10x ocorreu em '+timingPct(chessHits,chessOpportunities)+' dos casos comparáveis ('+chessHits+'/'+chessOpportunities+').');
+    alertParts.push((chessSignals>=30?'Xadrez em formação':'Xadrez: amostra limitada')+' — após ≥10x seguido de <10x, o próximo resultado foi ≥10x em '+timingPct(chessHits,chessSignals)+' dos casos históricos ('+chessHits+' acertos, '+chessMisses+' falhas em '+chessSignals+' sinais).');
   }
   if(!alertParts.length)alertParts.push('Nenhum Espelho ou Xadrez está em formação imediata na sequência final.');
-  const patternAlert=alertParts.join(' ');
+  alertParts.push('Validação histórica sem lookahead: Espelho '+mirrorHits+'/'+mirrorSignals+' acertos ('+mirrorMisses+' falhas); Xadrez '+chessHits+'/'+chessSignals+' acertos ('+chessMisses+' falhas). Os sinais são avaliados somente quando há uma rodada seguinte para conferir.');
   if(highs.length<2){
     summary.textContent='Precisamos de pelo menos 2 resultados ≥10x para calcular a taxa histórica por casa. Encontrados: '+highs.length+'.';
     rowsEl.innerHTML='<tr><td colspan="5">Histórico insuficiente.</td></tr>';
