@@ -1308,7 +1308,32 @@ function renderTimingRepeatPatterns(rounds){
   const rowsEl=document.getElementById('timingRepeatRows');
   const timeEl=document.getElementById('timingRepeatTime');
   if(!summary||!rowsEl||!timeEl)return;
-  const highs=rounds.map((r,i)=>({r,i})).filter(x=>Number(x.r.value)>=10);
+  const values=rounds.map(r=>Number(r.value));
+  const isHigh=v=>Number.isFinite(v)&&v>=10;
+  const highs=rounds.map((r,i)=>({r,i})).filter(x=>isHigh(Number(x.r.value)));
+  const mirrorOpportunities=values.slice(0,-1).filter(isHigh).length;
+  let mirrorHits=0,chessOpportunities=0,chessHits=0;
+  for(let i=0;i<values.length-1;i++){
+    if(isHigh(values[i])&&isHigh(values[i+1]))mirrorHits++;
+    if(i+2<values.length&&isHigh(values[i])&&!isHigh(values[i+1])){
+      chessOpportunities++;
+      if(isHigh(values[i+2]))chessHits++;
+    }
+  }
+  const mirrorRate=mirrorOpportunities?mirrorHits/mirrorOpportunities:0;
+  const tail=values.slice(-2);
+  const mirrorForming=tail.length>=1&&isHigh(tail[tail.length-1]);
+  const chessForming=tail.length===2&&isHigh(tail[0])&&!isHigh(tail[1]);
+  const alertParts=[];
+  if(mirrorForming){
+    const sample=mirrorOpportunities;
+    alertParts.push((sample>=30?'Espelho em observação':'Espelho: amostra limitada')+' — após um ≥10x, o histórico mostra '+timingPct(mirrorHits,mirrorOpportunities)+' de ≥10x consecutivo ('+mirrorHits+'/'+mirrorOpportunities+').');
+  }
+  if(chessForming){
+    alertParts.push((chessOpportunities>=30?'Xadrez em formação':'Xadrez: amostra limitada')+' — sequência ≥10x e depois <10x; historicamente, o próximo ≥10x ocorreu em '+timingPct(chessHits,chessOpportunities)+' dos casos comparáveis ('+chessHits+'/'+chessOpportunities+').');
+  }
+  if(!alertParts.length)alertParts.push('Nenhum Espelho ou Xadrez está em formação imediata na sequência final.');
+  const patternAlert=alertParts.join(' ');
   if(highs.length<2){
     summary.textContent='Precisamos de pelo menos 2 resultados ≥10x para calcular a taxa histórica por casa. Encontrados: '+highs.length+'.';
     rowsEl.innerHTML='<tr><td colspan="5">Histórico insuficiente.</td></tr>';
@@ -1359,7 +1384,7 @@ function renderTimingRepeatPatterns(rounds){
   let message='Desde o último resultado ≥10x, passaram '+currentLowCount+' casa(s) abaixo de 10x; a próxima posição é a '+nextHouse+'ª casa. O tempo decorrido desde o último ≥10x é '+timingFmt(elapsedMinutes)+' min.';
   if(likely)message+=' Entre as próximas posições com pelo menos 5 intervalos comparáveis, a maior taxa histórica foi na '+likely.house+'ª casa ('+timingPct(likely.hits,likely.opportunities)+', '+likely.hits+' ocorrências em '+likely.opportunities+' oportunidades).';
   else message+=' Ainda não há pelo menos 5 intervalos comparáveis para destacar uma posição com amostra mínima.';
-  summary.textContent=message;
+  summary.textContent=message+' '+patternAlert;
   const timed=gaps.filter(g=>Number.isFinite(g.minutes));
   const within5=timed.filter(g=>g.minutes<=5).length;
   const within10=timed.filter(g=>g.minutes<=10).length;
