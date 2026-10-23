@@ -1316,7 +1316,7 @@ function renderTimingRepeatPatterns(rounds){
   if(!summary||!rowsEl||!timeEl)return;
   const highs=rounds.map((r,i)=>({r,i})).filter(x=>Number(x.r.value)>=10);
   if(highs.length<2){
-    summary.textContent='Precisamos de pelo menos 2 resultados ≥10x para começar a medir os intervalos entre casas. Encontrados: '+highs.length+'.';
+    summary.textContent='Precisamos de pelo menos 2 resultados ≥10x para calcular a taxa histórica por casa. Encontrados: '+highs.length+'.';
     rowsEl.innerHTML='<tr><td colspan="6">Histórico insuficiente.</td></tr>';
     timeEl.textContent='Ainda não há intervalos suficientes para analisar recorrências por tempo.';
     return;
@@ -1347,7 +1347,7 @@ function renderTimingRepeatPatterns(rounds){
   const likely=rows.filter(x=>x.house>=nextHouse&&x.opportunities>=5).sort((a,b)=>b.rate-a.rate||b.hits-a.hits)[0];
   const houseRows=rows.map(x=>{
     const current=x.house===nextHouse?' class="timing-repeat-current"':'';
-    const typical=x.timeSamples>=2?timingFmt(x.medianTime)+' min (mediana)':'Poucos dados';
+    const typical='';
     let timeStatus='—';
     if(x.house===nextHouse&&x.timeSamples>=3&&x.medianTime>0){
       const ratio=elapsedMinutes/x.medianTime;
@@ -1355,7 +1355,11 @@ function renderTimingRepeatPatterns(rounds){
     }else if(x.house===nextHouse&&x.timeSamples>0){
       timeStatus='Intervalo atual: '+timingFmt(elapsedMinutes)+' min';
     }
-    return '<tr'+current+'><td><b>'+x.house+'ª casa'+(x.house===nextHouse?' · próxima':'')+'</b></td><td>'+x.hits+'</td><td>'+x.opportunities+'</td><td><b>'+(x.opportunities?timingPct(x.hits,x.opportunities):'—')+'</b></td><td>'+typical+'</td><td>'+timeStatus+'</td></tr>';
+    const pct=x.opportunities?Math.max(0,Math.min(100,x.rate*100)):0;
+    const probability=x.opportunities
+      ?'<div class="timing-probability"><b>'+timingPct(x.hits,x.opportunities)+'</b><div class="timing-probability-track" role="img" aria-label="Taxa histórica observada '+timingPct(x.hits,x.opportunities)+'"><span style="width:'+pct+'%"></span></div><small>taxa histórica</small></div>'
+      :'<span class="timing-probability-empty">Sem amostra</span>';
+    return '<tr'+current+'><td><b>'+x.house+'ª casa'+(x.house===nextHouse?' · próxima':'')+'</b></td><td>'+x.hits+'</td><td>'+x.opportunities+'</td><td>'+probability+'</td><td>'+timeStatus+'</td></tr>';
   }).join('');
   rowsEl.innerHTML=houseRows;
   let message='Desde o último resultado ≥10x, passaram '+currentLowCount+' casa(s) abaixo de 10x; a próxima posição é a '+nextHouse+'ª casa. O tempo decorrido desde o último ≥10x é '+timingFmt(elapsedMinutes)+' min.';
