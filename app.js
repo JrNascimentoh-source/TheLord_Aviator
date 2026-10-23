@@ -867,6 +867,20 @@ function nowTimeStr(d){d=d||new Date();return String(d.getHours()).padStart(2,'0
 // Histórico compartilhado em memória, carregado exclusivamente da tabela pública `velas`.
 const sharedRoundsByGame={aviator:[],aviator2:[]};
 function currentRounds(){return sharedRoundsByGame[data.activeGame]||[]}
+let monitorHistoryRange=storageGet('thelord_monitor_history_range')||'all';
+function setMonitorHistoryRange(range){
+  monitorHistoryRange=range==='24h'?'24h':'all';
+  storageSet('thelord_monitor_history_range',monitorHistoryRange);
+  const select=document.getElementById('monitorHistoryRange');
+  if(select)select.value=monitorHistoryRange;
+  renderMonitor();
+}
+function getMonitorRounds(){
+  const rounds=currentRounds();
+  if(monitorHistoryRange!=='24h')return rounds;
+  const cutoff=Date.now()-ROUND_MAX_AGE_MS;
+  return rounds.filter(r=>r.ts>=cutoff);
+}
 function setActiveGame(game){
   data.activeGame=game;
   document.getElementById('gameBtnAviator').classList.toggle('active',game==='aviator');
@@ -998,7 +1012,9 @@ function computeStreakLabels(roundsDesc){
 function renderMonitor(){
   const clockEl=document.getElementById('monitorClock');
   if(clockEl) clockEl.textContent=nowTimeStr();
-  const rounds=[...currentRounds()].sort((a,b)=>b.ts-a.ts);
+  const rounds=[...getMonitorRounds()].sort((a,b)=>b.ts-a.ts);
+  const rangeSelect=document.getElementById('monitorHistoryRange');
+  if(rangeSelect)rangeSelect.value=monitorHistoryRange;
   const grid=document.getElementById('roundGrid');
   if(grid){
 
