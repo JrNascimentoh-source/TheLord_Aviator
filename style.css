@@ -828,3 +828,8 @@ body.auth-login #login .login-back{display:none!important}
 .timing-repeat-table{min-width:520px}
 .timing-repeat-current td{background:rgba(192,132,252,.12)}
 .timing-repeat-current td:first-child{border-left:3px solid #c084fc}
+.timing-probability{min-width:108px;display:flex;flex-direction:column;gap:4px;align-items:flex-start}
+.timing-probability>b{color:#22c55e;font-size:.98rem;font-weight:900}
+.timing-probability-track{height:7px;width:100%;min-width:90px;max-width:150px;overflow:hidden;border-radius:99px;background:rgba(148,163,184,.18)}
+.timing-probability-track span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#16a34a,#4ade80);transition:width .25s ease}
+.timing-probability small,.timing-probability-empty{font-size:.68rem;color:var(--muted,#94a3b8)}
