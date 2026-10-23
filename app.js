@@ -1439,7 +1439,7 @@ function renderTimingRepeatPatterns(rounds){
   let message='Desde o último resultado ≥10x, passaram '+currentLowCount+' casa(s) abaixo de 10x; a próxima posição é a '+nextHouse+'ª casa. O tempo decorrido desde o último ≥10x é '+timingFmt(elapsedMinutes)+' min.';
   if(likely)message+=' Entre as próximas posições com pelo menos 5 intervalos comparáveis, a maior taxa histórica foi na '+likely.house+'ª casa ('+timingPct(likely.hits,likely.opportunities)+', '+likely.hits+' ocorrências em '+likely.opportunities+' oportunidades).';
   else message+=' Ainda não há pelo menos 5 intervalos comparáveis para destacar uma posição com amostra mínima.';
-  summary.textContent=message+' '+patternAlert;
+  summary.textContent=message+' '+alertParts.join(' ');
   const timed=gaps.filter(g=>Number.isFinite(g.minutes));
   const within5=timed.filter(g=>g.minutes<=5).length;
   const within10=timed.filter(g=>g.minutes<=10).length;
