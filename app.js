@@ -1256,52 +1256,46 @@ function renderTimingRadar(rounds){
 }
 
 function renderMinuteEndingRadar(rounds){
-  const root=document.getElementById('timingMinuteEndingRows');
+  const root=document.getElementById('timingMinuteCombinedRows');
   const summary=document.getElementById('timingMinuteEndingSummary');
   if(!root||!summary)return;
   const valid=rounds.filter(r=>Number.isFinite(Number(r.value))&&Number(r.value)>0&&Number.isFinite(Number(r.ts)));
   if(valid.length<30){
-    root.innerHTML='<tr><td colspan="7">Amostra insuficiente: são necessárias pelo menos 30 rodadas válidas.</td></tr>';
-    summary.textContent='Ainda há poucas rodadas para comparar os dez finais de minuto.';
+    root.innerHTML='<tr><td colspan="8">Amostra insuficiente: são necessárias pelo menos 30 rodadas válidas.</td></tr>';
+    summary.textContent='Ainda há poucas rodadas para comparar os minutos e finais de minuto.';
     return;
   }
-  const recentSet=new Set(valid.slice(-100));
-  const buckets=Array.from({length:10},(_,digit)=>({digit,total:0,hits10:0,hits50:0,hits100:0,recentTotal:0,recent10:0}));
-  valid.forEach(r=>{
-    const d=new Date(Number(r.ts)).getMinutes()%10;
-    const b=buckets[d],v=Number(r.value);
-    b.total++;
-    if(v>=10)b.hits10++;
-    if(v>=50)b.hits50++;
-    if(v>=100)b.hits100++;
-    if(recentSet.has(r)){
-      b.recentTotal++;
-      if(v>=10)b.recent10++;
-    }
-  });
   const overall10=valid.filter(r=>Number(r.value)>=10).length/valid.length*100;
   const overall50=valid.filter(r=>Number(r.value)>=50).length/valid.length*100;
   const overall100=valid.filter(r=>Number(r.value)>=100).length/valid.length*100;
-  const sorted=[...buckets].sort((a,b)=>(b.hits10/b.total)-(a.hits10/a.total)||b.total-a.total);
-  root.innerHTML=buckets.map(b=>{
-    const rate10=b.total?b.hits10/b.total*100:0;
-    const enough=b.total>=30;
-    const label=!enough?'Poucos dados':rate10>overall10+2?'Acima da média observada':rate10<overall10-2?'Abaixo da média observada':'Próximo da média';
-    const cls=!enough?'neutral':rate10>overall10+2?'up':rate10<overall10-2?'down':'neutral';
-    return '<tr><td><b>…'+b.digit+'</b></td><td>'+b.hits10+'</td><td>'+b.total+'</td><td><b>'+timingPct(b.hits10,b.total)+'</b></td><td>'+timingPct(b.hits50,b.total)+'</td><td>'+timingPct(b.hits100,b.total)+'</td><td><span class="timing-radar-tag '+cls+'">'+label+'</span></td></tr>';
-  }).join('');
-  const recentEligible=buckets.filter(b=>b.recentTotal>=5).sort((a,b)=>(b.recent10/b.recentTotal)-(a.recent10/a.recentTotal));
-  const leader=sorted.find(b=>b.total>=30);
-  const recentLeader=recentEligible[0];
+  const minuteMap=Array.from({length:60},(_,minute)=>({minute,total:0,hits10:0,hits50:0,hits100:0}));
+  const buckets=Array.from({length:10},(_,digit)=>({digit,total:0,hits10:0,hits50:0,hits100:0}));
+  valid.forEach(r=>{
+    const minute=new Date(Number(r.ts)).getMinutes(),digit=minute%10,v=Number(r.value);
+    const m=minuteMap[minute],b=buckets[digit];
+    [m,b].forEach(x=>{x.total++;if(v>=10)x.hits10++;if(v>=50)x.hits50++;if(v>=100)x.hits100++;});
+  });
+  const minuteRows=minuteMap.filter(x=>x.total>0).sort((a,b)=>(b.hits10/b.total)-(a.hits10/a.total)||b.hits10-a.hits10||b.total-a.total).slice(0,10);
+  const rows=[];
+  minuteRows.forEach(x=>{
+    const rate=x.hits10/x.total*100, enough=x.total>=30;
+    const label=!enough?'Poucos dados':rate>overall10+2?'Acima da média':rate<overall10-2?'Abaixo da média':'Próximo da média';
+    const cls=!enough?'neutral':rate>overall10+2?'up':rate<overall10-2?'down':'neutral';
+    rows.push({kind:'Minuto',name:'Min '+String(x.minute).padStart(2,'0'),...x,rate,label,cls});
+  });
+  buckets.forEach(x=>{
+    const rate=x.total?x.hits10/x.total*100:0,enough=x.total>=30;
+    const label=!enough?'Poucos dados':rate>overall10+2?'Acima da média':rate<overall10-2?'Abaixo da média':'Próximo da média';
+    const cls=!enough?'neutral':rate>overall10+2?'up':rate<overall10-2?'down':'neutral';
+    rows.push({kind:'Final',name:'…'+x.digit,...x,rate,label,cls});
+  });
+  root.innerHTML=rows.map(x=>'<tr><td>'+x.kind+'</td><td><b>'+x.name+'</b></td><td>'+x.hits10+'</td><td>'+x.total+'</td><td><b>'+timingPct(x.hits10,x.total)+'</b></td><td>'+timingPct(x.hits50,x.total)+'</td><td>'+timingPct(x.hits100,x.total)+'</td><td><span class="timing-radar-tag '+x.cls+'">'+x.label+'</span></td></tr>').join('');
+  const leader=minuteRows.find(x=>x.total>=30);
+  const bestFinal=[...buckets].filter(x=>x.total>=30).sort((a,b)=>(b.hits10/b.total)-(a.hits10/a.total))[0];
   let msg='Referência geral: ≥10x '+timingFmt(overall10)+'% · ≥50x '+timingFmt(overall50)+'% · ≥100x '+timingFmt(overall100)+'%. ';
-  if(leader){
-    const rate=leader.hits10/leader.total*100;
-    msg+='Final com maior frequência observada de ≥10x: …'+leader.digit+' ('+timingFmt(rate)+'%; '+leader.hits10+'/'+leader.total+' rodadas). ';
-  }else{
-    msg+='Nenhum final tem 30 rodadas para uma comparação minimamente estável. ';
-  }
-  if(recentLeader)msg+='Nas últimas 100 rodadas, o final com maior frequência de ≥10x entre os que tiveram amostra recente suficiente foi …'+recentLeader.digit+' ('+timingFmt(recentLeader.recent10/recentLeader.recentTotal*100)+'%; '+recentLeader.recent10+'/'+recentLeader.recentTotal+'). ';
-  msg+='“Acima da média” descreve apenas o histórico observado; não confirma que a próxima rodada será alta nem que esse final tenha poder preditivo.';
+  if(leader)msg+='Minuto com maior taxa observada (entre os 10 exibidos): '+String(leader.minute).padStart(2,'0')+' ('+timingPct(leader.hits10,leader.total)+', '+leader.hits10+'/'+leader.total+'). ';
+  if(bestFinal)msg+='Final com maior taxa observada: …'+bestFinal.digit+' ('+timingPct(bestFinal.hits10,bestFinal.total)+', '+bestFinal.hits10+'/'+bestFinal.total+'). ';
+  msg+='“Acima da média” descreve o histórico observado e não prevê a próxima rodada.';
   summary.textContent=msg;
 }
 
@@ -1410,13 +1404,6 @@ function renderTimingAnalysis(){
   ].join('');
   const updated=document.getElementById('timingUpdated');
   if(updated)updated.textContent='Atualizado em '+new Date().toLocaleTimeString('pt-BR')+' · '+(games.length===2?'Aviator + Aviator 2':games[0]==='aviator2'?'Aviator 2':'Aviator')+' · '+(windowValue==='all'?'todo o histórico disponível':windowValue==='60'?'últimos 60 minutos':windowValue==='360'?'últimas 6 horas':'últimas 24 horas');
-  const minuteMap=Array.from({length:60},(_,m)=>({minute:m,total:0,high:0}));
-  rounds.forEach(r=>{const m=new Date(r.ts).getMinutes();minuteMap[m].total++;if(Number(r.value)>=10)minuteMap[m].high++;});
-  const minuteRows=document.getElementById('timingMinuteRows');
-  if(minuteRows){
-    const eligible=minuteMap.filter(x=>x.total>0).sort((a,b)=>(b.high/b.total)-(a.high/a.total)||b.high-a.high||b.total-a.total).slice(0,10);
-    minuteRows.innerHTML=eligible.length?eligible.map(x=>'<tr><td><b>Min '+String(x.minute).padStart(2,'0')+'</b></td><td>'+x.high+'</td><td>'+x.total+'</td><td>'+timingPct(x.high,x.total)+'</td></tr>').join(''):'<tr><td colspan="4">Ainda não há rodadas suficientes nesse período.</td></tr>';
-  }
   const gaps10=[],gaps50=[],gaps100=[];
   let last10=-1,last50=-1,last100=-1,runLow=0,maxLow=0,streak10=0,maxStreak10=0;
   rounds.forEach((r,i)=>{
