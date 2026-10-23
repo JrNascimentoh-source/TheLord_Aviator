@@ -840,3 +840,8 @@ body.auth-login #login .login-back{display:none!important}
 /* Tabela única para minutos do relógio e finais de minuto */
 .timing-minute-combined .timing-table{min-width:760px}
 .timing-minute-combined .timing-table th,.timing-minute-combined .timing-table td{padding:8px 6px}
+
+/* Ordenação discreta das tabelas existentes da Minutagem */
+#timing .timing-table thead th[data-sort]{cursor:pointer;user-select:none;white-space:nowrap}
+#timing .timing-table thead th[data-sort]:hover{color:#d8b4fe}
+.timing-probability small{line-height:1.25}
