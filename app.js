@@ -1344,6 +1344,34 @@ function renderTimingRepeatPatterns(rounds){
   const houseSignals=[...houseBacktest.values()].reduce((sum,x)=>sum+x.signals,0);
   const houseHits=[...houseBacktest.values()].reduce((sum,x)=>sum+x.hits,0);
   const strongestHouse=[...houseBacktest.entries()].filter(([house,x])=>x.signals>=5).sort((a,b)=>(b[1].hits/b[1].signals)-(a[1].hits/a[1].signals)||b[1].signals-a[1].signals)[0];
+  // Validação temporal: compara o tempo já decorrido com a mediana de
+  // intervalos concluídos anteriormente e com número igual/maior de casas.
+  const completedIntervals=[];
+  for(let j=1;j<highs.length;j++){
+    completedIntervals.push({
+      endIndex:highs[j].i,
+      houses:highs[j].i-highs[j-1].i,
+      minutes:Math.max(0,(Number(highs[j].r.ts)-Number(highs[j-1].r.ts))/60000)
+    });
+  }
+  let timeSignals=0,timeHits=0;
+  let lastHighIndex=-1,lowCount=0;
+  for(let i=0;i<values.length-1;i++){
+    if(isHigh(values[i])){lastHighIndex=i;lowCount=0;continue;}
+    if(lastHighIndex<0)continue;
+    lowCount++;
+    const priorTimes=completedIntervals
+      .filter(g=>g.endIndex<=lastHighIndex&&g.houses>=lowCount&&Number.isFinite(g.minutes))
+      .map(g=>g.minutes).sort((x,y)=>x-y);
+    if(priorTimes.length<3)continue;
+    const elapsed=Math.max(0,(Number(rounds[i].ts)-Number(rounds[lastHighIndex].ts))/60000);
+    const median=priorTimes[Math.floor((priorTimes.length-1)/2)];
+    if(elapsed>=median){
+      timeSignals++;
+      if(isHigh(values[i+1]))timeHits++;
+    }
+  }
+  const timeMisses=timeSignals-timeHits;
   const tail=values.slice(-2);
   const mirrorForming=tail.length>=1&&isHigh(tail[tail.length-1]);
   const chessForming=tail.length===2&&isHigh(tail[0])&&!isHigh(tail[1]);
@@ -1358,6 +1386,7 @@ function renderTimingRepeatPatterns(rounds){
   let validationMessage='Validação histórica sem lookahead: Espelho '+mirrorHits+'/'+mirrorSignals+' acertos ('+mirrorMisses+' falhas); Xadrez '+chessHits+'/'+chessSignals+' acertos ('+chessMisses+' falhas). ';
   validationMessage+='Por casa: '+houseHits+'/'+houseSignals+' acertos ('+houseMisses+' falhas) ao conferir a rodada seguinte após casas abaixo de 10x.';
   if(strongestHouse)validationMessage+=' Entre posições com pelo menos 5 sinais, a maior taxa observada foi na '+strongestHouse[0]+'ª casa ('+timingPct(strongestHouse[1].hits,strongestHouse[1].signals)+', '+strongestHouse[1].hits+'/'+strongestHouse[1].signals+').';
+  validationMessage+=' Tempo: '+timeHits+'/'+timeSignals+' acertos ('+timeMisses+' falhas) quando o tempo decorrido atingiu a mediana histórica de intervalos comparáveis, calculada apenas com intervalos anteriores. ';
   validationMessage+=' Cada sinal é avaliado apenas quando há uma rodada seguinte para conferir.';
   alertParts.push(validationMessage);
   if(highs.length<2){
