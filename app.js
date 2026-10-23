@@ -1389,6 +1389,7 @@ function renderTimingAnalysis(){
   renderTimingRadar(rounds);
   renderMinuteEndingRadar(rounds);
   renderTimingRepeatPatterns(rounds);
+  enableTimingTableSorting();
   const total=values.length,above10=values.filter(v=>v>=10),above50=values.filter(v=>v>=50),above100=values.filter(v=>v>=100);
   const pink=values.filter(v=>v>=10&&v<100);
   const avg=timingMean(values),pinkAvg=timingMean(pink);
