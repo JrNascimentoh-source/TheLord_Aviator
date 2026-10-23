@@ -864,7 +864,9 @@ const colorMeta={
   fire:{cls:'fire',label:'Fogo'}
 };
 function nowTimeStr(d){d=d||new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0')}
-function currentRounds(){return data.roundsByGame[data.activeGame]}
+// Histórico compartilhado em memória, carregado exclusivamente da tabela pública `velas`.
+const sharedRoundsByGame={aviator:[],aviator2:[]};
+function currentRounds(){return sharedRoundsByGame[data.activeGame]||[]}
 function setActiveGame(game){
   data.activeGame=game;
   document.getElementById('gameBtnAviator').classList.toggle('active',game==='aviator');
@@ -904,20 +906,15 @@ async function syncVelas(){
   if(typeof supabaseClient==='undefined'||!supabaseClient){lastSyncOk=false;renderCollectorStatus();return;}
   syncVelasRunning=true;
   try{
-    // A primeira carga busca as últimas 24h. Nas seguintes, reconsulta uma janela
-    // recente sobreposta para também capturar registros inseridos com atraso ou IDs
-    // que não sejam maiores que o último sincronizado.
+    // A primeira carga busca as últimas 24h; depois, uma janela sobreposta atualiza
+    // o cache compartilhado sem depender dos dados privados da conta.
     const since=new Date(Date.now()-(initialVelasLoaded?10*60*1000:ROUND_MAX_AGE_MS)).toISOString();
-    let offset=0;
-    let rows=[];
-    let page=[];
+    let offset=0,rows=[],page=[];
     do{
       const query=supabaseClient.from('velas').select('id,game,value,created_at').gte('created_at',since).order('id',{ascending:true});
       const result=await query.range(offset,offset+VELAS_PAGE_SIZE-1);
       if(result.error||!result.data){lastSyncOk=false;renderCollectorStatus();return;}
-      page=result.data;
-      rows=rows.concat(page);
-      offset+=page.length;
+      page=result.data;rows=rows.concat(page);offset+=page.length;
     }while(page.length===VELAS_PAGE_SIZE);
     lastSyncOk=true;
     let changed=false;
@@ -926,50 +923,42 @@ async function syncVelas(){
       if(game!=='aviator'&&game!=='aviator2')return;
       const t=new Date(r.created_at).getTime();
       if(Number.isFinite(t)&&t>lastVelaTs)lastVelaTs=t;
-      const list=data.roundsByGame[game];
-      if(!list)return;
-      const id='v'+r.id;
-      if(list.some(x=>x.id===id))return;
       const v=Number(r.value);
       if(!Number.isFinite(v)||v<1||v>=1000000||!Number.isFinite(t))return;
-      list.push({id,value:v,color:classifyRound(v).key,ts:t});
-      changed=true;
+      const list=sharedRoundsByGame[game];
+      const id='v'+r.id;
+      const existing=list.findIndex(x=>x.id===id);
+      const entry={id,value:v,color:classifyRound(v).key,ts:t};
+      if(existing>=0){
+        if(list[existing].value!==entry.value||list[existing].ts!==entry.ts){list[existing]=entry;changed=true;}
+      }else{list.push(entry);changed=true;}
     });
     initialVelasLoaded=true;
+    const cutoff=Date.now()-ROUND_MAX_AGE_MS;
+    Object.keys(sharedRoundsByGame).forEach(game=>{
+      const list=sharedRoundsByGame[game];
+      const kept=list.filter(r=>r.ts>=cutoff);
+      if(kept.length!==list.length){sharedRoundsByGame[game]=kept;changed=true;}
+      sharedRoundsByGame[game].sort((a,b)=>a.ts-b.ts);
+    });
     renderCollectorStatus();
-    if(changed){
-      Object.keys(data.roundsByGame).forEach(g=>{
-        data.roundsByGame[g].sort((a,b)=>a.ts-b.ts);
-      });
-      save();renderMonitor();
-    }
-  }catch(e){console.error('Erro ao sincronizar histórico de velas:',e);lastSyncOk=false;renderCollectorStatus();}
+    if(changed){renderMonitor();const timing=document.getElementById('timing');if(timing&&!timing.classList.contains('hidden'))renderTimingAnalysis();}
+  }catch(e){console.error('Erro ao sincronizar histórico compartilhado de velas:',e);lastSyncOk=false;renderCollectorStatus();}
   finally{syncVelasRunning=false;}
 }
 setInterval(syncVelas,3000);
 setInterval(renderCollectorStatus,3000);
 setTimeout(syncVelas,1500);
-function pushRound(entry){
-   const list=currentRounds();
-  list.push(entry);
-
-  save();
-  renderMonitor();
+function pushRound(){
+  showAppNotice('O histórico oficial é compartilhado e vem do coletor central. Rodadas manuais não são adicionadas ao histórico comum.','Histórico compartilhado','info');
 }
 function registerRound(){
   const input=document.getElementById('roundValue');
-  const v=parseFloat((input.value||'').replace(',','.'));
-  if(!v || v<=0){showAppNotice('Informe um multiplicador válido, ex: 2.35','Multiplicador inválido','error');return}
-  pushRound({id:Date.now(),value:v,color:classifyRound(v).key,ts:Date.now()});
-  input.value='';
+  if(input)input.value='';
+  showAppNotice('As rodadas exibidas são sincronizadas automaticamente do histórico compartilhado. O registro manual está desativado para evitar diferenças entre usuários.','Histórico oficial','info');
 }
 function clearRounds(){
-  if(!currentRounds().length){showAppNotice('Não há rodadas registradas.','Histórico vazio','warning');return}
-  showAppConfirm('Limpar todo o histórico de rodadas deste jogo?',()=>{
-    data.roundsByGame[data.activeGame]=[];
-    save();
-    renderMonitor();
-  },'Limpar histórico','Limpar');
+  showAppNotice('O histórico compartilhado não pode ser apagado pela tela de um usuário. Ele é atualizado pelo coletor central.','Histórico protegido','info');
 }
 function timeAgo(ts){
   const diff=Math.max(0,Date.now()-ts);
@@ -1310,7 +1299,7 @@ function renderTimingAnalysis(){
   const game=gameEl.value,windowValue=windowEl.value;
   let rounds=[];
   const games=game==='both'?['aviator','aviator2']:[game==='active'?data.activeGame:game];
-  games.forEach(g=>(data.roundsByGame[g]||[]).forEach(r=>rounds.push({...r,game:g})));
+  games.forEach(g=>(sharedRoundsByGame[g]||[]).forEach(r=>rounds.push({...r,game:g})));
   rounds=rounds.filter(r=>Number.isFinite(Number(r.value))&&Number.isFinite(Number(r.ts)));
   if(windowValue!=='all'){
     const cutoff=Date.now()-Number(windowValue)*60000;
