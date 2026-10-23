@@ -458,16 +458,11 @@
       <div id="timingRepeatTime" class="timing-note">Analisando intervalos de tempo entre resultados ≥10x…</div>
     </div>
   </section>
-  <section class="card">
+  <section class="card timing-minute-combined">
     <div class="title">🕒🔢 Radar dos minutos · velas ≥ 10x</div>
-    <div class="timing-note">Visão combinada: confira quais minutos do relógio concentram mais resultados ≥10x e como se comportam os finais de minuto (0–9). Todas as taxas refletem apenas o histórico selecionado.</div>
-    <div class="timing-subsection-title">🕒 Minutos do relógio com mais resultados ≥10x</div>
-    <div class="timing-table-wrap"><table class="timing-table"><thead><tr><th>Minuto</th><th>≥10x</th><th>Rodadas</th><th>Frequência</th></tr></thead><tbody id="timingMinuteRows"><tr><td colspan="4">Aguardando dados.</td></tr></tbody></table></div>
-    <div class="timing-note">Ordenado pela frequência observada; amostras pequenas podem distorcer a classificação.</div>
-    <div class="timing-subsection-title">🔢 Radar dos finais de minuto</div>
-    <div class="timing-note">Cada rodada é agrupada pelo último dígito do minuto do relógio: por exemplo, 14:37 entra no final 7. As taxas são calculadas sobre as rodadas registradas em cada grupo.</div>
-    <div class="timing-table-wrap"><table class="timing-table timing-ending-table"><thead><tr><th>Final</th><th>≥10x</th><th>Rodadas</th><th>Taxa ≥10x</th><th>Taxa ≥50x</th><th>Taxa ≥100x</th><th>Comparação histórica</th></tr></thead><tbody id="timingMinuteEndingRows"><tr><td colspan="7">Aguardando dados.</td></tr></tbody></table></div>
-    <div id="timingMinuteEndingSummary" class="timing-signal">Aguardando histórico suficiente para comparar os finais de minuto.</div>
+    <div class="timing-note">Minutos do relógio e finais de minuto reunidos em uma única análise e tabela. As taxas representam frequências do histórico selecionado, não previsões garantidas.</div>
+    <div class="timing-table-wrap"><table class="timing-table timing-ending-table"><thead><tr><th>Tipo</th><th>Minuto / final</th><th>≥10x</th><th>Rodadas</th><th>Taxa ≥10x</th><th>Taxa ≥50x</th><th>Taxa ≥100x</th><th>Comparação histórica</th></tr></thead><tbody id="timingMinuteCombinedRows"><tr><td colspan="8">Aguardando dados.</td></tr></tbody></table></div>
+    <div id="timingMinuteEndingSummary" class="timing-signal">Aguardando histórico suficiente para comparar os minutos e seus finais.</div>
   </section>
   <section class="card timing-radar">
     <div class="title">📊 RADAR ESTATÍSTICO · PROBABILIDADES OBSERVADAS</div>
@@ -612,7 +607,7 @@
   <div class="pr-footer">Relatório gerado automaticamente com base nos registros informados pelo usuário. Não representa garantia de resultados futuros — jogos de aposta envolvem risco.</div>
 </div>
 
-<script src="app.js?v=20261022v" defer></script>
+<script src="app.js?v=20261022w" defer></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
