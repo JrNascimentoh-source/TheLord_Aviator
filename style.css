@@ -836,3 +836,7 @@ body.auth-login #login .login-back{display:none!important}
 
 /* Sub-seções do radar de minutos combinado */
 .timing-subsection-title{margin:18px 0 9px;padding-top:13px;border-top:1px solid rgba(192,132,252,.18);font-size:.88rem;font-weight:850;color:#e9d5ff}
+
+/* Tabela única para minutos do relógio e finais de minuto */
+.timing-minute-combined .timing-table{min-width:760px}
+.timing-minute-combined .timing-table th,.timing-minute-combined .timing-table td{padding:8px 6px}
