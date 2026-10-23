@@ -906,12 +906,13 @@ async function syncVelas(){
   if(typeof supabaseClient==='undefined'||!supabaseClient){lastSyncOk=false;renderCollectorStatus();return;}
   syncVelasRunning=true;
   try{
-    // A primeira carga busca as últimas 24h; depois, uma janela sobreposta atualiza
-    // o cache compartilhado sem depender dos dados privados da conta.
-    const since=new Date(Date.now()-(initialVelasLoaded?10*60*1000:ROUND_MAX_AGE_MS)).toISOString();
+    // A primeira carga recupera TODO o histórico compartilhado; depois, consulta
+    // uma janela sobreposta de 10 minutos para incorporar novas rodadas sem perder as antigas.
+    const since=initialVelasLoaded?new Date(Date.now()-10*60*1000).toISOString():null;
     let offset=0,rows=[],page=[];
     do{
-      const query=supabaseClient.from('velas').select('id,game,value,created_at').gte('created_at',since).order('id',{ascending:true});
+      let query=supabaseClient.from('velas').select('id,game,value,created_at').order('id',{ascending:true});
+      if(since) query=query.gte('created_at',since);
       const result=await query.range(offset,offset+VELAS_PAGE_SIZE-1);
       if(result.error||!result.data){lastSyncOk=false;renderCollectorStatus();return;}
       page=result.data;rows=rows.concat(page);offset+=page.length;
@@ -934,11 +935,8 @@ async function syncVelas(){
       }else{list.push(entry);changed=true;}
     });
     initialVelasLoaded=true;
-    const cutoff=Date.now()-ROUND_MAX_AGE_MS;
+    // Não apagar rodadas antigas do cache: o histórico é cumulativo e compartilhado.
     Object.keys(sharedRoundsByGame).forEach(game=>{
-      const list=sharedRoundsByGame[game];
-      const kept=list.filter(r=>r.ts>=cutoff);
-      if(kept.length!==list.length){sharedRoundsByGame[game]=kept;changed=true;}
       sharedRoundsByGame[game].sort((a,b)=>a.ts-b.ts);
     });
     renderCollectorStatus();
