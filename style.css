@@ -833,3 +833,6 @@ body.auth-login #login .login-back{display:none!important}
 .timing-probability-track{height:7px;width:100%;min-width:90px;max-width:150px;overflow:hidden;border-radius:99px;background:rgba(148,163,184,.18)}
 .timing-probability-track span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#16a34a,#4ade80);transition:width .25s ease}
 .timing-probability small,.timing-probability-empty{font-size:.68rem;color:var(--muted,#94a3b8)}
+
+/* Sub-seções do radar de minutos combinado */
+.timing-subsection-title{margin:18px 0 9px;padding-top:13px;border-top:1px solid rgba(192,132,252,.18);font-size:.88rem;font-weight:850;color:#e9d5ff}
