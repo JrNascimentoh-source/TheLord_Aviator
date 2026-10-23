@@ -391,6 +391,13 @@
       <button type="button" class="filter-chip" data-min="1000" onclick="setRoundFilter(1000)">🌟 ≥1000x</button>
     </div>
 
+    <div class="monitor-history-control">
+      <label for="monitorHistoryRange">🕒 Histórico exibido</label>
+      <select id="monitorHistoryRange" onchange="setMonitorHistoryRange(this.value)" aria-label="Selecionar período do histórico">
+        <option value="all">Histórico completo</option>
+        <option value="24h">Últimas 24 horas</option>
+      </select>
+    </div>
     <div class="contagem-row">
       <div class="contagem-left">
         <span class="contagem-label">🔢 Contagem de Casas</span>
@@ -595,7 +602,7 @@
   <div class="pr-footer">Relatório gerado automaticamente com base nos registros informados pelo usuário. Não representa garantia de resultados futuros — jogos de aposta envolvem risco.</div>
 </div>
 
-<script src="app.js?v=20261023fullhistory1" defer></script>
+<script src="app.js?v=20261023historyselector1" defer></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
