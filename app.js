@@ -1349,8 +1349,9 @@ function renderTimingRepeatPatterns(rounds){
       timeStatus='Intervalo atual: '+timingFmt(elapsedMinutes)+' min';
     }
     const pct=x.opportunities?Math.max(0,Math.min(100,x.rate*100)):0;
+    const confidence=x.opportunities<10?'Amostra pequena':x.opportunities<30?'Amostra limitada':'Histórico mais amplo';
     const probability=x.opportunities
-      ?'<div class="timing-probability"><b>'+timingPct(x.hits,x.opportunities)+'</b><div class="timing-probability-track" role="img" aria-label="Taxa histórica observada '+timingPct(x.hits,x.opportunities)+'"><span style="width:'+pct+'%"></span></div><small>taxa histórica</small></div>'
+      ?'<div class="timing-probability"><b>'+timingPct(x.hits,x.opportunities)+'</b><div class="timing-probability-track" role="img" aria-label="Taxa histórica observada '+timingPct(x.hits,x.opportunities)+'"><span style="width:'+pct+'%"></span></div><small>'+confidence+'</small></div>'
       :'<span class="timing-probability-empty">Sem amostra</span>';
     return '<tr'+current+'><td><b>'+x.house+'ª casa'+(x.house===nextHouse?' · próxima':'')+'</b></td><td>'+x.hits+'</td><td>'+x.opportunities+'</td><td>'+probability+'</td><td>'+timeStatus+'</td></tr>';
   }).join('');
@@ -1430,6 +1431,41 @@ function renderTimingAnalysis(){
     if(!total)summary.textContent='Nenhuma rodada disponível para os filtros escolhidos. Confirme que o coletor está conectado e que o histórico aparece na aba Monitor.';
     else summary.innerHTML='<p>Foram analisadas <b>'+total+'</b> rodadas. A frequência observada foi de <b>'+timingPct(above10.length,total)+'</b> para resultados ≥ 10x, <b>'+timingPct(above50.length,total)+'</b> para ≥ 50x e <b>'+timingPct(above100.length,total)+'</b> para ≥ 100x.</p><p>Essas proporções descrevem apenas a amostra selecionada. Não são garantia nem previsão da próxima rodada.</p>';
   }
+}
+function enableTimingTableSorting(){
+  document.querySelectorAll('#timing .timing-table thead th[data-sort]').forEach(th=>{
+    if(th.dataset.sortReady)return;
+    th.dataset.sortReady='1';
+    th.style.cursor='pointer';
+    th.addEventListener('click',()=>{
+      const table=th.closest('table'),tbody=table&&table.tBodies[0];
+      if(!tbody)return;
+      const index=Array.from(th.parentElement.children).indexOf(th);
+      const dir=th.dataset.sortDir==='asc'?'desc':'asc';
+      th.dataset.sortDir=dir;
+      const headers=Array.from(th.parentElement.children);
+      headers.forEach(h=>{if(h!==th)delete h.dataset.sortDir;});
+      const rows=Array.from(tbody.rows).filter(row=>row.cells.length>1);
+      const value=row=>{
+        const cell=row.cells[index];
+        if(!cell)return '';
+        const text=(cell.innerText||cell.textContent||'').trim();
+        if(th.dataset.sort==='number')return Number(text.replace(/[^0-9,.-]/g,'').replace(',','.'))||0;
+        if(th.dataset.sort==='percent'){
+          const m=text.match(/-?\\d+(?:[,.]\\d+)?/);
+          return m?Number(m[0].replace(',','.')):0;
+        }
+        return text.toLocaleLowerCase('pt-BR');
+      };
+      rows.sort((a,b)=>{
+        const av=value(a),bv=value(b);
+        const cmp=typeof av==='number'&&typeof bv==='number'?av-bv:String(av).localeCompare(String(bv),'pt-BR');
+        return dir==='asc'?cmp:-cmp;
+      });
+      rows.forEach(row=>tbody.appendChild(row));
+      th.setAttribute('aria-sort',dir==='asc'?'ascending':'descending');
+    });
+  });
 }
 setInterval(()=>{const p=document.getElementById('timing');if(p&&!p.classList.contains('hidden'))renderTimingAnalysis();},10000);
 
