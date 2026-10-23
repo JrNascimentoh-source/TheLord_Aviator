@@ -1326,6 +1326,24 @@ function renderTimingRepeatPatterns(rounds){
   }
   const mirrorMisses=mirrorSignals-mirrorHits;
   const chessMisses=chessSignals-chessHits;
+  // Walk-forward por casa: em cada rodada abaixo de 10x, registra a posição
+  // atual desde o último ≥10x e confere somente a rodada imediatamente seguinte.
+  const houseBacktest=new Map();
+  let lowsSinceHigh=0;
+  for(let i=0;i<values.length-1;i++){
+    if(isHigh(values[i])){lowsSinceHigh=0;continue;}
+    lowsSinceHigh++;
+    if(lowsSinceHigh>0){
+      const item=houseBacktest.get(lowsSinceHigh)||{signals:0,hits:0};
+      item.signals++;
+      if(isHigh(values[i+1]))item.hits++;
+      houseBacktest.set(lowsSinceHigh,item);
+    }
+  }
+  const houseMisses=[...houseBacktest.values()].reduce((sum,x)=>sum+x.signals-x.hits,0);
+  const houseSignals=[...houseBacktest.values()].reduce((sum,x)=>sum+x.signals,0);
+  const houseHits=[...houseBacktest.values()].reduce((sum,x)=>sum+x.hits,0);
+  const strongestHouse=[...houseBacktest.entries()].filter(([house,x])=>x.signals>=5).sort((a,b)=>(b[1].hits/b[1].signals)-(a[1].hits/a[1].signals)||b[1].signals-a[1].signals)[0];
   const tail=values.slice(-2);
   const mirrorForming=tail.length>=1&&isHigh(tail[tail.length-1]);
   const chessForming=tail.length===2&&isHigh(tail[0])&&!isHigh(tail[1]);
@@ -1337,7 +1355,11 @@ function renderTimingRepeatPatterns(rounds){
     alertParts.push((chessSignals>=30?'Xadrez em formação':'Xadrez: amostra limitada')+' — após ≥10x seguido de <10x, o próximo resultado foi ≥10x em '+timingPct(chessHits,chessSignals)+' dos casos históricos ('+chessHits+' acertos, '+chessMisses+' falhas em '+chessSignals+' sinais).');
   }
   if(!alertParts.length)alertParts.push('Nenhum Espelho ou Xadrez está em formação imediata na sequência final.');
-  alertParts.push('Validação histórica sem lookahead: Espelho '+mirrorHits+'/'+mirrorSignals+' acertos ('+mirrorMisses+' falhas); Xadrez '+chessHits+'/'+chessSignals+' acertos ('+chessMisses+' falhas). Os sinais são avaliados somente quando há uma rodada seguinte para conferir.');
+  let validationMessage='Validação histórica sem lookahead: Espelho '+mirrorHits+'/'+mirrorSignals+' acertos ('+mirrorMisses+' falhas); Xadrez '+chessHits+'/'+chessSignals+' acertos ('+chessMisses+' falhas). ';
+  validationMessage+='Por casa: '+houseHits+'/'+houseSignals+' acertos ('+houseMisses+' falhas) ao conferir a rodada seguinte após casas abaixo de 10x.';
+  if(strongestHouse)validationMessage+=' Entre posições com pelo menos 5 sinais, a maior taxa observada foi na '+strongestHouse[0]+'ª casa ('+timingPct(strongestHouse[1].hits,strongestHouse[1].signals)+', '+strongestHouse[1].hits+'/'+strongestHouse[1].signals+').';
+  validationMessage+=' Cada sinal é avaliado apenas quando há uma rodada seguinte para conferir.';
+  alertParts.push(validationMessage);
   if(highs.length<2){
     summary.textContent='Precisamos de pelo menos 2 resultados ≥10x para calcular a taxa histórica por casa. Encontrados: '+highs.length+'.';
     rowsEl.innerHTML='<tr><td colspan="5">Histórico insuficiente.</td></tr>';
