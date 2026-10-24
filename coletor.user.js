@@ -77,20 +77,44 @@
     // Se não há sobreposição confiável, não envia um lote ambíguo.
     return [];
   }
+  // Watchdog: só considera travamento quando já há histórico visível, a aba está ativa
+  // e nenhuma vela muda por 3 minutos. A fila fica no localStorage antes de qualquer reload.
+  const WATCH_KEY='thelord_collector_watchdog_v1_'+GAME;
+  const STALL_MS=180000, WINDOW_MS=30*60*1000, MAX_RELOADS=2, RELOAD_COOLDOWN=5*60*1000;
+  let lastChangeAt=Date.now();
+  function loadWatch(){try{return JSON.parse(localStorage.getItem(WATCH_KEY)||'{}')||{};}catch(e){return {};}}
+  function saveWatch(v){try{localStorage.setItem(WATCH_KEY,JSON.stringify(v));}catch(e){}}
+  function noteActivity(){lastChangeAt=Date.now();}
   setInterval(()=>{
     const vals=read();
     if(!vals.length){drainQueue();return;}
     show();
-    if(previousValues===null){previousValues=vals.slice(0,30);status('TheLord: coletando ✓ ('+host+')');drainQueue();return;}
+    if(previousValues===null){
+      previousValues=vals.slice(0,30);noteActivity();
+      status('TheLord: coletando ✓ ('+host+')');drainQueue();return;
+    }
     const changed=vals.slice(0,30).join('|')!==previousValues.slice(0,30).join('|');
     if(changed){
       const fresh=findNewValues(vals,previousValues);
       if(fresh.length){enqueue(fresh.slice().reverse());status('TheLord: recuperando '+fresh.length+' vela(s)');}
       else if(vals[0]!==previousValues[0]){enqueue([vals[0]]);}
-      previousValues=vals.slice(0,30);
+      previousValues=vals.slice(0,30);noteActivity();
     }
     drainQueue();
+    if(document.hidden||!navigator.onLine)return;
+    if(Date.now()-lastChangeAt<STALL_MS)return;
+    const now=Date.now(), w=loadWatch();
+    let attempts=Array.isArray(w.attempts)?w.attempts.filter(t=>Number.isFinite(t)&&now-t<WINDOW_MS):[];
+    if(attempts.length>=MAX_RELOADS||(w.lastReload&&now-w.lastReload<RELOAD_COOLDOWN)){
+      status('TheLord: jogo sem novas velas; recuperação automática em espera');
+      return;
+    }
+    // Persistir fila e limite antes de recarregar evita perda e ciclos de reload.
+    saveQueue();
+    attempts.push(now);saveWatch({attempts,lastReload:now});
+    status('TheLord: jogo travado há 3 min — recarregando página…');
+    location.reload();
   },1000);
-  window.addEventListener('online',drainQueue);
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden)drainQueue();});
+  window.addEventListener('online',()=>{noteActivity();drainQueue();});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden){noteActivity();drainQueue();}});
 })();
