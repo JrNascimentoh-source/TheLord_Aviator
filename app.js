@@ -906,7 +906,7 @@ function renderProbabilityCard(){
   const enoughGaps=pattern.gapCount>=5&&Number.isFinite(pattern.gapMedian)&&pattern.gapMedian>0&&Number.isFinite(pattern.lastSimilarTs);
   const sinceLast=enoughGaps?Math.max(0,(now-pattern.lastSimilarTs)/1000):null;
   const countdown=enoughGaps?Math.max(0,pattern.gapMedian-sinceLast):null;
-  let signal='AGUARDAR POSSÍVEL ENTRADA',signalClass='wait';
+  let signal='RADAR',signalClass='wait';
   let detail='O relógio depende do intervalo histórico entre ocorrências do padrão atual, não de um alvo fixo como 2x.';
   if(enoughGaps&&sinceLast!==null){
     if(sinceLast>=pattern.gapP20&&sinceLast<=pattern.gapP80){signal='POSSÍVEL ENTRADA';signalClass='observe';detail='O tempo desde a última ocorrência semelhante está dentro da faixa central dos intervalos históricos. Isso descreve o passado e não garante a próxima rodada.';}
