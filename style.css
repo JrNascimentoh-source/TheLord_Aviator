@@ -907,3 +907,7 @@ body.auth-login #login .login-back{display:none!important}
 .probability-note{margin-top:10px;color:var(--muted);font-size:.63rem;line-height:1.5}
 @media(min-width:520px){.probability-stats{grid-template-columns:repeat(3,minmax(0,1fr))}.probability-stat{flex-direction:column;align-items:flex-start;justify-content:flex-start}.probability-stat strong{text-align:left}}
 @media(max-width:380px){.probability-single{padding:9px}.probability-target-picker{gap:5px}.probability-target-choice{padding:8px 5px}.probability-stat{padding:8px}.probability-stat span{font-size:.62rem}.probability-stat strong{font-size:.68rem}}
+
+
+/* Alvo da análise de velas escolhido automaticamente */
+.probability-auto-target{display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px;margin-bottom:10px;border:1px solid rgba(255,192,31,.28);border-radius:12px;background:rgba(255,192,31,.055);text-align:center}.probability-auto-target span{font-size:.64rem;font-weight:900;letter-spacing:.1em;color:var(--muted)}.probability-auto-target strong{font-size:2rem;line-height:1.1;font-weight:950;color:var(--gold)}.probability-auto-target small{font-size:.68rem;color:var(--muted);line-height:1.4}
