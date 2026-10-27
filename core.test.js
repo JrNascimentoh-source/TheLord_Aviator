@@ -1,5 +1,5 @@
 // Testes simples, sem dependências — só o "assert" do próprio Node.
-// Rodar com: node tests/core.test.js
+// Rodar com: node core.test.js
 //
 // Isso NÃO importa o app.js diretamente (ele mexe direto no HTML da
 // página, então não roda sozinho fora do navegador). Em vez disso,

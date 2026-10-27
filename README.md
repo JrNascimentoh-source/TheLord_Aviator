@@ -37,25 +37,22 @@ O arquivo está dividido em seções com comentários, nesta ordem:
 8. **Navegação entre abas**
 9. **Inicialização**
 
-## Próximos passos possíveis (fora do que dá pra fazer num arquivo local)
+## Serviços e arquivos auxiliares
 
-Esses itens exigem uma decisão ou conta sua — não são algo que dá pra
-resolver só editando o código:
+- `timing-core.js` e `timing.js`: análise e exibição da minutagem.
+- `probability-core.js`: cálculos estatísticos do monitor de velas.
+- `coletor.user.js`: coletor de resultados para uso no navegador.
+- `sw.js` e `manifest.webmanifest`: cache auxiliar e instalação como app.
+- `velas.sql`: definição inicial da tabela compartilhada no Supabase.
 
-- [ ] **Sincronizar entre aparelhos** — precisa de um banco de dados na
-      nuvem (Firebase ou Supabase, ambos têm plano gratuito). Você cria a
-      conta, eu escrevo a integração.
-- [ ] **Endereço fixo na internet** — hospedar em algo como Vercel ou
-      Netlify (grátis), pra acessar de qualquer lugar sem precisar do
-      arquivo local.
-- [ ] **Reescrever em React** — só compensa se for usar as duas coisas
-      acima juntas (banco de dados + hospedagem). Sem isso, o ganho é
-      pequeno pra esse tamanho de projeto.
+A sincronização compartilhada de velas usa Supabase. Os dados de gerenciamento
+pessoal são mantidos separadamente por conta. Login, sincronização e coleta
+remota precisam de conexão e da configuração do serviço.
 
 ## Testes
 
-Em `core.test.js` há testes simples validando a formatação de
-valores em R$ e a matemática da projeção. Pra rodar, precisa ter o
+Em `core.test.js` há testes básicos para formatação em R$, projeção matemática
+e meta de Stop Win. Eles cobrem apenas essas funções auxiliares, não o app inteiro. Pra rodar, precisa ter o
 [Node.js](https://nodejs.org) instalado:
 
 ```

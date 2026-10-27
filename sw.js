@@ -1,4 +1,4 @@
-const CACHE_NAME = 'thelord-aviator-oficial-v21-radar-auto';
+const CACHE_NAME = 'thelord-aviator-oficial-v22-cache-cleanup';
 const APP_SHELL = [
   './',
   './index.html',
@@ -7,9 +7,10 @@ const APP_SHELL = [
   './icon-192.png',
   './icon-512.png',
   './aviator-perspectiva.jpg',
-  './style.css',
-  './desktop.css',
-  './app.js?v=20261027-range-estimates1',
+  './style.css?v=20261027-padrao-atual3',
+  './desktop.css?v=20261022m',
+  './app.js?v=20261027-padrao-atual3',
+  './probability-core.js?v=20261027-combined1',
   './timing-core.js?v=20261026b',
   './timing.js?v=20261026d'
 ];
