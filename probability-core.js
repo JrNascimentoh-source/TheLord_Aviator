@@ -9,7 +9,7 @@ function analyze(input,options={}) {
  const rounds=(Array.isArray(input)?input:[]).filter(r=>r&&Number.isFinite(Number(r.value))&&Number(r.value)>=1&&Number.isFinite(Number(r.ts))&&Number(r.ts)<=now).map(r=>({id:r.id,value:Number(r.value),ts:Number(r.ts)})).sort((a,b)=>a.ts-b.ts);
  const currentRounds=rounds.slice(-size),current=currentRounds.map(r=>category(r.value)),currentLog=currentRounds.map(r=>Math.log(r.value)),matches=[];
  // Busca janelas anteriores semelhantes; cada correspondência contribui com o resultado imediatamente seguinte.
- for(let i=size;i<=rounds.length-size;i++){
+ for(let i=size;i<rounds.length-size;i++){
   const prev=rounds.slice(i-size,i),logs=prev.map(r=>Math.log(r.value)),cats=prev.map(r=>category(r.value));
   let distance=0;
   for(let j=0;j<size;j++){
