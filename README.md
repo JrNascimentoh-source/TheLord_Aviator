@@ -1,6 +1,6 @@
 # TheLord_Aviator | Gestão & Análise
 
-App pessoal de gestão de banca — funciona 100% offline, sem servidor.
+App de gestão de banca e análise de velas, com sincronização via Supabase e suporte offline parcial por Service Worker quando aberto pelo site publicado. O login, a nuvem e a coleta remota dependem de internet e da configuração do Supabase.
 
 ## Estrutura
 
@@ -19,9 +19,7 @@ separado, então:
 
 ## Como usar
 
-Os três arquivos precisam ficar **na mesma pasta**. Dê duplo clique no
-`index.html` pra abrir no navegador — funciona exatamente como o arquivo
-único de antes, sem precisar de internet nem instalar nada.
+No site publicado, abra a URL do GitHub Pages e mantenha a conexão ativa para login, sincronização e coleta remota. O cache offline é auxiliar: a primeira visita precisa de internet. Abrir `index.html` diretamente como arquivo local não habilita Service Worker nem os recursos de nuvem.
 
 ## Organização do app.js
 
@@ -56,10 +54,10 @@ resolver só editando o código:
 
 ## Testes
 
-Em `tests/core.test.js` tem um exemplo simples validando a formatação de
+Em `core.test.js` há testes simples validando a formatação de
 valores em R$ e a matemática da projeção. Pra rodar, precisa ter o
 [Node.js](https://nodejs.org) instalado:
 
 ```
-node tests/core.test.js
+node core.test.js
 ```
