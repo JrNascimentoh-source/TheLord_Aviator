@@ -9,7 +9,7 @@ function analyze(input,options={}) {
  const rounds=(Array.isArray(input)?input:[]).filter(r=>r&&Number.isFinite(Number(r.value))&&Number(r.value)>=1&&Number.isFinite(Number(r.ts))&&Number(r.ts)<=now).map(r=>({id:r.id,value:Number(r.value),ts:Number(r.ts)})).sort((a,b)=>a.ts-b.ts);
  const currentRounds=rounds.slice(-size),current=currentRounds.map(r=>category(r.value)),currentLog=currentRounds.map(r=>Math.log(r.value)),matches=[];
  // Busca janelas anteriores semelhantes; cada correspondência contribui com o resultado imediatamente seguinte.
- for(let i=size;i<rounds.length;i++){
+ for(let i=size;i<=rounds.length-size;i++){
   const prev=rounds.slice(i-size,i),logs=prev.map(r=>Math.log(r.value)),cats=prev.map(r=>category(r.value));
   let distance=0;
   for(let j=0;j<size;j++){
@@ -30,7 +30,7 @@ function analyze(input,options={}) {
  const lastPinkTs=pinkRounds.length?pinkRounds[pinkRounds.length-1].ts:null,roundsSincePink=lastPinkTs===null?rounds.length:rounds.filter(r=>r.ts>lastPinkTs).length;
  const pinkIntervals={count:pinkGaps.length,roseCount:pinkRounds.length,lastTs:lastPinkTs,roundsSinceLast:roundsSincePink,median:quantile(pinkGaps,.5),p20:quantile(pinkGaps,.2),p80:quantile(pinkGaps,.8),mean:pinkGaps.length?pinkGaps.reduce((a,v)=>a+v,0)/pinkGaps.length:null};
  const thresholds={};TARGETS.forEach(target=>{const hits=rounds.filter(r=>r.value>=target),gaps=[];for(let i=1;i<hits.length;i++){const g=(hits[i].ts-hits[i-1].ts)/1000;if(g>0&&Number.isFinite(g))gaps.push(g);}thresholds[target]={target,count:hits.length,rate:rounds.length?hits.length/rounds.length:null,lastTs:hits.length?hits[hits.length-1].ts:null,gapCount:gaps.length,gapMedian:quantile(gaps,.5),gapP20:quantile(gaps,.2),gapP80:quantile(gaps,.8),gapMean:gaps.length?gaps.reduce((a,v)=>a+v,0)/gaps.length:null};});
- const rates={};TARGETS.forEach(t=>{rates[t]?null:null;rates[t]=matches.length?matches.filter(x=>x.value>=t).reduce((s,x)=>s+x.weight,0)/matches.reduce((s,x)=>s+x.weight,0):null;});
+ const rates={};TARGETS.forEach(t=>{rates[t]=matches.length?matches.filter(x=>x.value>=t).reduce((s,x)=>s+x.weight,0)/matches.reduce((s,x)=>s+x.weight,0):null;});
  return {roundCount:rounds.length,pinkIntervals,pattern:{labels:current.map(label),categories:current,matches:next.length,minimum,median,maximum,roseMinimum,roseMedian,roseMaximum,roseMatches:pinkNext.length,rates,lastSimilarTs:occurrences.length?occurrences[occurrences.length-1]:null,gapCount:patternGaps.length,gapMedian:quantile(patternGaps,.5),gapP20:quantile(patternGaps,.2),gapP80:quantile(patternGaps,.8),effectiveSampleSize:matches.length?Math.pow(matches.reduce((s,x)=>s+x.weight,0),2)/matches.reduce((s,x)=>s+x.weight*x.weight,0):0,method:'weighted-log-similarity-quantiles'} ,thresholds};
 }
 root.TheLordProbability={analyze,quantile,TARGETS};
