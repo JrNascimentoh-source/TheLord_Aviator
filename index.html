@@ -616,16 +616,17 @@ document.addEventListener('DOMContentLoaded', function () {
   const password = document.getElementById('loginPassword');
   if (!submit) return;
   submit.addEventListener('click', function () {
-    if (typeof window.doLogin !== 'function') {
+    const loginFn = window.doLogin;
+    if (typeof loginFn !== 'function') {
       const status = document.getElementById('loginStatus');
       if (status) {
-        status.textContent = 'O módulo de login não carregou corretamente. Atualize a página; se continuar, avise o suporte.';
+        status.textContent = 'O código principal do aplicativo não foi carregado. Verifique a conexão e tente novamente.';
         status.className = 'login-status error';
       }
-      console.error('TheLord_Aviator: função doLogin indisponível; verifique o carregamento de app.js.');
+      console.error('TheLord_Aviator: window.doLogin indisponível; o arquivo app.js pode não ter carregado ou contém erro de execução.');
       return;
     }
-    Promise.resolve(window.doLogin()).catch(function (error) {
+    Promise.resolve(loginFn()).catch(function (error) {
       console.error('Falha inesperada no login:', error);
       const status = document.getElementById('loginStatus');
       if (status) {
