@@ -66,7 +66,7 @@
         <button type="button" class="password-toggle" onclick="toggleLoginPassword()" aria-label="Mostrar ou ocultar senha"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></button>
       </div>
     </div>
-    <button id="authSubmitBtn" class="btn auth-submit" type="button" onclick="doLogin()">ENTRAR</button>
+    <button id="authSubmitBtn" class="btn auth-submit" type="button">ENTRAR</button>
     <div id="loginStatus" class="login-status hidden" role="status" aria-live="polite"></div>
     <div id="authForgotRow" class="auth-forgot"><button type="button" onclick="doPasswordReset()">Esqueci minha senha</button></div>
     <div class="login-divider"><span>ou</span></div>
@@ -607,6 +607,43 @@ function switchAuthMode(mode){
   if(password)password.autocomplete=signup?'new-password':'current-password';
   showLoginStatus('','hidden');
 }
+</script>
+<script>
+/* Fallback explícito para que falhas no carregamento do app.js não deixem o botão silencioso. */
+document.addEventListener('DOMContentLoaded', function () {
+  const submit = document.getElementById('authSubmitBtn');
+  const email = document.getElementById('loginEmail');
+  const password = document.getElementById('loginPassword');
+  if (!submit) return;
+  submit.addEventListener('click', function () {
+    if (typeof window.doLogin !== 'function') {
+      const status = document.getElementById('loginStatus');
+      if (status) {
+        status.textContent = 'O módulo de login não carregou corretamente. Atualize a página; se continuar, avise o suporte.';
+        status.className = 'login-status error';
+      }
+      console.error('TheLord_Aviator: função doLogin indisponível; verifique o carregamento de app.js.');
+      return;
+    }
+    Promise.resolve(window.doLogin()).catch(function (error) {
+      console.error('Falha inesperada no login:', error);
+      const status = document.getElementById('loginStatus');
+      if (status) {
+        status.textContent = 'Não foi possível concluir o login. Verifique a conexão e tente novamente.';
+        status.className = 'login-status error';
+      }
+    });
+  });
+  [email, password].forEach(function (field) {
+    if (!field) return;
+    field.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        submit.click();
+      }
+    });
+  });
+});
 </script>
 
 </body>
