@@ -1,4 +1,4 @@
-const CACHE_NAME = 'thelord-aviator-oficial-v9-timing';
+const CACHE_NAME = 'thelord-aviator-oficial-v10-fix';
 const APP_SHELL = [
   './',
   './index.html',
@@ -7,8 +7,11 @@ const APP_SHELL = [
   './icon-192.png',
   './icon-512.png',
   './aviator-perspectiva.jpg',
+  './style.css',
+  './desktop.css',
+  './app.js?v=20261023historyselector1',
   './timing-core.js?v=20261026b',
-  './timing.js?v=20261026c'
+  './timing.js?v=20261026d'
 ];
 
 self.addEventListener('install', event => {
@@ -28,9 +31,14 @@ self.addEventListener('fetch', event => {
   if (new URL(event.request.url).origin !== self.location.origin) return;
   event.respondWith(
     fetch(event.request).then(response => {
+      if (!response || !response.ok || response.type === 'opaque') return response;
       const copy = response.clone();
-      caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+      caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy)).catch(() => {});
       return response;
-    }).catch(() => caches.match(event.request).then(c => c || caches.match('./index.html')))
+    }).catch(() => caches.match(event.request).then(c => {
+      if (c) return c;
+      if (event.request.mode === 'navigate') return caches.match('./index.html');
+      return new Response('', {status: 504, statusText: 'Offline and asset not cached'});
+    }))
   );
 });
