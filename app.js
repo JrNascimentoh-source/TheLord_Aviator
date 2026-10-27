@@ -1556,15 +1556,24 @@ function translateAuthError(msg){
 }
 
 async function doLogin(){
-  if(!supabaseClient){showLoginStatus('Erro: não foi possível carregar o serviço de login. Verifique sua internet e recarregue a página.','error');return}
-  const email=document.getElementById('loginEmail').value.trim();
-  const password=document.getElementById('loginPassword').value;
+  const submit=document.getElementById('authSubmitBtn');
+  if(!supabaseClient){showLoginStatus('O serviço de login ainda está carregando. Verifique a conexão e atualize a página.','error');return}
+  const email=(document.getElementById('loginEmail')?.value||'').trim();
+  const password=document.getElementById('loginPassword')?.value||'';
   if(!email||!password){showLoginStatus('Preencha e-mail e senha.','error');return}
+  if(submit){submit.disabled=true;submit.setAttribute('aria-busy','true')}
   showLoginStatus('Entrando...','info');
-  const {error}=await supabaseClient.auth.signInWithPassword({email,password});
-  if(error){showLoginStatus('Erro: '+translateAuthError(error.message),'error');return}
-  showLoginStatus('Login realizado! Sincronizando seus dados...','ok');
-  setAuthView(true);
+  try{
+    const {error}=await supabaseClient.auth.signInWithPassword({email,password});
+    if(error){showLoginStatus('Erro: '+translateAuthError(error.message),'error');return}
+    showLoginStatus('Login realizado! Sincronizando seus dados...','ok');
+    setAuthView(true);
+  }catch(error){
+    console.error('Falha inesperada no login:',error);
+    showLoginStatus('Não foi possível conectar ao serviço de login. Verifique sua internet e tente novamente.','error');
+  }finally{
+    if(submit){submit.disabled=false;submit.removeAttribute('aria-busy')}
+  }
 }
 
 async function doSignUp(){
