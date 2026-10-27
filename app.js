@@ -881,14 +881,18 @@ function getMonitorRounds(){
   const cutoff=Date.now()-ROUND_MAX_AGE_MS;
   return rounds.filter(r=>r.ts>=cutoff);
 }
+let probabilityTarget=10;
+function setProbabilityTarget(target){
+  const value=Number(target);
+  if(![10,50,100].includes(value))return;
+  probabilityTarget=value;
+  renderProbabilityCard();
+}
 function renderProbabilityCard(){
   const grid=document.getElementById('probabilityGrid');
   const sampleEl=document.getElementById('probabilitySample');
   const gameEl=document.getElementById('probabilityGame');
   if(!grid)return;
-
-  // O card da aba Minutagem sempre usa as últimas 24 horas,
-  // independentemente do período selecionado nos outros gráficos.
   const timingGameEl=document.getElementById('timingGame');
   const selectedGame=timingGameEl?timingGameEl.value:'active';
   const games=selectedGame==='both'?['aviator','aviator2']:[
@@ -904,38 +908,38 @@ function renderProbabilityCard(){
   }));
   rounds.sort((a,b)=>a.ts-b.ts);
   const total=rounds.length;
-  const thresholds=[2,10,50,100,500,1000];
-  const fmtPct=value=>new Intl.NumberFormat('pt-BR',{
-    minimumFractionDigits:2,
-    maximumFractionDigits:4
-  }).format(value*100)+'%';
-
+  const fmtPct=value=>new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:4}).format(value*100)+'%';
+  const fmtX=value=>new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(value)+'x';
   if(sampleEl)sampleEl.textContent=total.toLocaleString('pt-BR')+' rodadas nas últimas 24 horas';
   if(gameEl)gameEl.textContent=games.length>1?'Aviator + Aviator 2':(games[0]==='aviator2'?'Aviator 2':'Aviator');
   if(!total){
     grid.innerHTML='<div class="probability-empty">Ainda não há rodadas válidas nas últimas 24 horas para este filtro.</div>';
     return;
   }
-  grid.innerHTML=thresholds.map(threshold=>{
-    const hits=rounds.reduce((sum,r)=>sum+(r.value>=threshold?1:0),0);
-    const p=hits/total;
-    // Modelo matemático ilustrativo: taxa histórica constante e rodadas independentes.
-    const p10=1-Math.pow(1-p,10);
-    return `<div class="probability-row">
-      <div class="probability-target">≥${threshold.toLocaleString('pt-BR')}x</div>
-      <div class="probability-metric">
-        <span class="probability-value">${fmtPct(p)}</span>
-        <span class="probability-caption">frequência por rodada</span>
-      </div>
-      <div class="probability-metric">
-        <span class="probability-value">${fmtPct(p10)}</span>
-        <span class="probability-caption">ao menos 1 em 10*</span>
-      </div>
-      <div class="probability-count">${hits.toLocaleString('pt-BR')} ocorrências em ${total.toLocaleString('pt-BR')} rodadas</div>
-    </div>`;
-  }).join('');
+  const pink=rounds.filter(r=>r.value>=10);
+  const pinkAverage=pink.length?pink.reduce((sum,r)=>sum+r.value,0)/pink.length:0;
+  const hits=rounds.filter(r=>r.value>=probabilityTarget);
+  const p=hits.length/total;
+  const hitIndexes=rounds.map((r,i)=>r.value>=probabilityTarget?i:-1).filter(i=>i>=0);
+  const gaps=[];
+  for(let i=1;i<hitIndexes.length;i++)gaps.push(hitIndexes[i]-hitIndexes[i-1]);
+  const avgGap=gaps.length?gaps.reduce((sum,g)=>sum+g,0)/gaps.length:null;
+  const sinceLast=hitIndexes.length?total-1-hitIndexes[hitIndexes.length-1]:null;
+  const targetButtons=[10,50,100].map(t=>'<button type="button" class="probability-target-choice'+(t===probabilityTarget?' active':'')+'" aria-pressed="'+(t===probabilityTarget?'true':'false')+'" onclick="setProbabilityTarget('+t+')">'+t+'x</button>').join('');
+  grid.innerHTML=`<div class="probability-single">
+    <div class="probability-target-picker" aria-label="Escolher multiplicador para análise">${targetButtons}</div>
+    <div class="probability-single-main">
+      <div class="probability-big-number">${fmtPct(p)}</div>
+      <div class="probability-main-label">Frequência histórica de ≥${probabilityTarget}x por rodada</div>
+      <div class="probability-main-detail">${hits.length.toLocaleString('pt-BR')} ocorrências em ${total.toLocaleString('pt-BR')} rodadas nas últimas 24h</div>
+    </div>
+    <div class="probability-stats">
+      <div class="probability-stat"><span>Média entre ocorrências ≥${probabilityTarget}x</span><strong>${avgGap===null?'Amostra insuficiente':Math.round(avgGap).toLocaleString('pt-BR')+' rodadas'}</strong></div>
+      <div class="probability-stat"><span>Desde a última ≥${probabilityTarget}x</span><strong>${sinceLast===null?'Nenhuma ocorrência':sinceLast.toLocaleString('pt-BR')+' rodadas'}</strong></div>
+      <div class="probability-stat"><span>Média das velas rosa (≥10x)</span><strong>${pink.length?fmtX(pinkAverage):'Sem ocorrências'}</strong></div>
+    </div>
+  </div>`;
 }
-
 function setActiveGame(game){
   data.activeGame=game;
   document.getElementById('gameBtnAviator').classList.toggle('active',game==='aviator');
