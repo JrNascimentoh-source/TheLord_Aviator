@@ -880,3 +880,26 @@ body.auth-login #login .login-back{display:none!important}
 
 /* Refinos mobile: afastar os rótulos das barras e compactar o gráfico */
 @media(max-width:699px){.timing-column{grid-template-rows:20px 92px 20px;row-gap:2px}.timing-count{padding-bottom:3px}.timing-digit{padding-top:3px}.timing-chart{margin-top:3px;margin-bottom:5px}}
+
+
+/* Card de probabilidade histórica das velas — identidade visual existente */
+.probability-card .title{margin-bottom:7px}
+.probability-subtitle{font-size:.7rem;color:var(--muted);line-height:1.5;margin-bottom:15px}
+.probability-subtitle strong{color:var(--gold)}
+.probability-table-head,.probability-row{display:grid;grid-template-columns:minmax(70px,.75fr) minmax(90px,1fr) minmax(100px,1fr);gap:8px;align-items:center}
+.probability-table-head{padding:0 10px 8px;color:var(--muted);font-size:.58rem;font-weight:900;text-transform:uppercase;line-height:1.35}
+.probability-row{padding:11px 10px;border:1px solid rgba(255,255,255,.075);border-radius:12px;background:rgba(255,255,255,.025);margin-bottom:7px}
+.probability-target{color:var(--gold);font-size:.82rem;font-weight:950;white-space:nowrap}
+.probability-metric{display:flex;flex-direction:column;gap:3px;min-width:0}
+.probability-value{font-size:.88rem;font-weight:950;color:var(--green);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.probability-caption{font-size:.58rem;color:var(--muted);line-height:1.25}
+.probability-count{grid-column:1/-1;color:rgba(228,196,131,.78);font-size:.61rem;padding-top:1px}
+.probability-empty{padding:14px 10px;border:1px dashed rgba(255,255,255,.13);border-radius:12px;text-align:center;color:var(--muted);font-size:.7rem;line-height:1.45}
+.probability-note{margin-top:10px;color:var(--muted);font-size:.63rem;line-height:1.5}
+@media(max-width:380px){
+  .probability-table-head,.probability-row{grid-template-columns:minmax(58px,.65fr) minmax(82px,1fr) minmax(90px,1fr);gap:5px}
+  .probability-table-head{font-size:.52rem;padding-left:6px;padding-right:6px}
+  .probability-row{padding:10px 6px}
+  .probability-value{font-size:.79rem}
+  .probability-target{font-size:.75rem}
+}
