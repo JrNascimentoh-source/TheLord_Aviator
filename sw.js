@@ -1,4 +1,4 @@
-const CACHE_NAME = 'thelord-aviator-oficial-v11-distribution';
+const CACHE_NAME = 'thelord-aviator-oficial-v12-timing-selectors';
 const APP_SHELL = [
   './',
   './index.html',
