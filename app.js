@@ -886,38 +886,52 @@ function renderProbabilityCard(){
   const sampleEl=document.getElementById('probabilitySample');
   const gameEl=document.getElementById('probabilityGame');
   if(!grid)return;
-  // Usa o histórico compartilhado completo do jogo selecionado, sem aplicar
-  // o filtro visual de rodadas nem o seletor de 24 horas do monitor.
-  const rounds=currentRounds().filter(r=>Number.isFinite(Number(r.value)));
+
+  // O card da aba Minutagem sempre usa as últimas 24 horas,
+  // independentemente do período selecionado nos outros gráficos.
+  const timingGameEl=document.getElementById('timingGame');
+  const selectedGame=timingGameEl?timingGameEl.value:'active';
+  const games=selectedGame==='both'?['aviator','aviator2']:[
+    selectedGame==='active'?data.activeGame:selectedGame
+  ];
+  const cutoff=Date.now()-24*60*60*1000;
+  const rounds=[];
+  games.forEach(game=>(sharedRoundsByGame[game]||[]).forEach(round=>{
+    const value=Number(round.value),ts=Number(round.ts);
+    if(Number.isFinite(value)&&value>=1&&Number.isFinite(ts)&&ts>=cutoff){
+      rounds.push({value,ts,game});
+    }
+  }));
+  rounds.sort((a,b)=>a.ts-b.ts);
   const total=rounds.length;
   const thresholds=[2,10,50,100,500,1000];
   const fmtPct=value=>new Intl.NumberFormat('pt-BR',{
     minimumFractionDigits:2,
     maximumFractionDigits:4
   }).format(value*100)+'%';
-  if(sampleEl)sampleEl.textContent=total.toLocaleString('pt-BR')+' rodadas no histórico completo';
-  if(gameEl)gameEl.textContent=data.activeGame==='aviator2'?'Aviator 2':'Aviator';
+
+  if(sampleEl)sampleEl.textContent=total.toLocaleString('pt-BR')+' rodadas nas últimas 24 horas';
+  if(gameEl)gameEl.textContent=games.length>1?'Aviator + Aviator 2':(games[0]==='aviator2'?'Aviator 2':'Aviator');
   if(!total){
-    grid.innerHTML='<div class="probability-empty">Aguardando rodadas compartilhadas para calcular as frequências.</div>';
+    grid.innerHTML='<div class="probability-empty">Ainda não há rodadas válidas nas últimas 24 horas para este filtro.</div>';
     return;
   }
   grid.innerHTML=thresholds.map(threshold=>{
-    const hits=rounds.reduce((sum,r)=>sum+(Number(r.value)>=threshold?1:0),0);
+    const hits=rounds.reduce((sum,r)=>sum+(r.value>=threshold?1:0),0);
     const p=hits/total;
-    // Probabilidade de pelo menos uma ocorrência em 10 tentativas,
-    // sob a hipótese matemática de taxa constante e rodadas independentes.
+    // Modelo matemático ilustrativo: taxa histórica constante e rodadas independentes.
     const p10=1-Math.pow(1-p,10);
     return `<div class="probability-row">
       <div class="probability-target">≥${threshold.toLocaleString('pt-BR')}x</div>
       <div class="probability-metric">
         <span class="probability-value">${fmtPct(p)}</span>
-        <span class="probability-caption">por rodada</span>
+        <span class="probability-caption">frequência por rodada</span>
       </div>
       <div class="probability-metric">
         <span class="probability-value">${fmtPct(p10)}</span>
-        <span class="probability-caption">ao menos 1 em 10</span>
+        <span class="probability-caption">ao menos 1 em 10*</span>
       </div>
-      <div class="probability-count">${hits.toLocaleString('pt-BR')} de ${total.toLocaleString('pt-BR')} rodadas</div>
+      <div class="probability-count">${hits.toLocaleString('pt-BR')} ocorrências em ${total.toLocaleString('pt-BR')} rodadas</div>
     </div>`;
   }).join('');
 }
@@ -1145,7 +1159,6 @@ function renderMonitor(){
     if(pctEl) pctEl.textContent=p+'%';
     if(cntEl) cntEl.textContent=counts[k];
   });
-  renderProbabilityCard();
 }
 function toggleDistribution(){
   const panel=document.getElementById('distributionPanel');
@@ -1362,6 +1375,7 @@ function renderTimingAnalysis(){
     rounds=rounds.filter(r=>r.ts>=cutoff);
   }
   rounds.sort((a,b)=>a.ts-b.ts);
+  renderProbabilityCard();
   const values=rounds.map(r=>Number(r.value));
   renderTimingRadar(rounds);
   renderMinuteEndingRadar(rounds);
