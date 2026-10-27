@@ -1555,7 +1555,7 @@ function translateAuthError(msg){
   return map[msg]||msg;
 }
 
-async function doLogin(){
+window.doLogin = async function doLogin(){
   const submit=document.getElementById('authSubmitBtn');
   if(!supabaseClient){showLoginStatus('O serviço de login ainda está carregando. Verifique a conexão e atualize a página.','error');return}
   const email=(document.getElementById('loginEmail')?.value||'').trim();
@@ -1576,7 +1576,7 @@ async function doLogin(){
   }
 }
 
-async function doSignUp(){
+window.doSignUp = async function doSignUp(){
   if(!supabaseClient){showLoginStatus('Erro: não foi possível carregar o serviço de login. Verifique sua internet e recarregue a página.','error');return}
   const name=(document.getElementById('loginName')?.value||'').trim();
   const email=document.getElementById('loginEmail').value.trim();
@@ -1595,14 +1595,14 @@ async function doSignUp(){
   }
 }
 
-async function doGoogleLogin(){
+window.doGoogleLogin = async function doGoogleLogin(){
   if(!supabaseClient){showLoginStatus('Erro: não foi possível carregar o serviço de login. Verifique sua internet e recarregue a página.','error');return}
   showLoginStatus('Abrindo login do Google...','info');
   const {error}=await supabaseClient.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.origin+window.location.pathname}});
   if(error) showLoginStatus('Erro: '+translateAuthError(error.message),'error');
 }
 
-async function doPasswordReset(){
+window.doPasswordReset = async function doPasswordReset(){
   if(!supabaseClient){showLoginStatus('Erro: não foi possível carregar o serviço de login. Verifique sua internet e recarregue a página.','error');return}
   const email=document.getElementById('loginEmail').value.trim();
   if(!email){showLoginStatus('Digite seu e-mail no campo acima primeiro.','error');return}
@@ -1612,7 +1612,7 @@ async function doPasswordReset(){
   showLoginStatus('E-mail de recuperação enviado! Confira sua caixa de entrada.','ok');
 }
 
-async function doLogout(){
+window.doLogout = async function doLogout(){
   showAppConfirm('Deseja sair da sua conta? Seus dados continuam salvos na nuvem.',async()=>{
     if(supabaseClient){
       const {error}=await supabaseClient.auth.signOut();
