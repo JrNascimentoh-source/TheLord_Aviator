@@ -12,7 +12,8 @@ function timingFormatMultiplier(value){const n=Number(value);return Number.isFin
 function timingSetText(id,value){const el=document.getElementById(id);if(el)el.textContent=value;}
 function renderTiming(){
   const chart=document.getElementById('timingChart');
-  if(!chart||!window.TheLordTiming||typeof currentRounds!=='function')return;
+  if(!window.TheLordTiming||typeof currentRounds!=='function')return;
+  if(!chart){renderAdvancedTiming();return;}
   const a=window.TheLordTiming.analyze(currentRounds(),timingOptions);
   const tier=timingOptions.minimum===2?'roxas+':timingOptions.minimum===500?'hot':'rosas+';
   timingSetText('timingGame',data.activeGame==='aviator2'?'Aviator 2':'Aviator');timingSetText('timingClock',nowTimeStr());
