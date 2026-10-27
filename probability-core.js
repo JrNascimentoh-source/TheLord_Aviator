@@ -44,7 +44,6 @@ function analyze(input,options={}) {
  let gapSincePink=0;
  for(let i=0;i<history.length;i++){
    const r=history[i];
-   if(r.value>=10)gapSincePink=0;else gapSincePink++;
    if(i>=size){
      const prior=history.slice(i-size,i).map(x=>colorCode(x.value)).join('');
      if(prior===colorSeq)TARGETS.forEach(t=>{sequenceCounts[t].n++;if(r.value>=t)sequenceCounts[t].hits++;});
@@ -54,6 +53,7 @@ function analyze(input,options={}) {
      if(!gapCounts[t][bucket])gapCounts[t][bucket]={n:0,hits:0};
      gapCounts[t][bucket].n++;if(r.value>=t)gapCounts[t][bucket].hits++;
    });
+   if(r.value>=10)gapSincePink=0;else gapSincePink++;
  }
  const roundsSincePinkNow=(()=>{let g=0;for(let i=history.length-1;i>=0;i--){if(history[i].value>=10)break;g++;}return g;})();
  const gapBucketNow=roundsSincePinkNow<=5?'1-5':roundsSincePinkNow<=10?'6-10':roundsSincePinkNow<=20?'11-20':roundsSincePinkNow<=50?'21-50':'51+';
