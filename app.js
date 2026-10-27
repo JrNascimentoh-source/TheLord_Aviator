@@ -881,6 +881,47 @@ function getMonitorRounds(){
   const cutoff=Date.now()-ROUND_MAX_AGE_MS;
   return rounds.filter(r=>r.ts>=cutoff);
 }
+function renderProbabilityCard(){
+  const grid=document.getElementById('probabilityGrid');
+  const sampleEl=document.getElementById('probabilitySample');
+  const gameEl=document.getElementById('probabilityGame');
+  if(!grid)return;
+  // Usa o histórico compartilhado completo do jogo selecionado, sem aplicar
+  // o filtro visual de rodadas nem o seletor de 24 horas do monitor.
+  const rounds=currentRounds().filter(r=>Number.isFinite(Number(r.value)));
+  const total=rounds.length;
+  const thresholds=[2,10,50,100,500,1000];
+  const fmtPct=value=>new Intl.NumberFormat('pt-BR',{
+    minimumFractionDigits:2,
+    maximumFractionDigits:4
+  }).format(value*100)+'%';
+  if(sampleEl)sampleEl.textContent=total.toLocaleString('pt-BR')+' rodadas no histórico completo';
+  if(gameEl)gameEl.textContent=data.activeGame==='aviator2'?'Aviator 2':'Aviator';
+  if(!total){
+    grid.innerHTML='<div class="probability-empty">Aguardando rodadas compartilhadas para calcular as frequências.</div>';
+    return;
+  }
+  grid.innerHTML=thresholds.map(threshold=>{
+    const hits=rounds.reduce((sum,r)=>sum+(Number(r.value)>=threshold?1:0),0);
+    const p=hits/total;
+    // Probabilidade de pelo menos uma ocorrência em 10 tentativas,
+    // sob a hipótese matemática de taxa constante e rodadas independentes.
+    const p10=1-Math.pow(1-p,10);
+    return `<div class="probability-row">
+      <div class="probability-target">≥${threshold.toLocaleString('pt-BR')}x</div>
+      <div class="probability-metric">
+        <span class="probability-value">${fmtPct(p)}</span>
+        <span class="probability-caption">por rodada</span>
+      </div>
+      <div class="probability-metric">
+        <span class="probability-value">${fmtPct(p10)}</span>
+        <span class="probability-caption">ao menos 1 em 10</span>
+      </div>
+      <div class="probability-count">${hits.toLocaleString('pt-BR')} de ${total.toLocaleString('pt-BR')} rodadas</div>
+    </div>`;
+  }).join('');
+}
+
 function setActiveGame(game){
   data.activeGame=game;
   document.getElementById('gameBtnAviator').classList.toggle('active',game==='aviator');
@@ -1104,6 +1145,7 @@ function renderMonitor(){
     if(pctEl) pctEl.textContent=p+'%';
     if(cntEl) cntEl.textContent=counts[k];
   });
+  renderProbabilityCard();
 }
 function toggleDistribution(){
   const panel=document.getElementById('distributionPanel');
