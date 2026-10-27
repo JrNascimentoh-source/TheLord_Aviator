@@ -37,30 +37,35 @@ function analyze(input,options={}) {
  const colorSeq=currentRounds.map(r=>colorCode(r.value)).join('');
  const history=rounds.slice(0,Math.max(0,rounds.length-size));
  const baseRates={},recentRates={},sequenceRates={},gapRates={},combinedRates={},signalDetails={};
+ const recent=history.slice(-300);
+ const recentHitCounts={};TARGETS.forEach(t=>{recentHitCounts[t]=recent.filter(r=>r.value>=t).length;});
+ const sequenceCounts={};TARGETS.forEach(t=>sequenceCounts[t]={n:0,hits:0});
+ const gapCounts={};TARGETS.forEach(t=>gapCounts[t]={});
+ let gapSincePink=0;
+ for(let i=0;i<history.length;i++){
+   const r=history[i];
+   if(r.value>=10)gapSincePink=0;else gapSincePink++;
+   if(i>=size){
+     const prior=history.slice(i-size,i).map(x=>colorCode(x.value)).join('');
+     if(prior===colorSeq)TARGETS.forEach(t=>{sequenceCounts[t].n++;if(r.value>=t)sequenceCounts[t].hits++;});
+   }
+   const bucket=gapSincePink<=5?'1-5':gapSincePink<=10?'6-10':gapSincePink<=20?'11-20':gapSincePink<=50?'21-50':'51+';
+   TARGETS.forEach(t=>{
+     if(!gapCounts[t][bucket])gapCounts[t][bucket]={n:0,hits:0};
+     gapCounts[t][bucket].n++;if(r.value>=t)gapCounts[t][bucket].hits++;
+   });
+ }
+ const roundsSincePinkNow=(()=>{let g=0;for(let i=history.length-1;i>=0;i--){if(history[i].value>=10)break;g++;}return g;})();
+ const gapBucketNow=roundsSincePinkNow<=5?'1-5':roundsSincePinkNow<=10?'6-10':roundsSincePinkNow<=20?'11-20':roundsSincePinkNow<=50?'21-50':'51+';
  TARGETS.forEach(target=>{
-   const hit=r=>r.value>=target?1:0;
-   const baseN=history.length,baseHits=history.reduce((s,r)=>s+hit(r),0),base=baseN?baseHits/baseN:null;
-   const recent=history.slice(-300),recentRate=recent.length?recent.reduce((s,r)=>s+hit(r),0)/recent.length:null;
-   let seqN=0,seqHits=0;
-   for(let i=size;i<history.length;i++){
-     const prior=history.slice(i-size,i).map(r=>colorCode(r.value)).join('');
-     if(prior===colorSeq){seqN++;seqHits+=hit(history[i]);}
-   }
-   const seq=base===null?null:(seqHits+base*20)/(seqN+20);
-   let roundsSincePink=0;
-   for(let i=history.length-1;i>=0;i--){if(history[i].value>=10)break;roundsSincePink++;}
-   const gapBucket=roundsSincePink<=5?'1-5':roundsSincePink<=10?'6-10':roundsSincePink<=20?'11-20':roundsSincePink<=50?'21-50':'51+';
-   let gapN=0,gapHits=0;
-   for(let i=1;i<history.length;i++){
-     let g=0;for(let j=i-1;j>=0;j--){g++;if(history[j].value>=10)break;}
-     const b=g<=5?'1-5':g<=10?'6-10':g<=20?'11-20':g<=50?'21-50':'51+';
-     if(b===gapBucket){gapN++;gapHits+=hit(history[i]);}
-   }
-   const gap=base===null?null:(gapHits+base*20)/(gapN+20);
+   const baseN=history.length,baseHits=history.reduce((s,r)=>s+(r.value>=target?1:0),0),base=baseN?baseHits/baseN:null;
+   const recentRate=recent.length?recentHitCounts[target]/recent.length:null;
+   const sc=sequenceCounts[target],seq=base===null?null:(sc.hits+base*20)/(sc.n+20);
+   const gc=gapCounts[target][gapBucketNow]||{n:0,hits:0},gap=base===null?null:(gc.hits+base*20)/(gc.n+20);
    const recentBlend=base===null||recentRate===null?base:base+.25*(recentRate-base);
    const combined=base===null?null:Math.max(0,Math.min(1,base+.20*(seq-base)+.15*(gap-base)+(recentBlend-base)));
    baseRates[target]=base;recentRates[target]=recentRate;sequenceRates[target]=seq;gapRates[target]=gap;combinedRates[target]=combined;
-   signalDetails[target]={baseline:base,recent:recentRate,sequence:seq,gap:gap,combined,sequenceSamples:seqN,gapSamples:gapN};
+   signalDetails[target]={baseline:base,recent:recentRate,sequence:seq,gap:gap,combined,sequenceSamples:sc.n,gapSamples:gc.n};
  });
  const lastPink=history.reduce((last,r,i)=>r.value>=10?i:last,-1);
  const roundsSincePink=lastPink<0?history.length:history.length-1-lastPink;
