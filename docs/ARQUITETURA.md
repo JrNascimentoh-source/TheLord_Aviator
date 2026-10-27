@@ -21,7 +21,7 @@ Scripts inline posteriores em `index.html` registram o Service Worker, alternam 
 - `timing.js`: renderização da aba Minutagem.
 - `probability-core.js`: análise estatística do histórico; resultados são descritivos e não garantem nem preveem a próxima rodada.
 - `sw.js`: cache de arquivos locais para suporte offline parcial.
-- `coletor.user.js`: coletor separado no navegador; atualmente declara `GAME = 'aviator'`.
+- `coletor.user.js`: coletor separado no navegador; atualmente declara `GAME = 'aviator'`. A fila local mantém o horário de detecção e envia `created_at` junto da rodada, para que pendências enviadas após uma falha de conexão não sejam registradas como se tivessem ocorrido no momento da reconexão. Isso registra o horário de detecção pelo coletor, não um horário oficial fornecido pelo servidor do jogo.
 - `core.test.js`: testes Node dos núcleos estatísticos e de alguns cálculos auxiliares.
 
 ## Dados pessoais versus dados compartilhados
