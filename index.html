@@ -13,7 +13,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#070509">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="style.css?v=20261022i">
+<link rel="stylesheet" href="style.css?v=20261027-prob1">
 <link rel="stylesheet" href="desktop.css?v=20261022m">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 </head>
@@ -365,6 +365,20 @@
         </div>
       </div>
     </div>
+  </section>
+
+  <section class="card probability-card" id="probabilityCard">
+    <div class="title">📈 Probabilidade histórica das velas</div>
+    <div class="probability-subtitle">Jogo: <strong id="probabilityGame">Aviator</strong> · <span id="probabilitySample">Carregando histórico...</span></div>
+    <div class="probability-table-head" aria-hidden="true">
+      <span>Multiplicador</span>
+      <span>Frequência por rodada</span>
+      <span>Ao menos 1 em 10</span>
+    </div>
+    <div id="probabilityGrid" class="probability-grid" aria-live="polite">
+      <div class="probability-empty">Carregando histórico compartilhado...</div>
+    </div>
+    <div class="probability-note">Estimativas calculadas a partir do histórico completo compartilhado. O cálculo para 10 rodadas supõe uma taxa constante e rodadas independentes; não prevê nem garante o próximo resultado.</div>
   </section>
 
   <section class="card">
