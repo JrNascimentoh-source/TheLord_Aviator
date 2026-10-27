@@ -889,6 +889,16 @@ function renderProbabilityCard(){
   const now=Date.now(),cutoff=now-86400000;
   const allRounds=(sharedRoundsByGame[game]||[]).filter(r=>Number.isFinite(Number(r.value))&&Number(r.value)>=1&&Number.isFinite(Number(r.ts))&&Number(r.ts)<=now).map(r=>({id:r.id,value:Number(r.value),ts:Number(r.ts),game})).sort((a,b)=>a.ts-b.ts);
   const recent=allRounds.filter(r=>r.ts>=cutoff),total=recent.length;
+  const liveStatusEl=document.getElementById('probabilityLiveStatus'),lastUpdateEl=document.getElementById('probabilityLastUpdate');
+  const latestRound=allRounds.length?allRounds[allRounds.length-1]:null;
+  if(liveStatusEl){
+    if(!latestRound) liveStatusEl.textContent='Aguardando a primeira vela compartilhada';
+    else{
+      const ageSeconds=Math.max(0,Math.floor((now-latestRound.ts)/1000));
+      liveStatusEl.textContent=ageSeconds<=120?'Histórico recebendo vela recente':'Sem vela nova recente';
+    }
+  }
+  if(lastUpdateEl) lastUpdateEl.textContent='Última vela: '+(latestRound?new Date(latestRound.ts).toLocaleTimeString('pt-BR'):'—');
   const fmtX=v=>Number.isFinite(v)?new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v)+'x':'—';
   const fmtPct=v=>Number.isFinite(v)?(v*100).toLocaleString('pt-BR',{maximumFractionDigits:1})+'%':'—';
   const fmtDuration=seconds=>{if(!Number.isFinite(seconds)||seconds<0)return '—';const n=Math.round(seconds),h=Math.floor(n/3600),m=Math.floor(n%3600/60),s=n%60;return h>0?String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'):String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');};
