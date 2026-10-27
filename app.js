@@ -1109,6 +1109,11 @@ function toggleContagemCasas(){
   renderMonitor();
 }
 function computeStreakLabels(roundsDesc){
+  // Reutiliza a regra compartilhada com a análise de minutagem.
+  // Mantém fallback para o monitor continuar funcionando se o módulo não carregar.
+  if(window.TheLordTiming&&typeof window.TheLordTiming.streakLabels==='function'){
+    return window.TheLordTiming.streakLabels(roundsDesc);
+  }
   const chronological=[...roundsDesc].reverse();
   let counter=0;
   const labelById={},streakEndById={};
