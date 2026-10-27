@@ -9,9 +9,14 @@ function analyze(input,options={}){const now=Number(options.now)||Date.now(),siz
  for(let i=size;i<rounds.length;i++){const prev=rounds.slice(i-size,i).map(r=>category(r.value));if(prev.every((v,j)=>v===current[j]))matches.push({value:rounds[i].value,ts:rounds[i].ts,patternTs:rounds[i-1].ts});}
  const next=matches.map(x=>x.value),occurrences=matches.map(x=>x.patternTs).filter(Number.isFinite),patternGaps=[];
  for(let i=1;i<occurrences.length;i++){const gap=(occurrences[i]-occurrences[i-1])/1000;if(gap>0&&Number.isFinite(gap))patternGaps.push(gap);}
+ const pinkRounds=rounds.filter(r=>r.value>=10),pinkGaps=[];
+ for(let i=1;i<pinkRounds.length;i++){const gap=(pinkRounds[i].ts-pinkRounds[i-1].ts)/1000;if(gap>0&&Number.isFinite(gap))pinkGaps.push(gap);}
+ const lastPinkTs=pinkRounds.length?pinkRounds[pinkRounds.length-1].ts:null;
+ const roundsSincePink=lastPinkTs===null?rounds.length:rounds.filter(r=>r.ts>lastPinkTs).length;
+ const pinkIntervals={count:pinkGaps.length,roseCount:pinkRounds.length,lastTs:lastPinkTs,roundsSinceLast:roundsSincePink,median:quantile(pinkGaps,.5),p20:quantile(pinkGaps,.2),p80:quantile(pinkGaps,.8),mean:pinkGaps.length?pinkGaps.reduce((a,v)=>a+v,0)/pinkGaps.length:null};
  const thresholds={};TARGETS.forEach(target=>{const hits=rounds.filter(r=>r.value>=target),gaps=[];for(let i=1;i<hits.length;i++){const g=(hits[i].ts-hits[i-1].ts)/1000;if(g>0&&Number.isFinite(g))gaps.push(g);}
  thresholds[target]={target,count:hits.length,rate:rounds.length?hits.length/rounds.length:null,lastTs:hits.length?hits[hits.length-1].ts:null,gapCount:gaps.length,gapMedian:quantile(gaps,.5),gapP20:quantile(gaps,.2),gapP80:quantile(gaps,.8),gapMean:gaps.length?gaps.reduce((a,v)=>a+v,0)/gaps.length:null};});
  const rates={};TARGETS.forEach(t=>{rates[t]=next.length?next.filter(v=>v>=t).length/next.length:null;});
- return {roundCount:rounds.length,pattern:{labels:current.map(label),categories:current,matches:next.length,minimum:next.length>=30?quantile(next,.2):null,maximum:next.length>=30?quantile(next,.8):null,rates,lastSimilarTs:occurrences.length?occurrences[occurrences.length-1]:null,gapCount:patternGaps.length,gapMedian:quantile(patternGaps,.5),gapP20:quantile(patternGaps,.2),gapP80:quantile(patternGaps,.8)},thresholds};}
+ return {roundCount:rounds.length,pinkIntervals,pattern:{labels:current.map(label),categories:current,matches:next.length,minimum:next.length>=30?quantile(next,.2):null,maximum:next.length>=30?quantile(next,.8):null,rates,lastSimilarTs:occurrences.length?occurrences[occurrences.length-1]:null,gapCount:patternGaps.length,gapMedian:quantile(patternGaps,.5),gapP20:quantile(patternGaps,.2),gapP80:quantile(patternGaps,.8)},thresholds};}
 root.TheLordProbability={analyze,quantile,TARGETS};
 })(typeof globalThis==='object'?globalThis:this);
