@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         TheLord Coletor de Velas
-// @version      1.6
+// @version      1.7
 // @description  Coleta velas do Aviator, mantém pendências e recarrega a página a cada 5 minutos
 // @match        *://*/*
 // @match        *://*.spribegaming.com/*
