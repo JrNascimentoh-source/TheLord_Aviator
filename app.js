@@ -927,16 +927,19 @@ function renderProbabilityCard(){
   const gapText=window.TheLordProbability.TARGETS.map(t=>thresholds[t]).filter(Boolean).map(x=>'≥'+x.target+'x: '+(x.gapCount>=3?fmtDuration(x.gapMedian):'amostra curta')).join(' · ');
   const pink=analysis.pinkIntervals||{},pinkGapEnough=pink.count>=5&&Number.isFinite(pink.median),pinkSince=pink.lastTs?Math.max(0,(now-pink.lastTs)/1000):null;
   const pinkText=pinkGapEnough?'Intervalo mediano entre rosas: '+fmtDuration(pink.median)+' · P20: '+fmtDuration(pink.p20)+' · P80: '+fmtDuration(pink.p80)+'. Foram observados '+pink.count.toLocaleString('pt-BR')+' intervalos completos entre rosas.':'Amostra insuficiente entre rosas: '+(pink.count||0).toLocaleString('pt-BR')+' intervalo(s); são necessários pelo menos 5 para resumir a distribuição.';
-  grid.innerHTML=`<div class="probability-single"><div class="probability-range-layout">
-   <div class="probability-range-button minimum"><span>TETO MÍNIMO</span><strong>${minimum===null?'—':fmtX(minimum)}</strong><small>${enoughPattern?'Percentil 20 ponderado após padrões semelhantes':'Aguardando correspondência histórica'}</small></div>
-   <div class="probability-single-main"><div class="probability-signal ${signalClass}">${signal}</div><div class="probability-main-label">REFERÊNCIA DINÂMICA · PADRÃO ATUAL</div><div class="probability-main-detail">${pattern.matches.toLocaleString('pt-BR')} sequências semelhantes no histórico · ${total.toLocaleString('pt-BR')} rodadas nas últimas 24h</div><div class="probability-countdown" style="display:flex;flex-direction:column;align-items:center;gap:3px;margin:8px auto;padding:7px 10px;border:1px solid rgba(255,192,31,.28);border-radius:12px;background:rgba(255,192,31,.07);max-width:180px"><span style="font-size:10px;letter-spacing:.06em;color:#e8c979;font-weight:700">◷ TEMPO ESTIMADO DO PADRÃO</span><strong style="font-size:22px;font-variant-numeric:tabular-nums;color:#ffc01f">${clock}</strong></div><div class="probability-signal-detail">${detail}</div></div>
-   <div class="probability-range-button maximum"><span>TETO MÁXIMO</span><strong>${maximum===null?'—':fmtX(maximum)}</strong><small>${enoughRoseMaximum?'Faixa rosa estimada P20–P80: '+fmtX(roseMinimum)+'–'+fmtX(roseMaximum):'Aguardando rosa após padrão semelhante'}</small></div></div>
-   ${combinedText}
-   <div class="probability-pattern-line"><b>Padrão atual:</b> ${patternLabel} · <b>${pattern.matches.toLocaleString('pt-BR')}</b> sequências semelhantes encontradas no histórico</div><div class="probability-probability-line">${probabilityLine}</div>
-   <div class="probability-stats"><div class="probability-stat"><span>Intervalo mediano entre padrões semelhantes</span><strong>${enoughGaps?fmtDuration(pattern.gapMedian):'Amostra insuficiente'}</strong></div><div class="probability-stat"><span>Tempo desde a última ocorrência do padrão</span><strong>${sinceLast===null?'Amostra insuficiente':fmtDuration(sinceLast)}</strong></div><div class="probability-stat"><span>Frequência geral ≥2x (24h)</span><strong>${fmtPct(recent.length?recent.filter(r=>r.value>=2).length/recent.length:null)}</strong></div></div>
-   <div class="probability-stats"><div class="probability-stat"><span>Intervalos Rosa → Rosa (≥10x)</span><strong>${(pink.count||0).toLocaleString('pt-BR')} intervalos</strong></div><div class="probability-stat"><span>Tempo desde a última rosa</span><strong>${pinkSince===null?'Sem rosa no histórico':fmtDuration(pinkSince)}</strong></div><div class="probability-stat"><span>Rodadas desde a última rosa</span><strong>${pink.roundsSinceLast===undefined?'—':pink.roundsSinceLast.toLocaleString('pt-BR')}</strong></div></div>
-   <div class="probability-main-detail"><b>Análise Rosa → Rosa:</b> ${pinkText} Intervalos são descritivos e não significam que uma rosa esteja atrasada ou mais provável na próxima rodada.</div>
-   <div class="probability-main-detail"><b>Intervalos gerais por nível:</b> ${gapText}. Esses intervalos são apenas descritivos; não representam previsão garantida. O motor usa o histórico disponível deste jogo, mantendo Aviator e Aviator 2 separados.</div></div>`;
+  grid.innerHTML=`<div class="probability-single">
+   <div class="probability-single-main">
+    <div class="probability-signal ${signalClass}">${signal}</div>
+    <div class="probability-main-label">PADRÃO ATUAL</div>
+    <div class="probability-pattern-line">${patternLabel}</div>
+    <div class="probability-main-detail">${pattern.matches.toLocaleString('pt-BR')} sequências semelhantes no histórico · ${total.toLocaleString('pt-BR')} rodadas nas últimas 24h</div>
+    <div class="probability-countdown" style="display:flex;flex-direction:column;align-items:center;gap:3px;margin:8px auto;padding:7px 10px;border:1px solid rgba(255,192,31,.28);border-radius:12px;background:rgba(255,192,31,.07);max-width:180px">
+     <span style="font-size:10px;letter-spacing:.06em;color:#e8c979;font-weight:700">◷ TEMPO ESTIMADO DO PADRÃO</span>
+     <strong style="font-size:22px;font-variant-numeric:tabular-nums;color:#ffc01f">${clock}</strong>
+    </div>
+    <div class="probability-signal-detail">${detail}</div>
+   </div>
+  </div>`;
 }
 function setActiveGame(game){
   data.activeGame=game;
