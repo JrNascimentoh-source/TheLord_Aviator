@@ -1,4 +1,4 @@
-const CACHE_NAME = 'thelord-aviator-oficial-v8-timing';
+const CACHE_NAME = 'thelord-aviator-oficial-v9-timing';
 const APP_SHELL = [
   './',
   './index.html',
@@ -6,7 +6,9 @@ const APP_SHELL = [
   './icon-180.png',
   './icon-192.png',
   './icon-512.png',
-  './aviator-perspectiva.jpg'
+  './aviator-perspectiva.jpg',
+  './timing-core.js?v=20261026b',
+  './timing.js?v=20261026c'
 ];
 
 self.addEventListener('install', event => {
