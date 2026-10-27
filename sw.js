@@ -1,4 +1,4 @@
-const CACHE_NAME = 'thelord-aviator-oficial-v20-range-estimates';
+const CACHE_NAME = 'thelord-aviator-oficial-v21-radar-auto';
 const APP_SHELL = [
   './',
   './index.html',
