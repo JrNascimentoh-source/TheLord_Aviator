@@ -877,3 +877,6 @@ body.auth-login #login .login-back{display:none!important}
 .timing-advanced{padding-bottom:14px}
 @media(max-width:699px){.timing-controls{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:10px 0}.timing-option-group:has(.timing-select){width:100%}.timing-select{max-width:none;width:100%;padding:9px 8px!important}.timing-column{grid-template-rows:16px 92px 18px;gap:1px}.timing-count{font-size:.66rem}.timing-digit{font-size:.7rem}.timing-chart{gap:3px;margin-top:4px;margin-bottom:6px}.timing-advanced .timing-source{margin-bottom:8px}.timing-advanced .timing-note{margin:8px 0;font-size:.72rem;line-height:1.45}}
 @media(min-width:700px){.timing-column{grid-template-rows:18px 150px 20px}.timing-chart{gap:8px}}
+
+/* Refinos mobile: afastar os rótulos das barras e compactar o gráfico */
+@media(max-width:699px){.timing-column{grid-template-rows:20px 92px 20px;row-gap:2px}.timing-count{padding-bottom:3px}.timing-digit{padding-top:3px}.timing-chart{margin-top:3px;margin-bottom:5px}}
