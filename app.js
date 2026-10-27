@@ -892,11 +892,9 @@ function renderProbabilityCard(){
   const liveStatusEl=document.getElementById('probabilityLiveStatus'),lastUpdateEl=document.getElementById('probabilityLastUpdate');
   const latestRound=allRounds.length?allRounds[allRounds.length-1]:null;
   if(liveStatusEl){
-    if(!latestRound) liveStatusEl.textContent='Aguardando a primeira vela compartilhada';
-    else{
-      const ageSeconds=Math.max(0,Math.floor((now-latestRound.ts)/1000));
-      liveStatusEl.textContent=ageSeconds<=120?'Histórico recebendo vela recente':'Sem vela nova recente';
-    }
+    if(velasRealtimeStatus==='SUBSCRIBED') liveStatusEl.textContent='Canal em tempo real conectado';
+    else if(velasRealtimeStatus==='CHANNEL_ERROR'||velasRealtimeStatus==='TIMED_OUT'||velasRealtimeStatus==='CLOSED'||velasRealtimeStatus==='UNAVAILABLE') liveStatusEl.textContent='Consulta periódica ativa · canal ao vivo indisponível';
+    else liveStatusEl.textContent='Conectando canal ao vivo · consulta periódica ativa';
   }
   if(lastUpdateEl) lastUpdateEl.textContent='Última vela: '+(latestRound?new Date(latestRound.ts).toLocaleTimeString('pt-BR'):'—');
   const fmtX=v=>Number.isFinite(v)?new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v)+'x':'—';
@@ -974,6 +972,67 @@ function renderCollectorStatus(){
 const VELAS_PAGE_SIZE=1000;
 let initialVelasLoaded=false;
 let syncVelasRunning=false;
+let velasRealtimeChannel=null;
+let velasRealtimeStatus='CONNECTING';
+let velasRealtimeStarted=false;
+
+function upsertSharedVelaRow(r){
+  if(!r)return false;
+  const game=String(r.game||'').toLowerCase();
+  if(game!=='aviator'&&game!=='aviator2')return false;
+  const t=new Date(r.created_at).getTime(),v=Number(r.value);
+  if(!Number.isFinite(t)||!Number.isFinite(v)||v<1||v>=1000000||r.id===undefined||r.id===null)return false;
+  if(t>lastVelaTs)lastVelaTs=t;
+  const list=sharedRoundsByGame[game],id='v'+r.id;
+  const existing=list.findIndex(x=>x.id===id);
+  const entry={id,value:v,color:classifyRound(v).key,ts:t};
+  if(existing>=0){
+    if(list[existing].value===entry.value&&list[existing].ts===entry.ts)return false;
+    list[existing]=entry;
+  }else list.push(entry);
+  list.sort((a,b)=>a.ts-b.ts);
+  return true;
+}
+
+function onRealtimeVela(payload){
+  const changed=upsertSharedVelaRow(payload&&payload.new);
+  if(!changed)return;
+  lastSyncOk=true;
+  renderCollectorStatus();
+  renderProbabilityCard();
+  renderMonitor();
+  const timing=document.getElementById('timing');
+  if(timing&&!timing.classList.contains('hidden')){
+    if(typeof renderTiming==='function')renderTiming();
+    else renderTimingAnalysis();
+  }
+}
+
+function startVelasRealtime(){
+  if(velasRealtimeStarted||!supabaseClient)return;
+  velasRealtimeStarted=true;
+  if(typeof supabaseClient.channel!=='function'){
+    velasRealtimeStatus='UNAVAILABLE';
+    renderProbabilityCard();
+    return;
+  }
+  try{
+    velasRealtimeChannel=supabaseClient
+      .channel('thelord-velas-live')
+      .on('postgres_changes',{event:'INSERT',schema:'public',table:'velas'},onRealtimeVela)
+      .subscribe(status=>{
+        velasRealtimeStatus=status;
+        renderProbabilityCard();
+        if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
+          console.warn('Canal Realtime de velas indisponível; a consulta periódica continua ativa.',status);
+        }
+      });
+  }catch(e){
+    velasRealtimeStatus='UNAVAILABLE';
+    console.warn('Não foi possível iniciar o canal Realtime de velas; a consulta periódica continua ativa.',e);
+    renderProbabilityCard();
+  }
+}
 async function syncVelas(){
   if(syncVelasRunning)return;
   if(typeof supabaseClient==='undefined'||!supabaseClient){lastSyncOk=false;renderCollectorStatus();const grid=document.getElementById('probabilityGrid');if(grid)grid.innerHTML='<div class="probability-empty">Conexão com o histórico compartilhado indisponível. Verifique se o Supabase terminou de carregar e tente novamente.</div>';return;}
@@ -992,26 +1051,9 @@ async function syncVelas(){
     }while(page.length===VELAS_PAGE_SIZE);
     lastSyncOk=true;
     let changed=false;
-    rows.forEach(r=>{
-      const game=String(r.game||'').toLowerCase();
-      if(game!=='aviator'&&game!=='aviator2')return;
-      const t=new Date(r.created_at).getTime();
-      if(Number.isFinite(t)&&t>lastVelaTs)lastVelaTs=t;
-      const v=Number(r.value);
-      if(!Number.isFinite(v)||v<1||v>=1000000||!Number.isFinite(t))return;
-      const list=sharedRoundsByGame[game];
-      const id='v'+r.id;
-      const existing=list.findIndex(x=>x.id===id);
-      const entry={id,value:v,color:classifyRound(v).key,ts:t};
-      if(existing>=0){
-        if(list[existing].value!==entry.value||list[existing].ts!==entry.ts){list[existing]=entry;changed=true;}
-      }else{list.push(entry);changed=true;}
-    });
+    rows.forEach(r=>{if(upsertSharedVelaRow(r))changed=true;});
     initialVelasLoaded=true;
     // Não apagar rodadas antigas do cache: o histórico é cumulativo e compartilhado.
-    Object.keys(sharedRoundsByGame).forEach(game=>{
-      sharedRoundsByGame[game].sort((a,b)=>a.ts-b.ts);
-    });
     renderCollectorStatus();
     // Atualiza o card mesmo quando a sincronização não trouxe rodadas novas.
     renderProbabilityCard();
@@ -1495,6 +1537,7 @@ function initSupabase(){
   supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{
     auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
   });
+  startVelasRealtime();
   supabaseClient.auth.onAuthStateChange((event,session)=>{
     currentUser=session?session.user:null;
     setAuthView(!!currentUser);
