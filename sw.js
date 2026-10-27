@@ -1,4 +1,4 @@
-const CACHE_NAME = 'thelord-aviator-oficial-v22-cache-cleanup';
+const CACHE_NAME = 'thelord-aviator-oficial-v23-cache-version-fix';
 const APP_SHELL = [
   './',
   './index.html',
@@ -9,7 +9,7 @@ const APP_SHELL = [
   './aviator-perspectiva.jpg',
   './style.css?v=20261027-padrao-atual3',
   './desktop.css?v=20261022m',
-  './app.js?v=20261027-padrao-atual3',
+  './app.js?v=20261027-refactor-streak1',
   './probability-core.js?v=20261027-combined1',
   './timing-core.js?v=20261026b',
   './timing.js?v=20261026d'
