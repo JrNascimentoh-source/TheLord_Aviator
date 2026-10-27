@@ -1012,7 +1012,7 @@ async function syncVelas(){
     // Atualiza o card mesmo quando a sincronização não trouxe rodadas novas.
     renderProbabilityCard();
     if(changed){renderMonitor();const timing=document.getElementById('timing');if(timing&&!timing.classList.contains('hidden')){if(typeof renderTiming==='function')renderTiming();else renderTimingAnalysis();}}
-  }catch(e){console.error('Erro ao sincronizar histórico compartilhado de velas:',e);lastSyncOk=false;renderCollectorStatus();const grid=document.getElementById('probabilityGrid');if(grid)grid.innerHTML='<div class="probability-empty">Falha ao sincronizar o histórico compartilhado. Confira a conexão e recarregue a página.</div>';
+  }catch(e){console.error('Erro ao sincronizar histórico compartilhado de velas:',e);lastSyncOk=false;renderCollectorStatus();const grid=document.getElementById('probabilityGrid');if(grid)grid.innerHTML='<div class="probability-empty">Falha ao sincronizar o histórico compartilhado. Confira a conexão e recarregue a página.</div>';}
   finally{syncVelasRunning=false;}
 }
 setInterval(syncVelas,3000);
