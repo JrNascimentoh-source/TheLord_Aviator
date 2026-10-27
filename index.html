@@ -424,53 +424,41 @@
 </main>
 
 <main id="timing" class="hidden">
-  <section class="card timing-hero">
-    <div class="title">⏱️ MINUTAGEM · ANÁLISE ESTATÍSTICA</div>
-    <div class="timing-intro">Analisa as rodadas disponíveis nesta sessão e atualiza os cálculos enquanto o aplicativo estiver aberto. Nenhuma análise é salva separadamente.</div>
-    <div class="timing-toolbar">
-      <label class="timing-field">Jogo
-        <select id="timingGame" onchange="renderTimingAnalysis()">
-          <option value="active">Jogo selecionado no Monitor</option>
-          <option value="aviator">Aviator</option>
-          <option value="aviator2">Aviator 2</option>
-          <option value="both">Ambos os jogos</option>
-        </select>
-      </label>
-      <label class="timing-field">Período
-        <select id="timingWindow" onchange="renderTimingAnalysis()">
-          <option value="60">Últimos 60 minutos</option>
-          <option value="360">Últimas 6 horas</option>
-          <option value="1440" selected>Últimas 24 horas</option>
-          <option value="all">Todo o histórico disponível</option>
-        </select>
-      </label>
-      <button type="button" class="btn timing-refresh" onclick="renderTimingAnalysis()">↻ Atualizar análise</button>
+  <section class="card">
+    <div class="timing-heading"><div><div class="title">⏱️ Minutagem</div><div class="timing-source">Monitor · <span id="timingGame">Aviator</span></div></div><time class="monitor-clock" id="timingClock">00:00:00</time></div>
+    <div class="projection-scenario-toggle timing-games">
+      <button type="button" class="scenario-btn active" id="timingGameAviator" onclick="setActiveGame('aviator')">✈️ Aviator</button>
+      <button type="button" class="scenario-btn" id="timingGameAviator2" onclick="setActiveGame('aviator2')">✈️ Aviator 2</button>
     </div>
-    <div id="timingUpdated" class="timing-updated">Aguardando histórico de rodadas…</div>
-    <div id="timingStats" class="timing-stats"></div>
+    <div class="timing-segments" role="group" aria-label="Intervalo de análise">
+      <button type="button" class="scenario-btn active" data-timing-option="hours" data-value="1" onclick="setTimingOption('hours',1)">Última hora</button>
+      <button type="button" class="scenario-btn" data-timing-option="hours" data-value="24" onclick="setTimingOption('hours',24)">Últimas 24h</button>
+    </div>
+    <div class="timing-controls">
+      <div class="timing-segments" role="group" aria-label="Tipo de vela">
+        <button type="button" class="scenario-btn" data-timing-option="minimum" data-value="2" onclick="setTimingOption('minimum',2)">Roxa+</button>
+        <button type="button" class="scenario-btn active" data-timing-option="minimum" data-value="10" onclick="setTimingOption('minimum',10)">Rosa+</button>
+        <button type="button" class="scenario-btn" data-timing-option="minimum" data-value="500" onclick="setTimingOption('minimum',500)">Hot ≥500x</button>
+      </div>
+      <div class="timing-segments" role="group" aria-label="Agrupamento de minutos">
+        <button type="button" class="scenario-btn active" data-timing-option="mode" data-value="digit" onclick="setTimingOption('mode','digit')">Dígito final</button>
+        <button type="button" class="scenario-btn" data-timing-option="mode" data-value="minute" onclick="setTimingOption('mode','minute')">Minuto cheio</button>
+      </div>
+    </div>
+    <div class="timing-period-filter"><label for="timingPeriod">Período do dia</label><select id="timingPeriod" class="input" onchange="setTimingOption('period',this.value)"><option value="all">Todos os períodos</option><option>Manhã</option><option>Tarde</option><option>Noite</option></select></div>
+    <div class="timing-stats">
+      <div><b id="timingTotal">0</b><span>Rodadas na amostra</span></div>
+      <div><b id="timingHits">0</b><span id="timingTierLabel">Velas rosas+ (≥10x)</span></div>
+      <div><b id="timingPeak">—</b><span>Minutos em destaque</span></div>
+      <div><b id="timingHouses">0</b><span>Casas desde a última rosa+</span></div>
+    </div>
+    <div id="timingChart" class="timing-chart" role="group" aria-label="Ocorrências por minuto"></div>
+    <p id="timingSummary" class="timing-summary" aria-live="polite">Aguardando velas do Monitor.</p>
+    <p id="timingCoverage" class="timing-coverage">Horário local · Sem amostra</p>
+    <div id="timingDetail" class="timing-detail hidden"><div class="title" id="timingDetailTitle"></div><div id="timingEvents"></div></div>
   </section>
-  <section class="card">
-    <div class="title">🧠 Resumo estatístico</div>
-    <div id="timingSummary" class="timing-summary">A análise será exibida assim que houver dados disponíveis.</div>
-  </section>
-  <section class="card timing-minute-combined">
-    <div class="title">🕒🔢 Radar dos minutos · velas ≥ 10x</div>
-    <div class="timing-note">Minutos do relógio e finais de minuto reunidos em uma única análise e tabela. As taxas representam frequências do histórico selecionado, não previsões garantidas.</div>
-    <div class="timing-table-wrap"><table class="timing-table timing-ending-table"><thead><tr><th data-sort="text" title="Clique para ordenar">Tipo ↕</th><th data-sort="text" title="Clique para ordenar">Minuto / final ↕</th><th data-sort="number" title="Clique para ordenar">≥10x ↕</th><th data-sort="number" title="Clique para ordenar">Rodadas ↕</th><th data-sort="percent" title="Clique para ordenar">Taxa ≥10x ↕</th><th data-sort="percent" title="Clique para ordenar">Taxa ≥50x ↕</th><th data-sort="percent" title="Clique para ordenar">Taxa ≥100x ↕</th><th>Comparação histórica</th></tr></thead><tbody id="timingMinuteCombinedRows"><tr><td colspan="8">Aguardando dados.</td></tr></tbody></table></div>
-    <div id="timingMinuteEndingSummary" class="timing-signal">Aguardando histórico suficiente para comparar os minutos e seus finais.</div>
-  </section>
-  <section class="card timing-radar">
-    <div class="title">📊 RADAR ESTATÍSTICO · PROBABILIDADES OBSERVADAS</div>
-    <div class="timing-note">Estimativas calculadas a partir do histórico disponível. O radar compara a frequência geral com as últimas rodadas; não prevê resultados com certeza e não garante entradas lucrativas.</div>
-    <div id="timingRadar" class="timing-radar-grid"><div class="timing-note">Calculando estimativas…</div></div>
-    <div id="timingSignal" class="timing-signal">Aguardando dados suficientes para comparar as frequências.</div>
-    <div id="timingAIResult" class="timing-ai-result hidden" aria-live="polite"></div>
-  </section>
-  <section class="card">
-    <div class="title">⚠️ Como interpretar</div>
-    <div class="timing-note">Estas são frequências históricas, não sinais garantidos de entrada. Se as rodadas forem independentes, horários e resultados anteriores não determinam o próximo multiplicador. O painel não recomenda apostar; mostra contagens, proporções e limitações da amostra.</div>
-  </section>
-
+  <section class="card"><div class="title">📍 Janelas em destaque</div><div id="timingHighlights" class="timing-highlights"></div><p class="timing-caution">Frequência histórica, não previsão: minutos e contagem de casas não garantem uma próxima vela rosa.</p></section>
+  <section class="card"><div class="title">☀️ Frequência por período</div><table class="timing-table"><thead><tr><th>Período</th><th>Rodadas</th><th>Ocorrências</th><th>Frequência</th></tr></thead><tbody id="timingPeriods"></tbody></table></section>
   <section class="card timing-advanced"><div class="title">📊 Distribuição por minutagem</div><p class="timing-source">Análise complementar do histórico do Monitor · <span id="timingAdvGame">Aviator</span> · <time id="timingAdvClock"></time></p><div class="timing-controls"><div class="timing-option-group"><span>Janela</span><button data-timing-option="hours" data-value="1" onclick="setTimingOption('hours',1)">Última hora</button><button data-timing-option="hours" data-value="24" onclick="setTimingOption('hours',24)">24 horas</button></div><div class="timing-option-group"><span>Ocorrência</span><button data-timing-option="minimum" data-value="2" onclick="setTimingOption('minimum',2)">≥2x</button><button data-timing-option="minimum" data-value="10" onclick="setTimingOption('minimum',10)">≥10x</button><button data-timing-option="minimum" data-value="500" onclick="setTimingOption('minimum',500)">≥500x</button></div><div class="timing-option-group"><span>Agrupar por</span><button data-timing-option="mode" data-value="digit" onclick="setTimingOption('mode','digit')">Final do minuto</button><button data-timing-option="mode" data-value="minute" onclick="setTimingOption('mode','minute')">Minutos 00–59</button></div><label class="timing-period-label">Período do dia <select id="timingAdvPeriod" onchange="setTimingOption('period',this.value)"><option value="all">Todo o dia</option><option value="Manhã">Manhã (05–11h)</option><option value="Tarde">Tarde (12–17h)</option><option value="Noite">Noite (18–04h)</option></select></label></div><div class="timing-kpis"><div><small>Rodadas analisadas</small><b id="timingAdvTotal">0</b></div><div><small>Ocorrências</small><b id="timingAdvHits">0</b></div><div><small>Categoria</small><b id="timingAdvTierLabel">Velas ≥10x</b></div><div><small>Casas desde ≥10x</small><b id="timingAdvHouses">—</b></div></div><div id="timingAdvChart" class="timing-chart"><div class="timing-empty">Aguardando histórico do Monitor.</div></div><p id="timingAdvSummary" class="timing-note">Aguardando dados.</p><p id="timingAdvCoverage" class="timing-note"></p><div class="timing-highlights" id="timingAdvHighlights"></div><div id="timingAdvDetail" class="timing-detail hidden"><b id="timingAdvDetailTitle"></b><div id="timingAdvEvents"></div></div><div class="timing-period-card"><div class="title">☀️ Frequência por período</div><div class="timing-table-wrap"><table class="timing-table"><thead><tr><th>Período</th><th>Rodadas</th><th>Ocorrências</th><th>Frequência</th></tr></thead><tbody id="timingAdvPeriods"></tbody></table></div></div><p class="timing-note">Frequências históricas não preveem nem garantem o próximo resultado.</p></section>
 </main>
 
@@ -606,7 +594,7 @@
 
 <script src="timing-core.js?v=20261026b" defer></script>
 <script src="app.js?v=20261023historyselector1" defer></script>
-<script src="timing.js?v=20261026c" defer></script>
+<script src="timing.js?v=20261026d" defer></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
