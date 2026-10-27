@@ -884,7 +884,7 @@ function getMonitorRounds(){
 let probabilityTarget=10;
 function setProbabilityTarget(target){
   const value=Number(target);
-  if(![10,50,100].includes(value))return;
+  if(![10,20,30].includes(value))return;
   probabilityTarget=value;
   renderProbabilityCard();
 }
@@ -908,8 +908,13 @@ function renderProbabilityCard(){
   }));
   rounds.sort((a,b)=>a.ts-b.ts);
   const total=rounds.length;
-  const fmtPct=value=>new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:4}).format(value*100)+'%';
   const fmtX=value=>new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(value)+'x';
+  const fmtMinutes=value=>{
+    if(!Number.isFinite(value))return '—';
+    if(value<60)return Math.round(value)+' min';
+    const hours=Math.floor(value/60),mins=Math.round(value%60);
+    return hours+'h'+(mins?' '+mins+'min':'');
+  };
   if(sampleEl)sampleEl.textContent=total.toLocaleString('pt-BR')+' rodadas nas últimas 24 horas';
   if(gameEl)gameEl.textContent=games.length>1?'Aviator + Aviator 2':(games[0]==='aviator2'?'Aviator 2':'Aviator');
   if(!total){
@@ -919,23 +924,40 @@ function renderProbabilityCard(){
   const pink=rounds.filter(r=>r.value>=10);
   const pinkAverage=pink.length?pink.reduce((sum,r)=>sum+r.value,0)/pink.length:0;
   const hits=rounds.filter(r=>r.value>=probabilityTarget);
-  const p=hits.length/total;
-  const hitIndexes=rounds.map((r,i)=>r.value>=probabilityTarget?i:-1).filter(i=>i>=0);
-  const gaps=[];
-  for(let i=1;i<hitIndexes.length;i++)gaps.push(hitIndexes[i]-hitIndexes[i-1]);
-  const avgGap=gaps.length?gaps.reduce((sum,g)=>sum+g,0)/gaps.length:null;
-  const sinceLast=hitIndexes.length?total-1-hitIndexes[hitIndexes.length-1]:null;
-  const targetButtons=[10,50,100].map(t=>'<button type="button" class="probability-target-choice'+(t===probabilityTarget?' active':'')+'" aria-pressed="'+(t===probabilityTarget?'true':'false')+'" onclick="setProbabilityTarget('+t+')">'+t+'x</button>').join('');
+  const gapsMinutes=[];
+  for(let i=1;i<hits.length;i++){
+    const gap=(hits[i].ts-hits[i-1].ts)/60000;
+    if(Number.isFinite(gap)&&gap>0)gapsMinutes.push(gap);
+  }
+  const sortedGaps=[...gapsMinutes].sort((a,b)=>a-b);
+  const medianGap=sortedGaps.length
+    ? (sortedGaps.length%2
+      ? sortedGaps[Math.floor(sortedGaps.length/2)]
+      : (sortedGaps[sortedGaps.length/2-1]+sortedGaps[sortedGaps.length/2])/2)
+    : null;
+  const avgGap=gapsMinutes.length?gapsMinutes.reduce((sum,g)=>sum+g,0)/gapsMinutes.length:null;
+  const sinceLast=hits.length?(Date.now()-hits[hits.length-1].ts)/60000:null;
+  const enoughData=hits.length>=3&&gapsMinutes.length>=2&&medianGap>0;
+  const inHistoricalWindow=enoughData&&sinceLast>=medianGap*0.75&&sinceLast<=medianGap*1.25;
+  const signal=inHistoricalWindow?'OBSERVAR PADRÃO':'AGUARDAR';
+  const signalClass=inHistoricalWindow?'observe':'wait';
+  const signalDetail=!enoughData
+    ? 'Amostra insuficiente para avaliar repetição com consistência.'
+    : inHistoricalWindow
+      ? 'O tempo atual está próximo do intervalo mediano histórico entre ocorrências deste alvo.'
+      : 'O tempo atual ainda está fora da faixa aproximada do intervalo mediano histórico.';
+  const targetButtons=[10,20,30].map(t=>'<button type="button" class="probability-target-choice'+(t===probabilityTarget?' active':'')+'" aria-pressed="'+(t===probabilityTarget?'true':'false')+'" onclick="setProbabilityTarget('+t+')">'+t+'x</button>').join('');
   grid.innerHTML=`<div class="probability-single">
     <div class="probability-target-picker" aria-label="Escolher multiplicador para análise">${targetButtons}</div>
     <div class="probability-single-main">
-      <div class="probability-big-number">${fmtPct(p)}</div>
-      <div class="probability-main-label">Frequência histórica de ≥${probabilityTarget}x por rodada</div>
+      <div class="probability-signal ${signalClass}">${signal}</div>
+      <div class="probability-main-label">Análise de repetição para ≥${probabilityTarget}x</div>
       <div class="probability-main-detail">${hits.length.toLocaleString('pt-BR')} ocorrências em ${total.toLocaleString('pt-BR')} rodadas nas últimas 24h</div>
+      <div class="probability-signal-detail">${signalDetail}</div>
     </div>
     <div class="probability-stats">
-      <div class="probability-stat"><span>Média entre ocorrências ≥${probabilityTarget}x</span><strong>${avgGap===null?'Amostra insuficiente':Math.round(avgGap).toLocaleString('pt-BR')+' rodadas'}</strong></div>
-      <div class="probability-stat"><span>Desde a última ≥${probabilityTarget}x</span><strong>${sinceLast===null?'Nenhuma ocorrência':sinceLast.toLocaleString('pt-BR')+' rodadas'}</strong></div>
+      <div class="probability-stat"><span>Intervalo médio entre ≥${probabilityTarget}x</span><strong>${avgGap===null?'Amostra insuficiente':fmtMinutes(avgGap)}</strong></div>
+      <div class="probability-stat"><span>Tempo desde a última ≥${probabilityTarget}x</span><strong>${sinceLast===null?'Nenhuma ocorrência':fmtMinutes(sinceLast)}</strong></div>
       <div class="probability-stat"><span>Média das velas rosa (≥10x)</span><strong>${pink.length?fmtX(pinkAverage):'Sem ocorrências'}</strong></div>
     </div>
   </div>`;
