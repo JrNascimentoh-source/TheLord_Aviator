@@ -888,100 +888,55 @@ function renderProbabilityCard(){
   if(!grid)return;
   const timingGameEl=document.getElementById('timingGame');
   const selectedGame=timingGameEl?timingGameEl.value:'active';
-  const games=selectedGame==='both'?['aviator','aviator2']:[selectedGame==='active'?data.activeGame:selectedGame];
+  const game=selectedGame==='both'?(data.activeGame||'aviator'):(selectedGame==='active'?data.activeGame:selectedGame);
   const cutoff=Date.now()-24*60*60*1000;
-  const rounds=[];
-  games.forEach(game=>(sharedRoundsByGame[game]||[]).forEach(round=>{
-    const value=Number(round.value),ts=Number(round.ts);
-    if(Number.isFinite(value)&&value>=1&&Number.isFinite(ts)&&ts>=cutoff)rounds.push({value,ts,game});
-  }));
-  rounds.sort((a,b)=>a.ts-b.ts);
+  const rounds=(sharedRoundsByGame[game]||[]).filter(r=>Number.isFinite(Number(r.value))&&Number(r.value)>=1&&Number.isFinite(Number(r.ts))&&Number(r.ts)>=cutoff).map(r=>({value:Number(r.value),ts:Number(r.ts),game})).sort((a,b)=>a.ts-b.ts);
   const total=rounds.length;
   const fmtX=value=>new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(value)+'x';
-  const fmtDuration=seconds=>{
-    if(!Number.isFinite(seconds)||seconds<0)return '—';
-    const whole=Math.ceil(seconds),h=Math.floor(whole/3600),m=Math.floor((whole%3600)/60),s=whole%60;
-    return h>0?String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'):String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
-  };
+  const fmtPct=value=>Number.isFinite(value)?(value*100).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:1})+'%':'—';
+  const fmtDuration=seconds=>{if(!Number.isFinite(seconds)||seconds<0)return '—';const whole=Math.ceil(seconds),h=Math.floor(whole/3600),m=Math.floor((whole%3600)/60),s=whole%60;return h>0?String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'):String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')};
   if(sampleEl)sampleEl.textContent=total.toLocaleString('pt-BR')+' rodadas nas últimas 24 horas';
-  if(gameEl)gameEl.textContent=games.length>1?'Aviator + Aviator 2':(games[0]==='aviator2'?'Aviator 2':'Aviator');
-  if(!total){
-    grid.innerHTML='<div class="probability-empty">Ainda não há rodadas válidas nas últimas 24 horas para a análise automática.</div>';
-    return;
-  }
-  const recent=rounds.slice(-100);
-  const tiers=[100,50,10];
-  const tierStats=tiers.map(target=>{
-    const hits=rounds.filter(r=>r.value>=target);
-    const recentHits=recent.filter(r=>r.value>=target).length;
-    const baseline=hits.length/total;
-    const recentRate=recent.length?recentHits/recent.length:0;
-    const lift=baseline>0?recentRate/baseline:0;
-    return {target,hits,recentHits,baseline,recentRate,lift};
-  });
-  // Escolhe automaticamente o maior alvo com amostra mínima e sinal recente
-  // relativamente mais forte que a frequência observada no histórico de 24h.
+  if(gameEl)gameEl.textContent=game==='aviator2'?'Aviator 2':'Aviator';
+  if(!total){grid.innerHTML='<div class="probability-empty">Ainda não há rodadas válidas nas últimas 24 horas para a análise automática.</div>';return;}
+  const recent=rounds.slice(-100),tiers=[100,50,10];
+  const tierStats=tiers.map(target=>{const hits=rounds.filter(r=>r.value>=target),recentHits=recent.filter(r=>r.value>=target).length,baseline=hits.length/total,recentRate=recent.length?recentHits/recent.length:0,lift=baseline>0?recentRate/baseline:0;return {target,hits,recentHits,baseline,recentRate,lift}});
   const chosen=tierStats.find(s=>recent.length>=30&&s.hits.length>=4&&s.recentHits>=3&&s.lift>=1.15)||tierStats[tierStats.length-1];
-  const probabilityTarget=chosen.target;
-  const hits=chosen.hits;
-  const targetGaps=[];
-  for(let i=1;i<hits.length;i++){
-    const gap=(hits[i].ts-hits[i-1].ts)/1000;
-    if(Number.isFinite(gap)&&gap>0)targetGaps.push(gap);
-  }
+  const probabilityTarget=chosen.target,hits=chosen.hits,targetGaps=[];
+  for(let i=1;i<hits.length;i++){const gap=(hits[i].ts-hits[i-1].ts)/1000;if(Number.isFinite(gap)&&gap>0)targetGaps.push(gap)}
   const sortedGaps=[...targetGaps].sort((a,b)=>a-b);
-  const medianGap=sortedGaps.length
-    ? (sortedGaps.length%2?sortedGaps[Math.floor(sortedGaps.length/2)]:(sortedGaps[sortedGaps.length/2-1]+sortedGaps[sortedGaps.length/2])/2)
-    : null;
+  const medianGap=sortedGaps.length?(sortedGaps.length%2?sortedGaps[Math.floor(sortedGaps.length/2)]:(sortedGaps[sortedGaps.length/2-1]+sortedGaps[sortedGaps.length/2])/2):null;
   const avgGap=targetGaps.length?targetGaps.reduce((sum,g)=>sum+g,0)/targetGaps.length:null;
   const sinceLast=hits.length?(Date.now()-hits[hits.length-1].ts)/1000:null;
   const enoughData=recent.length>=30&&hits.length>=4&&targetGaps.length>=3&&medianGap>0&&chosen.recentHits>=3;
   const tolerance=enoughData?Math.min(180,Math.max(30,medianGap*0.15)):0;
   const nextExpected=hits.length&&medianGap!==null?hits[hits.length-1].ts+medianGap*1000:null;
-  const windowStart=nextExpected===null?null:nextExpected-tolerance*1000;
-  const windowEnd=nextExpected===null?null:nextExpected+tolerance*1000;
-  const now=Date.now();
-  const secondsToWindow=windowStart===null?null:(windowStart-now)/1000;
-  const insideWindow=enoughData&&now>=windowStart&&now<=windowEnd;
-  const countdownActive=enoughData&&secondsToWindow>0&&secondsToWindow<=120;
+  const windowStart=nextExpected===null?null:nextExpected-tolerance*1000,windowEnd=nextExpected===null?null:nextExpected+tolerance*1000,now=Date.now();
+  const secondsToWindow=windowStart===null?null:(windowStart-now)/1000,insideWindow=enoughData&&now>=windowStart&&now<=windowEnd,countdownActive=enoughData&&secondsToWindow>0&&secondsToWindow<=120;
   let signal='AGUARDAR',signalClass='wait',signalDetail='';
-  if(!enoughData){
-    signalDetail='A amostra recente ou os intervalos deste alvo ainda são insuficientes para estimar uma janela. O alvo é escolhido automaticamente conforme o padrão observado.';
-  }else if(insideWindow){
-    signal='POSSÍVEL JANELA ATIVA';
-    signalClass='entry';
-    signalDetail='A janela estimada pelo intervalo mediano de resultados ≥'+probabilityTarget+'x está aberta por aproximadamente '+fmtDuration((windowEnd-now)/1000)+'. É uma leitura histórica, não uma previsão garantida.';
-  }else if(countdownActive){
-    signal='OBSERVAR EM '+fmtDuration(secondsToWindow);
-    signalClass='countdown';
-    signalDetail='Contagem até a janela histórica estimada para ≥'+probabilityTarget+'x. O padrão pode não se repetir e o alvo automático pode mudar com novas rodadas.';
-  }else if(secondsToWindow!==null&&secondsToWindow>120){
-    signal='OBSERVAR PADRÃO';
-    signalClass='observe';
-    signalDetail='Janela histórica estimada em '+fmtDuration(secondsToWindow)+' para resultados ≥'+probabilityTarget+'x, com base no intervalo mediano passado.';
-  }else{
-    signalDetail='A janela estimada passou sem novo resultado ≥'+probabilityTarget+'x. Aguardando novas rodadas para recalcular o padrão.';
-  }
-  const recentLabel=recent.length.toLocaleString('pt-BR')+' rodadas recentes';
-  const liftLabel=chosen.baseline>0?chosen.lift.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'×':'—';
+  if(!enoughData){signalDetail='Amostra insuficiente para estimar uma janela histórica confiável. O alvo é escolhido automaticamente; isso não prevê a próxima rodada.'}
+  else if(insideWindow){signal='POSSÍVEL JANELA';signalClass='entry';signalDetail='Janela estimada pelo intervalo mediano de resultados ≥'+probabilityTarget+'x. O histórico não garante que a próxima vela alcance esse alvo.'}
+  else if(countdownActive){signal='OBSERVAR EM '+fmtDuration(secondsToWindow);signalClass='countdown';signalDetail='Contagem baseada em intervalos anteriores de ≥'+probabilityTarget+'x; a próxima rodada pode ser diferente.'}
+  else if(secondsToWindow!==null&&secondsToWindow>120){signal='OBSERVAR PADRÃO';signalClass='observe';signalDetail='Próxima janela histórica estimada em '+fmtDuration(secondsToWindow)+'. É uma referência descritiva, não uma previsão.'}
+  else{signalDetail='A janela histórica estimada passou sem novo resultado ≥'+probabilityTarget+'x. Aguardando novas rodadas.'}
+  const category=v=>v<2?'baixa':(v<10?'media':'alta'),patternSize=4,currentPattern=rounds.slice(-patternSize).map(r=>category(r.value)),matches=[];
+  for(let i=patternSize;i<rounds.length;i++){const prior=rounds.slice(i-patternSize,i).map(r=>category(r.value));if(prior.every((v,j)=>v===currentPattern[j]))matches.push(rounds[i].value)}
+  const sortedMatches=[...matches].sort((a,b)=>a-b);
+  const quantile=q=>sortedMatches.length?sortedMatches[Math.max(0,Math.min(sortedMatches.length-1,Math.ceil(q*sortedMatches.length)-1))]:null;
+  const enoughPattern=matches.length>=20&&currentPattern.length===patternSize,minimum=enoughPattern?quantile(0.20):null,maximum=enoughPattern?quantile(0.80):null;
+  const rateAt=target=>enoughPattern?matches.filter(v=>v>=target).length/matches.length:null;
+  const recentLabel=recent.length.toLocaleString('pt-BR')+' rodadas recentes',liftLabel=chosen.baseline>0?chosen.lift.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'×':'—';
+  const patternLabel=currentPattern.map(v=>v==='baixa'?'Baixa':(v==='media'?'Média':'Alta')).join(' → ');
+  const probabilityLine=enoughPattern?'Após '+matches.length+' sequências semelhantes: ≥10x '+fmtPct(rateAt(10))+' · ≥50x '+fmtPct(rateAt(50))+' · ≥100x '+fmtPct(rateAt(100)):'Amostra insuficiente: são necessárias pelo menos 20 sequências históricas semelhantes para exibir frequências.';
   grid.innerHTML=`<div class="probability-single">
-    <div class="probability-auto-target" aria-live="polite">
-      <span>ALVO AUTOMÁTICO</span>
-      <strong>${probabilityTarget}x</strong>
-      <small>Selecionado pelo padrão recente · ${recentLabel}</small>
+    <div class="probability-range-layout">
+      <div class="probability-range-button minimum"><span>FAIXA MÍNIMA</span><strong>${minimum===null?'—':fmtX(minimum)}</strong><small>${enoughPattern?'Percentil inferior observado':'Aguardando amostra'}</small></div>
+      <div class="probability-single-main"><div class="probability-signal ${signalClass}">${signal}</div><div class="probability-main-label">ALVO AUTOMÁTICO · ≥${probabilityTarget}x</div><div class="probability-main-detail">${hits.length.toLocaleString('pt-BR')} ocorrências ≥${probabilityTarget}x em 24h · ${chosen.recentHits.toLocaleString('pt-BR')} nas últimas ${recent.length} rodadas</div><div class="probability-signal-detail">${signalDetail}</div></div>
+      <div class="probability-range-button maximum"><span>FAIXA MÁXIMA</span><strong>${maximum===null?'—':fmtX(maximum)}</strong><small>${enoughPattern?'Percentil superior observado':'Aguardando amostra'}</small></div>
     </div>
-    <div class="probability-single-main">
-      <div class="probability-signal ${signalClass}">${signal}</div>
-      <div class="probability-main-label">Análise automática para resultado ≥${probabilityTarget}x</div>
-      <div class="probability-main-detail">${hits.length.toLocaleString('pt-BR')} ocorrências ≥${probabilityTarget}x nas últimas 24h · ${chosen.recentHits.toLocaleString('pt-BR')} nas últimas ${recent.length} rodadas</div>
-      <div class="probability-signal-detail">${signalDetail}</div>
-    </div>
-    <div class="probability-stats">
-      <div class="probability-stat"><span>Intervalo médio entre resultados ≥${probabilityTarget}x</span><strong>${avgGap===null?'Amostra insuficiente':fmtDuration(avgGap)}</strong></div>
-      <div class="probability-stat"><span>Tempo desde o último resultado ≥${probabilityTarget}x</span><strong>${sinceLast===null?'Nenhuma ocorrência':fmtDuration(sinceLast)}</strong></div>
-      <div class="probability-stat"><span>Multiplicador médio do alvo</span><strong>${hits.length?fmtX(hits.reduce((sum,r)=>sum+r.value,0)/hits.length):'Sem ocorrências'}</strong></div>
-    </div>
-    <div class="probability-main-detail">Índice relativo recente/histórico: ${liftLabel}. Esse índice descreve a amostra; não é uma probabilidade real da próxima rodada.</div>
+    <div class="probability-pattern-line"><b>Padrão atual:</b> ${patternLabel||'Aguardando 4 velas'} · <b>${matches.length}</b> sequências semelhantes encontradas</div>
+    <div class="probability-probability-line">${probabilityLine}</div>
+    <div class="probability-stats"><div class="probability-stat"><span>Intervalo médio entre resultados ≥${probabilityTarget}x</span><strong>${avgGap===null?'Amostra insuficiente':fmtDuration(avgGap)}</strong></div><div class="probability-stat"><span>Tempo desde o último resultado ≥${probabilityTarget}x</span><strong>${sinceLast===null?'Nenhuma ocorrência':fmtDuration(sinceLast)}</strong></div><div class="probability-stat"><span>Multiplicador médio do alvo</span><strong>${hits.length?fmtX(hits.reduce((sum,r)=>sum+r.value,0)/hits.length):'Sem ocorrências'}</strong></div></div>
+    <div class="probability-main-detail">Índice relativo recente/histórico: ${liftLabel}. As faixas e frequências descrevem resultados passados semelhantes; não são garantia, proteção nem probabilidade real da próxima rodada.</div>
   </div>`;
 }
 function setActiveGame(game){
