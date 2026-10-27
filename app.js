@@ -914,7 +914,7 @@ function renderProbabilityCard(){
   const secondsToWindow=windowStart===null?null:(windowStart-now)/1000,insideWindow=enoughData&&now>=windowStart&&now<=windowEnd,countdownActive=enoughData&&secondsToWindow>0&&secondsToWindow<=120;
   let signal='AGUARDAR',signalClass='wait',signalDetail='';
   if(!enoughData){signalDetail='Amostra insuficiente para estimar uma janela histórica confiável. O alvo é escolhido automaticamente; isso não prevê a próxima rodada.'}
-  else if(insideWindow){signal='POSSÍVEL JANELA';signalClass='entry';signalDetail='Janela estimada pelo intervalo mediano de resultados ≥'+probabilityTarget+'x. O histórico não garante que a próxima vela alcance esse alvo.'}
+  else if(insideWindow){signal='POSSÍVEL ENTRADA';signalClass='entry';signalDetail='Janela estimada pelo intervalo mediano de resultados ≥'+probabilityTarget+'x. O histórico não garante que a próxima vela alcance esse alvo.'}
   else if(countdownActive){signal='OBSERVAR EM '+fmtDuration(secondsToWindow);signalClass='countdown';signalDetail='Contagem baseada em intervalos anteriores de ≥'+probabilityTarget+'x; a próxima rodada pode ser diferente.'}
   else if(secondsToWindow!==null&&secondsToWindow>120){signal='OBSERVAR PADRÃO';signalClass='observe';signalDetail='Próxima janela histórica estimada em '+fmtDuration(secondsToWindow)+'. É uma referência descritiva, não uma previsão.'}
   else{signalDetail='A janela histórica estimada passou sem novo resultado ≥'+probabilityTarget+'x. Aguardando novas rodadas.'}
