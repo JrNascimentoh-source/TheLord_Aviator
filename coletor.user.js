@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         TheLord Coletor de Velas
-// @version      1.4
+// @version      1.5
 // @description  Coleta velas do Aviator, mantém pendências e recarrega a página a cada 5 minutos
 // @match        *://*/*
 // @match        *://*.spribegaming.com/*
@@ -22,9 +22,9 @@
   // Chave original da versão 1.3 — mantida exatamente como estava.
   const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5cGphcW1tbHVybHFlb3RiZXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAzMDU2MTAsImV4cCI6MjEwNTg4MTYxMH0.IeAT6gwsAfzfw2N4BIxg9gc5pRqZH0ELn3Xo9fogHnY';
 
-  const QUEUE_KEY = 'thelord_aviator_pending_v14';
-  const SIG_KEY = 'thelord_aviator_signature_v14';
-  const RELOAD_KEY = 'thelord_aviator_reload_v14';
+  const QUEUE_KEY = 'thelord_aviator_pending_v15';
+  const SIG_KEY = 'thelord_aviator_signature_v15';
+  const RELOAD_KEY = 'thelord_aviator_reload_v15';
   const RELOAD_MS = 5 * 60 * 1000;
   const host = location.hostname;
   const isTop = window.top === window.self;
@@ -173,7 +173,9 @@
           },
           body: JSON.stringify({
             game: GAME,
-            value: item.value
+            value: item.value,
+            // Preserva o horário em que a rodada foi detectada, inclusive após ficar offline.
+            created_at: item.time || new Date().toISOString()
           })
         });
 
