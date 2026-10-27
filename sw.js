@@ -1,4 +1,4 @@
-const CACHE_NAME = 'thelord-aviator-oficial-v18-recurrence-countdown';
+const CACHE_NAME = 'thelord-aviator-oficial-v19-auto-target';
 const APP_SHELL = [
   './',
   './index.html',
@@ -9,7 +9,7 @@ const APP_SHELL = [
   './aviator-perspectiva.jpg',
   './style.css',
   './desktop.css',
-  './app.js?v=20261027-prob4',
+  './app.js?v=20261027-auto-target1',
   './timing-core.js?v=20261026b',
   './timing.js?v=20261026d'
 ];
