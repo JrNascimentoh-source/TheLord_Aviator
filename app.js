@@ -882,78 +882,37 @@ function getMonitorRounds(){
   return rounds.filter(r=>r.ts>=cutoff);
 }
 function renderProbabilityCard(){
-  const grid=document.getElementById('probabilityGrid');
-  const sampleEl=document.getElementById('probabilitySample');
-  const gameEl=document.getElementById('probabilityGame');
+  const grid=document.getElementById('probabilityGrid'),sampleEl=document.getElementById('probabilitySample'),gameEl=document.getElementById('probabilityGame');
   if(!grid)return;
-  const timingGameEl=document.getElementById('timingGame');
-  const selectedGame=timingGameEl?timingGameEl.value:'active';
-  const game=selectedGame==='both'?(data.activeGame||'aviator'):(selectedGame==='active'?data.activeGame:selectedGame);
-  const cutoff=Date.now()-24*60*60*1000;
-  const rounds=(sharedRoundsByGame[game]||[])
-    .filter(r=>Number.isFinite(Number(r.value))&&Number(r.value)>=1&&Number.isFinite(Number(r.ts))&&Number(r.ts)>=cutoff)
-    .map(r=>({id:r.id,value:Number(r.value),ts:Number(r.ts),game}))
-    .sort((a,b)=>a.ts-b.ts);
-  const total=rounds.length;
-  const fmtX=value=>Number.isFinite(value)?new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(value)+'x':'—';
-  const fmtPct=value=>Number.isFinite(value)?(value*100).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:1})+'%':'—';
-  const fmtDuration=seconds=>{
-    if(!Number.isFinite(seconds)||seconds<0)return '—';
-    const whole=Math.round(seconds),h=Math.floor(whole/3600),m=Math.floor((whole%3600)/60),s=whole%60;
-    return h>0?String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'):String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
-  };
+  const sel=document.getElementById('timingGame'),selected=sel?sel.value:'active';
+  const game=selected==='both'?(data.activeGame||'aviator'):(selected==='active'?data.activeGame:selected);
+  const now=Date.now(),cutoff=now-86400000;
+  const rounds=(sharedRoundsByGame[game]||[]).filter(r=>Number.isFinite(Number(r.value))&&Number(r.value)>=1&&Number.isFinite(Number(r.ts))&&Number(r.ts)>=cutoff&&Number(r.ts)<=now).map(r=>({id:r.id,value:Number(r.value),ts:Number(r.ts),game})).sort((a,b)=>a.ts-b.ts);
+  const total=rounds.length,fmtX=v=>Number.isFinite(v)?new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v)+'x':'—',fmtPct=v=>Number.isFinite(v)?(v*100).toLocaleString('pt-BR',{maximumFractionDigits:1})+'%':'—';
+  const fmtDuration=seconds=>{if(!Number.isFinite(seconds)||seconds<0)return '—';const n=Math.round(seconds),h=Math.floor(n/3600),m=Math.floor(n%3600/60),s=n%60;return h>0?String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'):String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');};
   if(sampleEl)sampleEl.textContent=total.toLocaleString('pt-BR')+' rodadas nas últimas 24 horas';
   if(gameEl)gameEl.textContent=game==='aviator2'?'Aviator 2':'Aviator';
   if(!total){grid.innerHTML='<div class="probability-empty">Ainda não há rodadas válidas nas últimas 24 horas para a análise automática.</div>';return;}
-  if(!window.TheLordProbability||typeof window.TheLordProbability.analyze!=='function'){
-    grid.innerHTML='<div class="probability-empty">O motor estatístico ainda não foi carregado. Atualize a página para tentar novamente.</div>';return;
-  }
-  const analysis=window.TheLordProbability.analyze(rounds,{now:Date.now(),patternSize:4});
-  const pattern=analysis.pattern;
-  const targetOrder=[2,10,20,30,50,100,250,500,1000];
-  const targetStats=targetOrder.map(target=>analysis.thresholds[target]);
-  const chosen=[...targetStats].reverse().find(s=>s&&s.gapCount>=3&&s.count>=4)||
-    [...targetStats].reverse().find(s=>s&&s.gapCount>=2&&s.count>=3)||
-    analysis.thresholds[2];
-  const enoughPattern=pattern.matches>=20&&Number.isFinite(pattern.minimum)&&Number.isFinite(pattern.maximum);
-  const minimum=enoughPattern?pattern.minimum:null;
-  const maximum=enoughPattern?pattern.maximum:null;
-  const fmtInterval=s=>s&&s.gapCount>=2?fmtDuration(s.gapMedian):'amostra curta';
-  const gapText=targetStats.map(s=>s?'≥'+s.target+'x: '+fmtInterval(s):'').filter(Boolean).join(' · ');
-  const sinceLast=chosen&&chosen.lastTs?Math.max(0,(Date.now()-chosen.lastTs)/1000):null;
-  const enoughGaps=chosen&&chosen.gapCount>=3&&Number.isFinite(chosen.gapMedian);
-  let signal='OBSERVAR',signalClass='observe';
-  let signalDetail='Estimativas históricas em cálculo; não indicam que uma vela esteja atrasada nem garantem o próximo resultado.';
-  if(enoughGaps){
-    const low=chosen.gapP20,high=chosen.gapP80;
-    if(Number.isFinite(low)&&Number.isFinite(high)&&sinceLast!==null&&sinceLast>=low&&sinceLast<=high){
-      signal='OBSERVAR · FAIXA HISTÓRICA';signalClass='observe';
-      signalDetail='O tempo atual está dentro da faixa central dos intervalos históricos para resultados ≥'+chosen.target+'x. Isso descreve o histórico, não prevê a próxima rodada.';
-    }else if(Number.isFinite(high)&&sinceLast!==null&&sinceLast>high){
-      signal='OBSERVAR · ACIMA DA FAIXA';signalClass='wait';
-      signalDetail='O tempo desde a última ocorrência ultrapassou o percentil superior dos intervalos observados para ≥'+chosen.target+'x. Isso não aumenta por si só a chance da próxima rodada.';
-    }else{
-      signalDetail='O tempo atual ainda está abaixo da faixa central histórica de intervalos para ≥'+chosen.target+'x. A próxima rodada continua imprevisível.';
-    }
-  }else{
-    signalDetail='Amostra insuficiente de intervalos para criar uma faixa confiável neste nível. Os dados são descritivos e não garantem resultados.';
-  }
-  const patternLabel=pattern.labels.length?pattern.labels.join(' → '):'Aguardando sequência';
-  const probabilityLine=enoughPattern
-    ?'Após '+pattern.matches.toLocaleString('pt-BR')+' sequências semelhantes: faixa observada de '+fmtX(minimum)+' a '+fmtX(maximum)+'. ≥2x '+fmtPct(pattern.rates[2])+' · ≥10x '+fmtPct(pattern.rates[10])+' · ≥50x '+fmtPct(pattern.rates[50])+' · ≥100x '+fmtPct(pattern.rates[100])
-    :'Amostra insuficiente: são necessárias pelo menos 20 sequências anteriores semelhantes para estimar a faixa de multiplicadores.';
-  const rateLabel=chosen&&Number.isFinite(chosen.rate)?fmtPct(chosen.rate):'—';
-  grid.innerHTML=`<div class="probability-single">
-    <div class="probability-range-layout">
-      <div class="probability-range-button minimum"><span>TETO MÍNIMO</span><strong>${minimum===null?'—':fmtX(minimum)}</strong><small>${enoughPattern?'Percentil 20% após padrão semelhante':'Aguardando amostra'}</small></div>
-      <div class="probability-single-main"><div class="probability-signal ${signalClass}">${signal}</div><div class="probability-main-label">ALVO DE REFERÊNCIA · ≥${chosen?chosen.target:2}x</div><div class="probability-main-detail">${chosen?chosen.count.toLocaleString('pt-BR')+' ocorrências ≥'+chosen.target+'x em 24h':'Sem amostra'} · ${total.toLocaleString('pt-BR')} rodadas analisadas</div><div class="probability-signal-detail">${signalDetail}</div></div>
-      <div class="probability-range-button maximum"><span>TETO MÁXIMO</span><strong>${maximum===null?'—':fmtX(maximum)}</strong><small>${enoughPattern?'Percentil 80% após padrão semelhante':'Aguardando amostra'}</small></div>
-    </div>
-    <div class="probability-pattern-line"><b>Padrão atual:</b> ${patternLabel} · <b>${pattern.matches.toLocaleString('pt-BR')}</b> sequências semelhantes encontradas</div>
-    <div class="probability-probability-line">${probabilityLine}</div>
-    <div class="probability-stats"><div class="probability-stat"><span>Intervalo mediano entre resultados ≥${chosen?chosen.target:2}x</span><strong>${chosen&&Number.isFinite(chosen.gapMedian)?fmtDuration(chosen.gapMedian):'Amostra insuficiente'}</strong></div><div class="probability-stat"><span>Tempo desde o último resultado ≥${chosen?chosen.target:2}x</span><strong>${sinceLast===null?'Nenhuma ocorrência':fmtDuration(sinceLast)}</strong></div><div class="probability-stat"><span>Frequência histórica do alvo</span><strong>${rateLabel}</strong></div></div>
-    <div class="probability-main-detail"><b>Intervalos históricos por nível:</b> ${gapText||'Aguardando ocorrências suficientes'}. As faixas são estimativas descritivas do histórico e não representam garantia nem probabilidade real da próxima rodada.</div>
-  </div>`;
+  if(!window.TheLordProbability||typeof window.TheLordProbability.analyze!=='function'){grid.innerHTML='<div class="probability-empty">O motor estatístico ainda não foi carregado. Atualize a página para tentar novamente.</div>';return;}
+  const analysis=window.TheLordProbability.analyze(rounds,{now,patternSize:4}),pattern=analysis.pattern,thresholds=analysis.thresholds,base=thresholds[2];
+  const enoughPattern=pattern.matches>=30&&Number.isFinite(pattern.minimum)&&Number.isFinite(pattern.maximum),minimum=enoughPattern?pattern.minimum:null,maximum=enoughPattern?pattern.maximum:null;
+  const fmtInterval=x=>x&&x.gapCount>=3?fmtDuration(x.gapMedian):'amostra curta',gapText=window.TheLordProbability.TARGETS.map(t=>thresholds[t]).filter(Boolean).map(x=>'≥'+x.target+'x: '+fmtInterval(x)).join(' · ');
+  const sinceLast=base&&base.lastTs!==null?Math.max(0,(now-base.lastTs)/1000):null,enoughGaps=base&&base.gapCount>=5&&Number.isFinite(base.gapMedian)&&base.gapMedian>0;
+  let signal='AGUARDAR POSSÍVEL ENTRADA',signalClass='wait',detail='Acompanhando o intervalo histórico de resultados ≥2x. O relógio é uma estimativa estatística, não uma garantia.',countdown=null;
+  if(enoughGaps&&sinceLast!==null){const low=base.gapP20,high=base.gapP80;countdown=Math.max(0,base.gapMedian-sinceLast);
+   if(sinceLast>=low&&sinceLast<=high){signal='POSSÍVEL ENTRADA';signalClass='observe';detail='O intervalo atual está na faixa histórica observada para ≥2x. Isso não garante que a próxima rodada atinja qualquer multiplicador.';}
+   else if(sinceLast>high){signal='AGUARDAR · FORA DA FAIXA';signalClass='wait';detail='O intervalo atual passou do percentil 80% histórico para ≥2x. Um intervalo longo não torna a próxima rodada mais provável.';}
+   else{signal='AGUARDAR POSSÍVEL ENTRADA';signalClass='wait';detail='Tempo restante até a mediana histórica de ≥2x; referência descritiva, não contagem garantida.';}
+  }else detail='Ainda não há intervalos suficientes entre resultados ≥2x para estimar um relógio com estabilidade.';
+  const clock=countdown===null?'—':countdown===0?'00:00':fmtDuration(countdown),patternLabel=pattern.labels.length?pattern.labels.join(' → '):'Aguardando sequência';
+  const probabilityLine=enoughPattern?'Após '+pattern.matches.toLocaleString('pt-BR')+' padrões anteriores semelhantes, a faixa central observada dos próximos multiplicadores foi de '+fmtX(minimum)+' a '+fmtX(maximum)+'. Frequência nesse grupo: ≥2x '+fmtPct(pattern.rates[2])+' · ≥10x '+fmtPct(pattern.rates[10])+' · ≥20x '+fmtPct(pattern.rates[20])+' · ≥50x '+fmtPct(pattern.rates[50]):'Amostra insuficiente: são necessárias pelo menos 30 ocorrências anteriores de sequências semelhantes para exibir tetos estimados. Nenhum valor foi inventado.';
+  grid.innerHTML=`<div class="probability-single"><div class="probability-range-layout">
+   <div class="probability-range-button minimum"><span>TETO MÍNIMO</span><strong>${minimum===null?'—':fmtX(minimum)}</strong><small>${enoughPattern?'Percentil 20% dos resultados seguintes':'Aguardando amostra válida'}</small></div>
+   <div class="probability-single-main"><div class="probability-signal ${signalClass}">${signal}</div><div class="probability-main-label">REFERÊNCIA PRINCIPAL · ≥2x</div><div class="probability-main-detail">${base.count.toLocaleString('pt-BR')} ocorrências ≥2x em 24h · ${total.toLocaleString('pt-BR')} rodadas</div><div class="probability-countdown"><span>◷ TEMPO ESTIMADO</span><strong>${clock}</strong></div><div class="probability-signal-detail">${detail}</div></div>
+   <div class="probability-range-button maximum"><span>TETO MÁXIMO</span><strong>${maximum===null?'—':fmtX(maximum)}</strong><small>${enoughPattern?'Percentil 80% dos resultados seguintes':'Aguardando amostra válida'}</small></div></div>
+   <div class="probability-pattern-line"><b>Padrão atual:</b> ${patternLabel} · <b>${pattern.matches.toLocaleString('pt-BR')}</b> sequências semelhantes encontradas</div><div class="probability-probability-line">${probabilityLine}</div>
+   <div class="probability-stats"><div class="probability-stat"><span>Intervalo mediano entre resultados ≥2x</span><strong>${enoughGaps?fmtDuration(base.gapMedian):'Amostra insuficiente'}</strong></div><div class="probability-stat"><span>Tempo desde o último resultado ≥2x</span><strong>${sinceLast===null?'Nenhuma ocorrência':fmtDuration(sinceLast)}</strong></div><div class="probability-stat"><span>Frequência histórica ≥2x</span><strong>${fmtPct(base.rate)}</strong></div></div>
+   <div class="probability-main-detail"><b>Intervalos históricos por nível:</b> ${gapText}. Os tetos são percentis observados após padrões semelhantes; não são garantias de saída nem garantem a próxima rodada.</div></div>`;
 }
 function setActiveGame(game){
   data.activeGame=game;
