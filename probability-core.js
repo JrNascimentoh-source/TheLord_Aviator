@@ -31,7 +31,41 @@ function analyze(input,options={}) {
  const pinkIntervals={count:pinkGaps.length,roseCount:pinkRounds.length,lastTs:lastPinkTs,roundsSinceLast:roundsSincePink,median:quantile(pinkGaps,.5),p20:quantile(pinkGaps,.2),p80:quantile(pinkGaps,.8),mean:pinkGaps.length?pinkGaps.reduce((a,v)=>a+v,0)/pinkGaps.length:null};
  const thresholds={};TARGETS.forEach(target=>{const hits=rounds.filter(r=>r.value>=target),gaps=[];for(let i=1;i<hits.length;i++){const g=(hits[i].ts-hits[i-1].ts)/1000;if(g>0&&Number.isFinite(g))gaps.push(g);}thresholds[target]={target,count:hits.length,rate:rounds.length?hits.length/rounds.length:null,lastTs:hits.length?hits[hits.length-1].ts:null,gapCount:gaps.length,gapMedian:quantile(gaps,.5),gapP20:quantile(gaps,.2),gapP80:quantile(gaps,.8),gapMean:gaps.length?gaps.reduce((a,v)=>a+v,0)/gaps.length:null};});
  const rates={};TARGETS.forEach(t=>{rates[t]=matches.length?matches.filter(x=>x.value>=t).reduce((s,x)=>s+x.weight,0)/matches.reduce((s,x)=>s+x.weight,0):null;});
- return {roundCount:rounds.length,pinkIntervals,pattern:{labels:current.map(label),categories:current,matches:next.length,minimum,median,maximum,roseMinimum,roseMedian,roseMaximum,roseMatches:pinkNext.length,rates,lastSimilarTs:occurrences.length?occurrences[occurrences.length-1]:null,gapCount:patternGaps.length,gapMedian:quantile(patternGaps,.5),gapP20:quantile(patternGaps,.2),gapP80:quantile(patternGaps,.8),effectiveSampleSize:matches.length?Math.pow(matches.reduce((s,x)=>s+x.weight,0),2)/matches.reduce((s,x)=>s+x.weight*x.weight,0):0,method:'weighted-log-similarity-quantiles'} ,thresholds};
+ // Estimativa combinada experimental: frequência histórica + padrão de cores + distância desde a última rosa + frequência recente.
+ // Apenas resultados anteriores à sequência atual entram nas estimativas condicionais.
+ const colorCode=v=>v<2?'A':v<10?'P':'R';
+ const colorSeq=currentRounds.map(r=>colorCode(r.value)).join('');
+ const history=rounds.slice(0,Math.max(0,rounds.length-size));
+ const baseRates={},recentRates={},sequenceRates={},gapRates={},combinedRates={},signalDetails={};
+ TARGETS.forEach(target=>{
+   const hit=r=>r.value>=target?1:0;
+   const baseN=history.length,baseHits=history.reduce((s,r)=>s+hit(r),0),base=baseN?baseHits/baseN:null;
+   const recent=history.slice(-300),recentRate=recent.length?recent.reduce((s,r)=>s+hit(r),0)/recent.length:null;
+   let seqN=0,seqHits=0;
+   for(let i=size;i<history.length;i++){
+     const prior=history.slice(i-size,i).map(r=>colorCode(r.value)).join('');
+     if(prior===colorSeq){seqN++;seqHits+=hit(history[i]);}
+   }
+   const seq=base===null?null:(seqHits+base*20)/(seqN+20);
+   let roundsSincePink=0;
+   for(let i=history.length-1;i>=0;i--){if(history[i].value>=10)break;roundsSincePink++;}
+   const gapBucket=roundsSincePink<=5?'1-5':roundsSincePink<=10?'6-10':roundsSincePink<=20?'11-20':roundsSincePink<=50?'21-50':'51+';
+   let gapN=0,gapHits=0;
+   for(let i=1;i<history.length;i++){
+     let g=0;for(let j=i-1;j>=0;j--){g++;if(history[j].value>=10)break;}
+     const b=g<=5?'1-5':g<=10?'6-10':g<=20?'11-20':g<=50?'21-50':'51+';
+     if(b===gapBucket){gapN++;gapHits+=hit(history[i]);}
+   }
+   const gap=base===null?null:(gapHits+base*20)/(gapN+20);
+   const recentBlend=base===null||recentRate===null?base:base+.25*(recentRate-base);
+   const combined=base===null?null:Math.max(0,Math.min(1,base+.20*(seq-base)+.15*(gap-base)+(recentBlend-base)));
+   baseRates[target]=base;recentRates[target]=recentRate;sequenceRates[target]=seq;gapRates[target]=gap;combinedRates[target]=combined;
+   signalDetails[target]={baseline:base,recent:recentRate,sequence:seq,gap:gap,combined,sequenceSamples:seqN,gapSamples:gapN};
+ });
+ const lastPink=history.reduce((last,r,i)=>r.value>=10?i:last,-1);
+ const roundsSincePink=lastPink<0?history.length:history.length-1-lastPink;
+ const combined={colorSequence:colorSeq,roundsSincePink,historyCount:history.length,rates:combinedRates,baselineRates:baseRates,recentRates,sequenceRates,gapRates,details:signalDetails,method:'experimental-shrunk-combination-v1',warning:'Experimental descriptive estimate; not a guarantee or a validated entry signal.'};
+ return {roundCount:rounds.length,pinkIntervals,combined,pattern:{labels:current.map(label),categories:current,matches:next.length,minimum,median,maximum,roseMinimum,roseMedian,roseMaximum,roseMatches:pinkNext.length,rates,lastSimilarTs:occurrences.length?occurrences[occurrences.length-1]:null,gapCount:patternGaps.length,gapMedian:quantile(patternGaps,.5),gapP20:quantile(patternGaps,.2),gapP80:quantile(patternGaps,.8),effectiveSampleSize:matches.length?Math.pow(matches.reduce((s,x)=>s+x.weight,0),2)/matches.reduce((s,x)=>s+x.weight*x.weight,0):0,method:'weighted-log-similarity-quantiles'} ,thresholds};
 }
 root.TheLordProbability={analyze,quantile,TARGETS};
 })(typeof globalThis==='object'?globalThis:this);
