@@ -17,7 +17,7 @@ function renderTiming(){
   return;
   const chart=document.getElementById('timingChart');
   const a=window.TheLordTiming.analyze(currentRounds(),timingOptions);
-  const tier=timingOptions.minimum===2?'roxas+':timingOptions.minimum===500?'hot':'rosas+';
+  const tier=timingOptions.minimum===2?'≥2x':timingOptions.minimum===10?'≥10x':timingOptions.minimum===50?'≥50x':timingOptions.minimum===100?'≥100x':timingOptions.minimum===500?'≥500x':'≥1000x';
   timingSetText('timingGame',data.activeGame==='aviator2'?'Aviator 2':'Aviator');timingSetText('timingClock',nowTimeStr());
   timingSetText('timingTotal',a.total.toLocaleString('pt-BR'));timingSetText('timingHits',a.hits.toLocaleString('pt-BR'));
   timingSetText('timingTierLabel','Velas '+tier+' (≥'+timingOptions.minimum+'x)');timingSetText('timingHouses',a.currentHouses);
@@ -36,11 +36,11 @@ function renderTiming(){
   renderAdvancedTiming();
 }
 function renderAdvancedTiming(){
- const chart=document.getElementById('timingAdvChart');if(!chart||!window.TheLordTiming||typeof currentRounds!=='function')return;
- const a=window.TheLordTiming.analyze(currentRounds(),timingOptions),tier=timingOptions.minimum===2?'roxas+':timingOptions.minimum===500?'hot':'rosas+';
+ const chart=document.getElementById('timingAdvChart');if(!window.TheLordTiming||typeof currentRounds!=='function')return;
+ const a=window.TheLordTiming.analyze(currentRounds(),timingOptions),tier='≥'+timingOptions.minimum+'x';
  timingSetText('timingAdvGame',data.activeGame==='aviator2'?'Aviator 2':'Aviator');timingSetText('timingAdvClock',nowTimeStr());timingSetText('timingAdvTotal',a.total.toLocaleString('pt-BR'));timingSetText('timingAdvHits',a.hits.toLocaleString('pt-BR'));timingSetText('timingAdvTierLabel','Velas '+tier+' (≥'+timingOptions.minimum+'x)');timingSetText('timingAdvHouses',a.currentHouses);
- chart.className='timing-chart'+(timingOptions.mode==='minute'?' full-minutes':'');
- chart.innerHTML=a.bins.map(b=>{const label=String(b.key).padStart(timingOptions.mode==='minute'?2:1,'0');return '<button type="button" class="timing-column'+(b.hits===a.max&&a.max?' peak':'')+(timingSelected===b.key?' selected':'')+'" onclick="selectTimingBin('+b.key+')" aria-label="Minuto '+label+': '+b.hits+' ocorrências, '+b.total+' rodadas" aria-pressed="'+(timingSelected===b.key)+'"><span class="timing-count">'+b.hits+'</span><span class="timing-track"><span class="timing-fill" style="height:'+(a.max?b.hits/a.max*100:0)+'%"></span></span><span class="timing-digit">'+label+'</span></button>';}).join('');
+ if(chart){chart.className='timing-chart'+(timingOptions.mode==='minute'?' full-minutes':'');
+ chart.innerHTML=a.bins.map(b=>{const label=String(b.key).padStart(timingOptions.mode==='minute'?2:1,'0');return '<button type="button" class="timing-column'+(b.hits===a.max&&a.max?' peak':'')+(timingSelected===b.key?' selected':'')+'" onclick="selectTimingBin('+b.key+')" aria-label="Minuto '+label+': '+b.hits+' ocorrências, '+b.total+' rodadas" aria-pressed="'+(timingSelected===b.key)+'"><span class="timing-count">'+b.hits+'</span><span class="timing-track"><span class="timing-fill" style="height:'+(a.max?b.hits/a.max*100:0)+'%"></span></span><span class="timing-digit">'+label+'</span></button>';}).join('');}
  timingSetText('timingAdvSummary',a.total?a.hits+' ocorrências em '+a.total+' rodadas · '+(a.ranked.length?'Pico: '+a.ranked.filter(b=>b.hits===a.max).map(b=>b.key).join(', ')+' ('+a.max+' ocorrências)':'Nenhuma ocorrência neste período'):(data.activeGame==='aviator2'?'Velas automáticas ainda não ativas para o Aviator 2.':'Aguardando velas do Monitor neste período.'));
  timingSetText('timingAdvCoverage',a.firstTs?'Horário local · Primeira vela da amostra: '+new Date(a.firstTs).toLocaleString('pt-BR'):'Horário local · Sem amostra');
  const highlights=document.getElementById('timingHighlights');if(highlights)highlights.innerHTML=a.ranked.slice(0,3).map(b=>{const minutes=timingOptions.mode==='digit'?Array.from({length:6},(_,i)=>String(i*10+b.key).padStart(2,'0')).join(' · '):String(b.key).padStart(2,'0');return '<div class="timing-highlight"><div class="timing-highlight-head"><b>'+(timingOptions.mode==='digit'?'Final '+b.key:'Minuto '+minutes)+'</b><span>'+b.hits+' velas</span></div><div class="timing-minute-list">'+(timingOptions.mode==='digit'?minutes:'≥'+timingOptions.minimum+'x')+'</div><div class="timing-highlight-meta">'+b.rate.toFixed(1)+'% de '+b.total+' rodadas · '+(b.averageHouses===null?'—':b.averageHouses.toFixed(1))+' casas em média</div></div>';}).join('')||'<div class="timing-empty">Sem ocorrências para comparar neste período.</div>';
