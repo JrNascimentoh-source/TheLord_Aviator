@@ -9,7 +9,7 @@ function analyze(input,options={}) {
  const rounds=(Array.isArray(input)?input:[]).filter(r=>r&&Number.isFinite(Number(r.value))&&Number(r.value)>=1&&Number.isFinite(Number(r.ts))&&Number(r.ts)<=now).map(r=>({id:r.id,value:Number(r.value),ts:Number(r.ts)})).sort((a,b)=>a.ts-b.ts);
  const currentRounds=rounds.slice(-size),current=currentRounds.map(r=>category(r.value)),currentLog=currentRounds.map(r=>Math.log(r.value)),matches=[];
  // Busca janelas anteriores semelhantes; cada correspondência contribui com o resultado imediatamente seguinte.
- for(let i=size;i<=rounds.length-size;i++){
+ for(let i=size;i<rounds.length-size;i++){
   const prev=rounds.slice(i-size,i),logs=prev.map(r=>Math.log(r.value)),cats=prev.map(r=>category(r.value));
   let distance=0;
   for(let j=0;j<size;j++){
@@ -68,8 +68,8 @@ function analyze(input,options={}) {
    signalDetails[target]={baseline:base,recent:recentRate,sequence:seq,gap:gap,combined,sequenceSamples:sc.n,gapSamples:gc.n};
  });
  const lastPink=history.reduce((last,r,i)=>r.value>=10?i:last,-1);
- const roundsSincePink=lastPink<0?history.length:history.length-1-lastPink;
- const combined={colorSequence:colorSeq,roundsSincePink,historyCount:history.length,rates:combinedRates,baselineRates:baseRates,recentRates,sequenceRates,gapRates,details:signalDetails,method:'experimental-shrunk-combination-v1',warning:'Experimental descriptive estimate; not a guarantee or a validated entry signal.'};
+ const combinedRoundsSincePink=lastPink<0?history.length:history.length-1-lastPink;
+ const combined={colorSequence:colorSeq,roundsSincePink:combinedRoundsSincePink,historyCount:history.length,rates:combinedRates,baselineRates:baseRates,recentRates,sequenceRates,gapRates,details:signalDetails,method:'experimental-shrunk-combination-v1',warning:'Experimental descriptive estimate; not a guarantee or a validated entry signal.'};
  return {roundCount:rounds.length,pinkIntervals,combined,pattern:{labels:current.map(label),categories:current,matches:next.length,minimum,median,maximum,roseMinimum,roseMedian,roseMaximum,roseMatches:pinkNext.length,rates,lastSimilarTs:occurrences.length?occurrences[occurrences.length-1]:null,gapCount:patternGaps.length,gapMedian:quantile(patternGaps,.5),gapP20:quantile(patternGaps,.2),gapP80:quantile(patternGaps,.8),effectiveSampleSize:matches.length?Math.pow(matches.reduce((s,x)=>s+x.weight,0),2)/matches.reduce((s,x)=>s+x.weight*x.weight,0):0,method:'weighted-log-similarity-quantiles'} ,thresholds};
 }
 root.TheLordProbability={analyze,quantile,TARGETS};
