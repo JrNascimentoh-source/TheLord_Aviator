@@ -13,7 +13,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#070509">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="style.css?v=20261027-prob2">
+<link rel="stylesheet" href="style.css?v=20261027-prob3">
 <link rel="stylesheet" href="desktop.css?v=20261022m">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 </head>
@@ -427,12 +427,12 @@
 
 <main id="timing" class="hidden">
   <section class="card probability-card" id="probabilityCard">
-    <div class="title">🎯 Probabilidade das velas · últimas 24h</div>
+    <div class="title">🎯 Padrão de repetição das velas · últimas 24h</div>
     <div class="probability-subtitle">Jogo: <strong id="probabilityGame">Aviator</strong> · <span id="probabilitySample">Carregando histórico das últimas 24h...</span></div>
     <div id="probabilityGrid" class="probability-grid" aria-live="polite">
       <div class="probability-empty">Carregando histórico compartilhado...</div>
     </div>
-    <div class="probability-note">Análise do histórico compartilhado das últimas 24 horas. A frequência observada, o intervalo médio e a média das velas rosa descrevem resultados anteriores; não permitem garantir nem prever a próxima rodada.</div>
+    <div class="probability-note">Análise dos intervalos de tempo entre ocorrências históricas de 10x, 20x ou 30x nas últimas 24 horas. “Observar padrão” significa apenas que o tempo atual está perto do intervalo mediano passado; não é previsão nem garantia de resultado ou de entrada.</div>
   </section>
 
   <section class="card timing-advanced"><div class="title">📊 Distribuição por minutagem</div><p class="timing-source">Análise complementar do histórico do Monitor · <span id="timingAdvGame">Aviator</span> · <time id="timingAdvClock"></time></p><div class="timing-controls"><label class="timing-option-group"><span>Janela</span><select class="timing-select" aria-label="Janela de análise" onchange="setTimingOption('hours',Number(this.value))"><option value="1">Última hora</option><option value="6">Últimas 6 Hrs</option><option value="12">Últimas 12 Hrs</option><option value="24">Últimas 24 Hrs</option></select></label><label class="timing-option-group"><span>Ocorrência</span><select class="timing-select" aria-label="Multiplicador mínimo" onchange="setTimingOption('minimum',Number(this.value))"><option value="2">⚡ ≥2x</option><option value="10">🌀 ≥10x</option><option value="50">🔥 ≥50x</option><option value="100">🚀 ≥100x</option><option value="500">⭐ ≥500x</option><option value="1000">🌟 ≥1000x</option></select></label><div class="timing-option-group"><span>Agrupar por</span><button data-timing-option="mode" data-value="digit" onclick="setTimingOption('mode','digit')">Final do minuto</button><button data-timing-option="mode" data-value="minute" onclick="setTimingOption('mode','minute')">Minutos 00–59</button></div><label class="timing-period-label">Período do dia <select id="timingAdvPeriod" onchange="setTimingOption('period',this.value)"><option value="all">Todo o dia</option><option value="Manhã">Manhã (05–11h)</option><option value="Tarde">Tarde (12–17h)</option><option value="Noite">Noite (18–04h)</option></select></label></div><div id="timingAdvChart" class="timing-chart"><div class="timing-empty">Aguardando histórico do Monitor.</div></div><div class="timing-kpis"><div><small>Rodadas analisadas</small><b id="timingAdvTotal">0</b></div><div><small>Ocorrências</small><b id="timingAdvHits">0</b></div><div><small>Categoria</small><b id="timingAdvTierLabel">Velas ≥10x</b></div><div><small id="timingAdvHousesLabel">Casas desde ≥2x</small><b id="timingAdvHouses">—</b></div></div><p id="timingAdvSummary" class="timing-note">Aguardando dados.</p><p id="timingAdvCoverage" class="timing-note"></p><div id="timingAdvDetail" class="timing-detail hidden"><b id="timingAdvDetailTitle"></b><div id="timingAdvEvents"></div></div><p class="timing-note">Frequências históricas não preveem nem garantem o próximo resultado.</p></section>
@@ -571,7 +571,7 @@
 </div>
 
 <script src="timing-core.js?v=20261026b" defer></script>
-<script src="app.js?v=20261027-prob2" defer></script>
+<script src="app.js?v=20261027-prob3" defer></script>
 <script src="timing.js?v=20261026d" defer></script>
 <script>
 if ('serviceWorker' in navigator) {
