@@ -972,7 +972,7 @@ let initialVelasLoaded=false;
 let syncVelasRunning=false;
 async function syncVelas(){
   if(syncVelasRunning)return;
-  if(typeof supabaseClient==='undefined'||!supabaseClient){lastSyncOk=false;renderCollectorStatus();return;}
+  if(typeof supabaseClient==='undefined'||!supabaseClient){lastSyncOk=false;renderCollectorStatus();const grid=document.getElementById('probabilityGrid');if(grid)grid.innerHTML='<div class="probability-empty">Conexão com o histórico compartilhado indisponível. Verifique se o Supabase terminou de carregar e tente novamente.</div>';return;}
   syncVelasRunning=true;
   try{
     // A primeira carga recupera TODO o histórico compartilhado; depois, consulta
@@ -983,7 +983,7 @@ async function syncVelas(){
       let query=supabaseClient.from('velas').select('id,game,value,created_at').order('id',{ascending:true});
       if(since) query=query.gte('created_at',since);
       const result=await query.range(offset,offset+VELAS_PAGE_SIZE-1);
-      if(result.error||!result.data){lastSyncOk=false;renderCollectorStatus();return;}
+      if(result.error||!result.data){lastSyncOk=false;renderCollectorStatus();const grid=document.getElementById('probabilityGrid');if(grid)grid.innerHTML='<div class="probability-empty">Não foi possível carregar o histórico compartilhado. Verifique a conexão e as permissões de leitura.</div>';console.error('Erro ao consultar histórico compartilhado de velas:',result.error);return;}
       page=result.data;rows=rows.concat(page);offset+=page.length;
     }while(page.length===VELAS_PAGE_SIZE);
     lastSyncOk=true;
@@ -1009,8 +1009,10 @@ async function syncVelas(){
       sharedRoundsByGame[game].sort((a,b)=>a.ts-b.ts);
     });
     renderCollectorStatus();
+    // Atualiza o card mesmo quando a sincronização não trouxe rodadas novas.
+    renderProbabilityCard();
     if(changed){renderMonitor();const timing=document.getElementById('timing');if(timing&&!timing.classList.contains('hidden')){if(typeof renderTiming==='function')renderTiming();else renderTimingAnalysis();}}
-  }catch(e){console.error('Erro ao sincronizar histórico compartilhado de velas:',e);lastSyncOk=false;renderCollectorStatus();}
+  }catch(e){console.error('Erro ao sincronizar histórico compartilhado de velas:',e);lastSyncOk=false;renderCollectorStatus();const grid=document.getElementById('probabilityGrid');if(grid)grid.innerHTML='<div class="probability-empty">Falha ao sincronizar o histórico compartilhado. Confira a conexão e recarregue a página.</div>';
   finally{syncVelasRunning=false;}
 }
 setInterval(syncVelas,3000);
