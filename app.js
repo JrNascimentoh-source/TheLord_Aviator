@@ -940,7 +940,11 @@ function renderProbabilityCard(){
     <div class="probability-signal-detail">${detail}</div>
    </div>
    <div class="probability-range-button maximum"><span>TETO MÁXIMO</span><strong>${maximum===null?'—':fmtX(maximum)}</strong><small>${enoughRoseMaximum?'Faixa rosa estimada P20–P80: '+fmtX(roseMinimum)+'–'+fmtX(roseMaximum):'Aguardando rosa após padrão semelhante'}</small></div>
-  </div></div>`;
+  </div>
+  <div class="probability-pattern-line"><b>PADRÃO ATUAL:</b> ${patternLabel} · ${pattern.matches.toLocaleString('pt-BR')} sequências semelhantes no histórico.
+   ${pattern.matches>=20?'Frequência histórica após padrões semelhantes: ≥10x '+fmtPct(pattern.rates[10])+' · ≥50x '+fmtPct(pattern.rates[50])+' · ≥100x '+fmtPct(pattern.rates[100])+'.':'Amostra insuficiente para resumir frequências de 10x, 50x e 100x; são necessárias pelo menos 20 sequências semelhantes.'}
+  </div>
+ </div>`;
 }
 function setActiveGame(game){
   data.activeGame=game;
