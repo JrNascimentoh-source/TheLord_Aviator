@@ -882,24 +882,23 @@ body.auth-login #login .login-back{display:none!important}
 @media(max-width:699px){.timing-column{grid-template-rows:20px 92px 20px;row-gap:2px}.timing-count{padding-bottom:3px}.timing-digit{padding-top:3px}.timing-chart{margin-top:3px;margin-bottom:5px}}
 
 
-/* Card de probabilidade das velas na aba Minutagem — identidade visual existente */
+/* Card único de análise estatística das velas na aba Minutagem */
 .probability-card .title{margin-bottom:7px}
-.probability-subtitle{font-size:.7rem;color:var(--muted);line-height:1.5;margin-bottom:15px}
+.probability-subtitle{font-size:.7rem;color:var(--muted);line-height:1.5;margin-bottom:13px}
 .probability-subtitle strong{color:var(--gold)}
-.probability-table-head,.probability-row{display:grid;grid-template-columns:minmax(70px,.75fr) minmax(90px,1fr) minmax(100px,1fr);gap:8px;align-items:center}
-.probability-table-head{padding:0 10px 8px;color:var(--muted);font-size:.58rem;font-weight:900;text-transform:uppercase;line-height:1.35}
-.probability-row{padding:11px 10px;border:1px solid rgba(255,255,255,.075);border-radius:12px;background:rgba(255,255,255,.025);margin-bottom:7px}
-.probability-target{color:var(--gold);font-size:.82rem;font-weight:950;white-space:nowrap}
-.probability-metric{display:flex;flex-direction:column;gap:3px;min-width:0}
-.probability-value{font-size:.88rem;font-weight:950;color:var(--green);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
-.probability-caption{font-size:.58rem;color:var(--muted);line-height:1.25}
-.probability-count{grid-column:1/-1;color:rgba(228,196,131,.78);font-size:.61rem;padding-top:1px}
+.probability-single{padding:12px;border:1px solid rgba(255,255,255,.09);border-radius:14px;background:rgba(255,255,255,.025)}
+.probability-target-picker{display:flex;gap:8px;margin-bottom:13px}
+.probability-target-choice{flex:1;padding:9px 10px;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:rgba(255,255,255,.035);color:var(--muted);font-weight:900;font-size:.8rem}
+.probability-target-choice.active{border-color:var(--gold);background:rgba(255,192,31,.12);color:var(--gold);box-shadow:inset 0 0 0 1px rgba(255,192,31,.12)}
+.probability-single-main{text-align:center;padding:5px 3px 14px}
+.probability-big-number{font-size:clamp(1.8rem,7vw,2.5rem);font-weight:950;color:var(--green);font-variant-numeric:tabular-nums;line-height:1.15}
+.probability-main-label{margin-top:5px;font-size:.76rem;font-weight:850;color:var(--text)}
+.probability-main-detail{margin-top:5px;font-size:.65rem;color:var(--muted);line-height:1.4}
+.probability-stats{display:grid;grid-template-columns:1fr;gap:7px}
+.probability-stat{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;border-radius:9px;background:rgba(255,255,255,.035)}
+.probability-stat span{font-size:.66rem;color:var(--muted);line-height:1.35}
+.probability-stat strong{font-size:.72rem;color:var(--gold);text-align:right;font-variant-numeric:tabular-nums}
 .probability-empty{padding:14px 10px;border:1px dashed rgba(255,255,255,.13);border-radius:12px;text-align:center;color:var(--muted);font-size:.7rem;line-height:1.45}
 .probability-note{margin-top:10px;color:var(--muted);font-size:.63rem;line-height:1.5}
-@media(max-width:380px){
-  .probability-table-head,.probability-row{grid-template-columns:minmax(58px,.65fr) minmax(82px,1fr) minmax(90px,1fr);gap:5px}
-  .probability-table-head{font-size:.52rem;padding-left:6px;padding-right:6px}
-  .probability-row{padding:10px 6px}
-  .probability-value{font-size:.79rem}
-  .probability-target{font-size:.75rem}
-}
+@media(min-width:520px){.probability-stats{grid-template-columns:repeat(3,minmax(0,1fr))}.probability-stat{flex-direction:column;align-items:flex-start;justify-content:flex-start}.probability-stat strong{text-align:left}}
+@media(max-width:380px){.probability-single{padding:9px}.probability-target-picker{gap:5px}.probability-target-choice{padding:8px 5px}.probability-stat{padding:8px}.probability-stat span{font-size:.62rem}.probability-stat strong{font-size:.68rem}}
