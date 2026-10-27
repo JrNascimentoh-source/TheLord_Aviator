@@ -896,7 +896,7 @@ function renderProbabilityCard(){
   if(gameEl)gameEl.textContent=game==='aviator2'?'Aviator 2':'Aviator';
   if(!total){grid.innerHTML='<div class="probability-empty">Ainda não há rodadas válidas nas últimas 24 horas para a análise automática.</div>';return;}
   if(!window.TheLordProbability||typeof window.TheLordProbability.analyze!=='function'){grid.innerHTML='<div class="probability-empty">O motor estatístico ainda não foi carregado. Atualize a página para tentar novamente.</div>';return;}
-  const analysis=window.TheLordProbability.analyze(allRounds,{now,patternSize:5}),pattern=analysis.pattern,thresholds=analysis.thresholds;
+  const analysis=window.TheLordProbability.analyze(allRounds,{now,patternSize:2}),pattern=analysis.pattern,thresholds=analysis.thresholds;
   const enoughPattern=pattern.matches>=30&&Number.isFinite(pattern.minimum)&&Number.isFinite(pattern.maximum);
   const minimum=enoughPattern?pattern.minimum:null,maximum=enoughPattern?pattern.maximum:null;
   const enoughGaps=pattern.gapCount>=5&&Number.isFinite(pattern.gapMedian)&&pattern.gapMedian>0&&Number.isFinite(pattern.lastSimilarTs);
