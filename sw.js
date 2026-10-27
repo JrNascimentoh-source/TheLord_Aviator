@@ -1,4 +1,4 @@
-const CACHE_NAME = 'thelord-aviator-oficial-v13-windows-sync';
+const CACHE_NAME = 'thelord-aviator-oficial-v14-no-chart';
 const APP_SHELL = [
   './',
   './index.html',
