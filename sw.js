@@ -1,4 +1,4 @@
-const CACHE_NAME = 'thelord-aviator-oficial-v14-no-chart';
+const CACHE_NAME = 'thelord-aviator-oficial-v15-mobile-chart-select';
 const APP_SHELL = [
   './',
   './index.html',
