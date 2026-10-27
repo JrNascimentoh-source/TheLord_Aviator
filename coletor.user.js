@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         TheLord Coletor de Velas
-// @version      1.7
+// @version      1.8
 // @description  Coleta velas do Aviator, mantém pendências e recarrega a página a cada 5 minutos
 // @match        *://*/*
 // @match        *://*.spribegaming.com/*
@@ -238,7 +238,7 @@
     lastSig = localStorage.getItem(SIG_KEY) || null;
   } catch (_) {}
 
-  // Exige duas leituras consecutivas iguais antes de aceitar uma nova assinatura.
+  // Exige três leituras consecutivas iguais antes de aceitar uma nova assinatura.
   // Isso reduz falsos positivos causados por atualizações transitórias do DOM.
   let observedSig = null;
   let observedCount = 0;
@@ -263,7 +263,7 @@
 
     // A primeira leitura estável serve apenas como referência inicial.
     if (lastSig === null) {
-      if (observedCount < 2) return;
+      if (observedCount < 3) return;
 
       lastSig = sig;
       try {
@@ -274,8 +274,8 @@
       return;
     }
 
-    // Só registra mudança depois de duas leituras seguidas com a mesma assinatura.
-    if (sig !== lastSig && observedCount >= 2) {
+    // Só registra mudança depois de três leituras seguidas com a mesma assinatura.
+    if (sig !== lastSig && observedCount >= 3) {
       lastSig = sig;
 
       try {
