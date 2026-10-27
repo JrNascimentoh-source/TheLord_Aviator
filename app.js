@@ -954,7 +954,7 @@ async function syncVelas(){
       sharedRoundsByGame[game].sort((a,b)=>a.ts-b.ts);
     });
     renderCollectorStatus();
-    if(changed){renderMonitor();const timing=document.getElementById('timing');if(timing&&!timing.classList.contains('hidden'))renderTimingAnalysis();}
+    if(changed){renderMonitor();const timing=document.getElementById('timing');if(timing&&!timing.classList.contains('hidden')){if(typeof renderTiming==='function')renderTiming();else renderTimingAnalysis();}}
   }catch(e){console.error('Erro ao sincronizar histórico compartilhado de velas:',e);lastSyncOk=false;renderCollectorStatus();}
   finally{syncVelasRunning=false;}
 }
