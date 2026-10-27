@@ -6,6 +6,9 @@
 // @match        *://*.spribegaming.com/*
 // @match        *://*.spribe.io/*
 // @match        *://*.spribe.co/*
+// Exclui o domínio 7a7dd.com da execução do coletor.
+// @exclude      *://7a7dd.com/*
+// @exclude      *://*.7a7dd.com/*
 // @grant        none
 // @run-at       document-idle
 // ==/UserScript==
