@@ -3,10 +3,10 @@
 // @version      1.8
 // @description  Teste isolado: identifica a plataforma pelo host e mantém filas separadas
 // @match        https://betdopovo.co/*
- // @match        https://*.betdopovo.co/*
- // @match        *://*.spribegaming.com/*
- // @match        *://*.spribe.io/*
- // @match        *://*.spribe.co/*
+// @match        https://*.betdopovo.co/*
+// @match        *://*.spribegaming.com/*
+// @match        *://*.spribe.io/*
+// @match        *://*.spribe.co/*
 // @grant        none
 // @run-at       document-idle
 // ==/UserScript==
