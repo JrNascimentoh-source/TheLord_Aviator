@@ -1,15 +1,9 @@
 // ==UserScript==
-// @name         TheLord Coletor de Velas — Aviator 2
+// @name         TheLord Coletor 2
 // @version      1.0.0
-// @description  Coletor isolado do Aviator 2; mantém pendências e confirma leituras estáveis
+// @description  Coletor isolado de resultados; mantém pendências e confirma leituras estáveis
 // @match        https://betdopovo.co/*
 // @match        https://*.betdopovo.co/*
-// @match        https://*.spribegaming.com/*
-// @match        https://*.spribe.io/*
-// @match        https://*.spribe.co/*
-// Exclui o domínio 7a7dd.com da execução do coletor.
-// @exclude      *://7a7dd.com/*
-// @exclude      *://*.7a7dd.com/*
 // @grant        none
 // @run-at       document-idle
 // ==/UserScript==
@@ -63,7 +57,7 @@
     'background:#000c;color:#ffc72c;font:11px sans-serif;' +
     'padding:3px 6px;border-radius:6px;pointer-events:none';
 
-  badge.textContent = 'TheLord: iniciando...';
+  badge.textContent = 'TheLord Coletor 2: iniciando...';
 
   function showBadge() {
     if (document.body && !document.body.contains(badge)) {
@@ -132,7 +126,7 @@
       localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
       return true;
     } catch (_) {
-      badge.textContent = 'TheLord: erro ao salvar pendências';
+      badge.textContent = 'TheLord Coletor 2: erro ao salvar pendências';
       return false;
     }
   }
@@ -145,7 +139,7 @@
       time: new Date().toISOString()
     });
     if (saveQueue(queue)) {
-      badge.textContent = 'TheLord: pendente ' + value + 'x';
+      badge.textContent = 'TheLord Coletor 2: pendente ' + value + 'x';
       sendNext();
     }
   }
@@ -181,7 +175,7 @@
         });
 
         if (!response.ok) {
-          badge.textContent = 'TheLord: erro HTTP ' + response.status;
+          badge.textContent = 'TheLord Coletor 2: erro HTTP ' + response.status;
           break;
         }
 
@@ -190,14 +184,14 @@
         saveQueue(queue);
 
         badge.textContent =
-          'TheLord: enviada ' +
+          'TheLord Coletor 2: enviada ' +
           Number(item.value).toLocaleString('en-US', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
           }) + 'x';
 
       } catch (_) {
-        badge.textContent = 'TheLord: sem internet; pendente salva';
+        badge.textContent = 'TheLord Coletor 2: sem internet; pendente salva';
         break;
       }
 
@@ -227,9 +221,9 @@
         location.reload();
       }, delay);
 
-      badge.textContent = 'TheLord: ativo; recarga em até 5 min';
+      badge.textContent = 'TheLord Coletor 2: ativo; recarga em até 5 min';
     } catch (_) {
-      badge.textContent = 'TheLord: armazenamento indisponível';
+      badge.textContent = 'TheLord Coletor 2: armazenamento indisponível';
     }
   }
 
@@ -271,7 +265,7 @@
         localStorage.setItem(SIG_KEY, sig);
       } catch (_) {}
 
-      badge.textContent = 'TheLord: coletando (' + host + ')';
+      badge.textContent = 'TheLord Coletor 2: ativo (' + host + ')';
       return;
     }
 
