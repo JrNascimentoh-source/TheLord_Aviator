@@ -4,6 +4,8 @@
 // @description  Teste isolado: identifica a plataforma pelo host e mantém filas separadas
 // @match        https://betdopovo.co/*
 // @match        https://betdopovo.co/
+// @match        https://betdopovo.co/game/spribe/aviator
+// @match        https://betdopovo.co/game/spribe/aviator*
 // @match        *://*.spribegaming.com/*
 // @match        *://*.spribe.io/*
 // @match        *://*.spribe.co/*
