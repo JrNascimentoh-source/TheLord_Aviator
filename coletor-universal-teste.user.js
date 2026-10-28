@@ -1,14 +1,11 @@
 // ==UserScript==
-// @name         TheLord Coletor Universal (TESTE)
-// @version      1.8
-// @description  Teste isolado: identifica a plataforma pelo host e mantém filas separadas
-// @match        https://betdopovo.co/*
-// @match        https://betdopovo.co/
-// @match        https://betdopovo.co/game/spribe/aviator
-// @match        https://betdopovo.co/game/spribe/aviator*
-// @match        *://*.spribegaming.com/*
-// @match        *://*.spribe.io/*
-// @match        *://*.spribe.co/*
+// @name         TheLord Coletor Universal
+// @namespace    thelord-aviator
+// @version      2.1
+// @description  Identifica automaticamente Aviator ou Aviator 2 (inclusive dentro do iframe da Spribe) e envia as velas para o jogo correto
+// @match        *://*/*
+// @exclude      *://7a7dd.com/*
+// @exclude      *://*.7a7dd.com/*
 // @grant        none
 // @run-at       document-idle
 // ==/UserScript==
@@ -16,19 +13,70 @@
 (function () {
   'use strict';
 
-  const PLATFORM_CONFIG = [
-    { matches: ['betdopovo.co', '.betdopovo.co'], game: 'aviator2' },
-    { matches: ['spribegaming.com', '.spribegaming.com', 'spribe.io', '.spribe.io', 'spribe.co', '.spribe.co'], game: 'aviator' }
-  ];
-  function identifyGame(hostname) {
-    const host = String(hostname || '').toLowerCase();
-    const config = PLATFORM_CONFIG.find(item => item.matches.some(domain =>
-      domain.startsWith('.') ? host.endsWith(domain) : host === domain
-    ));
-    return config ? config.game : null;
+  // Qualquer endereço que contenha estes nomes é tratado como Aviator 2
+  // (vale para betdopovo.co, betdopovo.com, www.betdopovo..., etc.).
+  const AVIATOR2_NAMES = ['betdopovo'];
+
+  function isAviator2Host(host) {
+    host = String(host || '').toLowerCase();
+    return AVIATOR2_NAMES.some(n => host.indexOf(n) !== -1);
   }
-  const GAME = identifyGame(location.hostname);
-  if (!GAME) return;
+  function hostOf(url) {
+    try { return new window.URL(url).hostname.toLowerCase(); } catch (_) { return ''; }
+  }
+
+  const SELF_HOST = location.hostname.toLowerCase();
+  const IS_TOP = window.top === window.self;
+  const MSG = 'thelord-coletor-top-host';
+
+  // Endereço da página principal, quando já for conhecido.
+  let topHost = IS_TOP ? SELF_HOST : '';
+
+  function forwardToFrames(h) {
+    for (let i = 0; i < window.frames.length; i++) {
+      try { window.frames[i].postMessage({ type: MSG, host: h }, '*'); } catch (_) {}
+    }
+  }
+
+  // A página principal avisa os quadros (o jogo) em qual site eles estão,
+  // e cada quadro repassa o aviso para os quadros dentro dele.
+  window.addEventListener('message', ev => {
+    const d = ev.data;
+    if (!d || d.type !== MSG || IS_TOP) return;
+    topHost = String(d.host || '').toLowerCase();
+    forwardToFrames(topHost);
+  });
+  if (IS_TOP) {
+    forwardToFrames(SELF_HOST);
+    setInterval(() => forwardToFrames(SELF_HOST), 1500);
+  }
+
+  // Igual ao coletor original: roda em qualquer página.
+  // Aviator 2 = página principal (ou o próprio quadro) no betdopovo; senão, Aviator.
+  function resolveGame() {
+    return new Promise(resolve => {
+      if (isAviator2Host(SELF_HOST)) return resolve('aviator2');
+      if (IS_TOP) return resolve('aviator');
+
+      // Chrome/Edge: ancestorOrigins. Firefox: document.referrer.
+      try {
+        const anc = location.ancestorOrigins;
+        if (anc && anc.length) return resolve(isAviator2Host(hostOf(anc[anc.length - 1])) ? 'aviator2' : 'aviator');
+      } catch (_) {}
+      if (isAviator2Host(hostOf(document.referrer))) return resolve('aviator2');
+
+      // Aguarda o aviso da página principal; sem aviso em 4 s, assume Aviator.
+      const t0 = Date.now();
+      const wait = setInterval(() => {
+        if (topHost) { clearInterval(wait); resolve(isAviator2Host(topHost) ? 'aviator2' : 'aviator'); }
+        else if (Date.now() - t0 > 4000) { clearInterval(wait); resolve('aviator'); }
+      }, 200);
+    });
+  }
+
+  resolveGame().then(start);
+
+  function start(GAME) {
   const URL = 'https://aypjaqmmlurlqeotbepp.supabase.co/rest/v1/velas';
 
   // Chave original da versão 1.3 — mantida exatamente como estava.
@@ -39,7 +87,7 @@
   const RELOAD_KEY = 'thelord_universal_reload_v1_' + GAME;
   const RELOAD_MS = 5 * 60 * 1000;
   const host = location.hostname;
-  const isTop = window.top === window.self;
+  const isTop = IS_TOP;
 
   function parseMultiplier(text) {
     let raw = String(text || '')
@@ -74,7 +122,7 @@
     'background:#000c;color:#ffc72c;font:11px sans-serif;' +
     'padding:3px 6px;border-radius:6px;pointer-events:none';
 
-  badge.textContent = 'TheLord: iniciando...';
+  badge.textContent = 'TheLord [' + GAME + ']: aguardando velas';
 
   function showBadge() {
     if (document.body && !document.body.contains(badge)) {
@@ -238,7 +286,7 @@
         location.reload();
       }, delay);
 
-      badge.textContent = 'TheLord: ativo; recarga em até 5 min';
+      badge.textContent = 'TheLord [' + GAME + ']: ativo; recarga em até 5 min';
     } catch (_) {
       badge.textContent = 'TheLord: armazenamento indisponível';
     }
@@ -299,4 +347,5 @@
   }, 1000);
 
   setupReload();
+  }
 })();
