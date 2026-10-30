@@ -41,6 +41,7 @@ if(data.contagemAtivada===undefined) data.contagemAtivada=true;
 
 const money=v=>'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const pct=v=>Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%';
+const formatMultiplier=v=>Number.isFinite(Number(v))?new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(v))+'x':'—';
 
 function save(){
   storageSet(STORAGE_KEY,JSON.stringify(data));
@@ -868,8 +869,9 @@ function nowTimeStr(d){d=d||new Date();return String(d.getHours()).padStart(2,'0
 const sharedRoundsByGame={aviator:[],aviator2:[]};
 function currentRounds(){return sharedRoundsByGame[data.activeGame]||[]}
 let monitorHistoryRange=storageGet('thelord_monitor_history_range')||'all';
+if(!['all','1h','6h','12h','24h'].includes(monitorHistoryRange))monitorHistoryRange='all';
 function setMonitorHistoryRange(range){
-  monitorHistoryRange=range==='24h'?'24h':'all';
+  monitorHistoryRange=['all','1h','6h','12h','24h'].includes(range)?range:'all';
   storageSet('thelord_monitor_history_range',monitorHistoryRange);
   const select=document.getElementById('monitorHistoryRange');
   if(select)select.value=monitorHistoryRange;
@@ -877,9 +879,10 @@ function setMonitorHistoryRange(range){
 }
 function getMonitorRounds(){
   const rounds=currentRounds();
-  if(monitorHistoryRange!=='24h')return rounds;
-  const cutoff=Date.now()-ROUND_MAX_AGE_MS;
-  return rounds.filter(r=>r.ts>=cutoff);
+  if(monitorHistoryRange==='all')return rounds;
+  const hours=Number(monitorHistoryRange.replace('h',''));
+  const cutoff=Date.now()-hours*60*60*1000;
+  return rounds.filter(r=>Number.isFinite(Number(r.ts))&&Number(r.ts)>=cutoff);
 }
 function renderProbabilityCard(){
   const grid=document.getElementById('probabilityGrid'),sampleEl=document.getElementById('probabilitySample'),gameEl=document.getElementById('probabilityGame');
@@ -1168,7 +1171,7 @@ function renderMonitor(){
         : '';
       previousDay=dayKey;
       const cls=classifyRound(r.value).key;
-      const valLabel=(r.value!==null && r.value!==undefined)?r.value.toFixed(2)+'x':colorMeta[cls].label;
+      const valLabel=(r.value!==null && r.value!==undefined)?formatMultiplier(r.value):colorMeta[cls].label;
       const isStreakEnd=streakEndById[r.id];
       const showBadge=contagemCasasEnabled;
       const streakClass=(showBadge && isStreakEnd)?' streak-end':'';
@@ -1196,11 +1199,11 @@ function renderMonitor(){
 
   const setText=(id,txt)=>{const el=document.getElementById(id);if(el)el.textContent=txt};
   setText('statRounds',totalRounds);
-  setText('statAvg',avg.toFixed(2)+'x');
+  setText('statAvg',formatMultiplier(avg));
   setText('statAbove2',above2+'%');
   setText('statAbove10',above10+'%');
   setText('statAbove100',above100Count);
-  setText('statMax',maxValue.toFixed(2)+'x');
+  setText('statMax',formatMultiplier(maxValue));
 
   const counts={blue:0,purple:0,pink:0,yellow:0,hot:0,fire:0};
   rounds.forEach(r=>counts[classifyRound(r.value).key]++);
