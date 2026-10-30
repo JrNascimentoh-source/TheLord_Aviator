@@ -1,11 +1,36 @@
 'use strict';
 const timingOptions={hours:1,minimum:10,mode:'digit',period:'all'};
 let timingSelected=null;
+const timingPickerOptions={"hours":[["1","Última hora"],["6","Últimas 6 Hrs"],["12","Últimas 12 Hrs"],["24","Últimas 24 Hrs"]],"minimum":[["2","⚡ ≥2x"],["10","🌀 ≥10x"],["50","🔥 ≥50x"],["100","🚀 ≥100x"],["500","⭐ ≥500x"],["1000","🌟 ≥1000x"]],"period":[["all","Todo o dia"],["Manhã","Manhã (05–11h)"],["Tarde","Tarde (12–17h)"],["Noite","Noite (18–04h)"]]};
+function toggleTimingPicker(id,force){
+  const menu=document.getElementById(id+'Menu'),trigger=document.getElementById(id+'Trigger');
+  if(!menu||!trigger)return;
+  const open=typeof force==='boolean'?force:menu.hidden;
+  document.querySelectorAll('.timing-picker-menu').forEach(other=>{if(other!==menu)other.hidden=true;});
+  document.querySelectorAll('.timing-picker-trigger').forEach(other=>{if(other!==trigger)other.setAttribute('aria-expanded','false');});
+  menu.hidden=!open;trigger.setAttribute('aria-expanded',String(open));
+}
+function updateTimingPickers(){
+  Object.keys(timingPickerOptions).forEach(key=>{
+    const id='timing'+key[0].toUpperCase()+key.slice(1),value=String(timingOptions[key]);
+    const label=document.getElementById(id+'Label'),menu=document.getElementById(id+'Menu'),trigger=document.getElementById(id+'Trigger');
+    const option=timingPickerOptions[key].find(item=>item[0]===value)||timingPickerOptions[key][0];
+    if(label)label.textContent=option[1];
+    if(trigger)trigger.setAttribute('aria-label',option[1]);
+    if(menu)menu.querySelectorAll('[data-timing-picker-value]').forEach(button=>{
+      const active=button.dataset.timingPickerValue===value;
+      button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));
+    });
+  });
+}
 function setTimingOption(key,value){
   timingOptions[key]=value;timingSelected=null;
   const p=document.getElementById('timingPeriod');if(p)p.value=timingOptions.period;
   const ap=document.getElementById('timingAdvPeriod');if(ap)ap.value=timingOptions.period;
-  document.querySelectorAll('.timing-select').forEach(el=>{const key=el.getAttribute('onchange')?.includes("'hours'")?'hours':'minimum';el.value=String(timingOptions[key]);});
+  updateTimingPickers();
+  document.querySelectorAll('.timing-picker-menu').forEach(menu=>menu.hidden=true);
+  document.querySelectorAll('.timing-picker-trigger').forEach(trigger=>trigger.setAttribute('aria-expanded','false'));
+  document.querySelectorAll('[data-timing-option="mode"]').forEach(button=>button.classList.toggle('active',button.dataset.value===String(timingOptions.mode)));
   renderTiming();
 }
 function selectTimingBin(key){timingSelected=key;renderTiming();}
