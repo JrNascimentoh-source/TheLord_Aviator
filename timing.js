@@ -43,7 +43,7 @@ function renderTiming(){
 function renderAdvancedTiming(){
  const chart=document.getElementById('timingAdvChart');if(!window.TheLordTiming||typeof currentRounds!=='function')return;
  const a=window.TheLordTiming.analyze(currentRounds(),timingOptions),tier='≥'+timingOptions.minimum+'x';
- document.querySelectorAll('.timing-select').forEach(el=>{const key=el.getAttribute('onchange')?.includes("'hours'")?'hours':'minimum';el.value=String(timingOptions[key]);});
+ updateTimingPickers();
  timingSetText('timingAdvGame',data.activeGame==='aviator2'?'Aviator 2':'Aviator');timingSetText('timingAdvClock',nowTimeStr());timingSetText('timingAdvTotal',a.total.toLocaleString('pt-BR'));timingSetText('timingAdvHits',a.hits.toLocaleString('pt-BR'));timingSetText('timingAdvTierLabel','Velas (≥'+timingOptions.minimum+'x)');timingSetText('timingAdvHousesLabel','Casas desde '+tier);timingSetText('timingAdvHouses',a.currentHouses);
  if(chart){chart.className='timing-chart'+(timingOptions.mode==='minute'?' full-minutes':'');
  chart.innerHTML=a.bins.map(b=>{const label=String(b.key).padStart(timingOptions.mode==='minute'?2:1,'0');return '<button type="button" class="timing-column'+(b.hits===a.max&&a.max?' peak':'')+(timingSelected===b.key?' selected':'')+'" onclick="selectTimingBin('+b.key+')" aria-label="Minuto '+label+': '+b.hits+' ocorrências, '+b.total+' rodadas" aria-pressed="'+(timingSelected===b.key)+'"><span class="timing-count">'+b.hits+'</span><span class="timing-track"><span class="timing-fill" style="height:'+(a.max?b.hits/a.max*100:0)+'%"></span></span><span class="timing-digit">'+label+'</span></button>';}).join('');}
@@ -54,4 +54,6 @@ function renderAdvancedTiming(){
  const selected=a.bins.find(b=>b.key===timingSelected),detail=document.getElementById('timingAdvDetail');if(detail)detail.classList.toggle('hidden',!selected);
  if(selected){timingSetText('timingAdvDetailTitle',(timingOptions.mode==='digit'?'Final ':'Minuto ')+selected.key+' · '+selected.hits+' ocorrências');const ev=document.getElementById('timingAdvEvents');if(ev)ev.innerHTML=[...selected.events].reverse().slice(0,12).map(r=>'<div class="timing-event"><time>'+nowTimeStr(new Date(r.ts))+'</time><b>'+timingFormatMultiplier(r.value)+'</b><span>'+r.houses+' casas</span></div>').join('')||'<div class="timing-empty">Nenhuma ocorrência neste agrupamento.</div>';}
 }
+updateTimingPickers();
+document.querySelectorAll('[data-timing-option="mode"]').forEach(button=>button.classList.toggle('active',button.dataset.value===String(timingOptions.mode)));
 setInterval(()=>{if(!document.getElementById('timing')?.classList.contains('hidden'))renderTiming();},30000);
