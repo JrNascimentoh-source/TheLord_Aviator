@@ -870,11 +870,33 @@ const sharedRoundsByGame={aviator:[],aviator2:[]};
 function currentRounds(){return sharedRoundsByGame[data.activeGame]||[]}
 let monitorHistoryRange=storageGet('thelord_monitor_history_range')||'all';
 if(!['all','1h','6h','12h','24h'].includes(monitorHistoryRange))monitorHistoryRange='all';
+const monitorHistoryOptions=[['all','Histórico Completo'],['1h','Última 1 Hora'],['6h','Últimas 6 Horas'],['12h','Últimas 12 Horas'],['24h','Últimas 24 Horas']];
+function toggleMonitorHistoryMenu(force){
+  const menu=document.getElementById('monitorHistoryMenu');
+  const trigger=document.getElementById('monitorHistoryTrigger');
+  if(!menu||!trigger)return;
+  const open=typeof force==='boolean'?force:menu.hidden;
+  menu.hidden=!open;
+  trigger.setAttribute('aria-expanded',String(open));
+}
+function updateMonitorHistoryPicker(){
+  const trigger=document.getElementById('monitorHistoryTrigger');
+  const label=document.getElementById('monitorHistoryLabel');
+  const menu=document.getElementById('monitorHistoryMenu');
+  const selected=monitorHistoryOptions.find(option=>option[0]===monitorHistoryRange)||monitorHistoryOptions[0];
+  if(label)label.textContent=selected[1];
+  if(trigger)trigger.setAttribute('aria-label','Histórico exibido: '+selected[1]);
+  if(menu)menu.querySelectorAll('[data-history-range]').forEach(button=>{
+    const active=button.dataset.historyRange===monitorHistoryRange;
+    button.classList.toggle('active',active);
+    button.setAttribute('aria-pressed',String(active));
+  });
+}
 function setMonitorHistoryRange(range){
   monitorHistoryRange=['all','1h','6h','12h','24h'].includes(range)?range:'all';
   storageSet('thelord_monitor_history_range',monitorHistoryRange);
-  const select=document.getElementById('monitorHistoryRange');
-  if(select)select.value=monitorHistoryRange;
+  updateMonitorHistoryPicker();
+  toggleMonitorHistoryMenu(false);
   renderMonitor();
 }
 function getMonitorRounds(){
@@ -1134,8 +1156,7 @@ function renderMonitor(){
   const clockEl=document.getElementById('monitorClock');
   if(clockEl) clockEl.textContent=nowTimeStr();
   const rounds=[...getMonitorRounds()].sort((a,b)=>b.ts-a.ts);
-  const rangeSelect=document.getElementById('monitorHistoryRange');
-  if(rangeSelect)rangeSelect.value=monitorHistoryRange;
+  updateMonitorHistoryPicker();
   const grid=document.getElementById('roundGrid');
   if(grid){
 
