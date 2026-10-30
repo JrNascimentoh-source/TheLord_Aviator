@@ -394,14 +394,19 @@
     </div>
 
     <div class="monitor-history-control">
-      <label for="monitorHistoryRange">🕒 Histórico exibido</label>
-      <select id="monitorHistoryRange" onchange="setMonitorHistoryRange(this.value)" aria-label="Selecionar período do histórico">
-        <option value="all">Histórico Completo</option>
-        <option value="1h">Última 1 Hora</option>
-        <option value="6h">Últimas 6 Horas</option>
-        <option value="12h">Últimas 12 Horas</option>
-        <option value="24h">Últimas 24 Horas</option>
-      </select>
+      <label for="monitorHistoryTrigger">🕒 Histórico exibido</label>
+      <div class="monitor-history-picker">
+        <button type="button" id="monitorHistoryTrigger" class="monitor-history-trigger" aria-haspopup="true" aria-expanded="false" aria-controls="monitorHistoryMenu" onclick="toggleMonitorHistoryMenu()">
+          <span id="monitorHistoryLabel">Histórico Completo</span><span class="monitor-history-chevron" aria-hidden="true">⌄</span>
+        </button>
+        <div id="monitorHistoryMenu" class="monitor-history-menu" role="group" aria-label="Período do histórico" hidden>
+          <button type="button" data-history-range="all" onclick="setMonitorHistoryRange('all')">Histórico Completo</button>
+          <button type="button" data-history-range="1h" onclick="setMonitorHistoryRange('1h')">Última 1 Hora</button>
+          <button type="button" data-history-range="6h" onclick="setMonitorHistoryRange('6h')">Últimas 6 Horas</button>
+          <button type="button" data-history-range="12h" onclick="setMonitorHistoryRange('12h')">Últimas 12 Horas</button>
+          <button type="button" data-history-range="24h" onclick="setMonitorHistoryRange('24h')">Últimas 24 Horas</button>
+        </div>
+      </div>
     </div>
     <div class="contagem-row">
       <div class="contagem-left">
