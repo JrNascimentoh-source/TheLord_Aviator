@@ -986,6 +986,7 @@ function toggleMonitorPlatformMenu(force){
   if(!menu||!trigger)return;
   const open=typeof force==='boolean'?force:menu.hidden;
   menu.hidden=!open;
+  document.body.classList.toggle('monitor-menu-expanded',open&&document.body.classList.contains('sidebar-collapsed'));
   trigger.setAttribute('aria-expanded',String(open));
 }
 function setActivePlatform(platform){

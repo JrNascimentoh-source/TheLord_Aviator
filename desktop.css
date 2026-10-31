@@ -318,3 +318,36 @@
 }
 @media screen and (max-width:700px){.sidebar-brand{display:none!important}}
 @media (prefers-reduced-motion:reduce){.sidebar-collapsed .nav::after{transition:none}}
+ 
+/* Ao abrir o seletor com a barra recolhida, expande-a temporariamente
+   para manter as opções legíveis e dentro do fluxo da navegação. */
+@media screen and (min-width:701px){
+  body.sidebar-collapsed.monitor-menu-expanded .bottom{
+    width:204px!important;
+    padding:28px 14px!important;
+    gap:8px!important;
+  }
+  body.sidebar-collapsed.monitor-menu-expanded .bottom::after{
+    content:'Gestão & Análise';
+    margin-top:auto;padding:18px 10px 0;
+    border-top:1px solid var(--desktop-line);
+    color:var(--muted);font-size:.72rem;
+  }
+  body.sidebar-collapsed.monitor-menu-expanded .sidebar-brand{
+    display:block;min-width:0;max-width:100%;overflow:hidden;
+    text-overflow:ellipsis;white-space:nowrap;
+  }
+  body.sidebar-collapsed.monitor-menu-expanded .nav{
+    justify-content:flex-start;gap:12px;padding:15px 12px;
+  }
+  body.sidebar-collapsed.monitor-menu-expanded .nav .nav-label{display:inline}
+  body.sidebar-collapsed.monitor-menu-expanded .nav span:first-child{font-size:1.15rem}
+  body.sidebar-collapsed.monitor-menu-expanded .sidebar-toggle{align-self:flex-end}
+  body.sidebar-collapsed.monitor-menu-expanded .app,
+  body:not(.auth-login).sidebar-collapsed.monitor-menu-expanded .app{
+    padding-left:240px!important;
+  }
+  body.sidebar-collapsed.monitor-menu-expanded .monitor-platform-menu{
+    width:100%;margin:5px 0 7px;
+  }
+}
