@@ -1,4 +1,4 @@
-const CACHE_NAME = 'thelord-aviator-oficial-v23-cache-version-fix';
+const CACHE_NAME = 'thelord-aviator-oficial-v24-betdopovo-vip';
 const APP_SHELL = [
   './',
   './index.html',
@@ -7,12 +7,12 @@ const APP_SHELL = [
   './icon-192.png',
   './icon-512.png',
   './aviator-perspectiva.jpg',
-  './style.css?v=20261027-padrao-atual3',
+  './style.css?v=20261031-betdopovo-vip',
   './desktop.css?v=20261022m',
-  './app.js?v=20261027-refactor-streak1',
+  './app.js?v=20261031-betdopovo-vip',
   './probability-core.js?v=20261027-combined1',
   './timing-core.js?v=20261026b',
-  './timing.js?v=20261026d'
+  './timing.js?v=20261031-betdopovo-vip'
 ];
 
 self.addEventListener('install', event => {
