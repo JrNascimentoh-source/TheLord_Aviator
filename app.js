@@ -33,6 +33,7 @@ if(!data.roundsByGame || typeof data.roundsByGame!=='object'){
 }
 if(!Array.isArray(data.roundsByGame.aviator)) data.roundsByGame.aviator=[];
 if(!Array.isArray(data.roundsByGame.aviator2)) data.roundsByGame.aviator2=[];
+if(!Array.isArray(data.roundsByGame.aviatorvip)) data.roundsByGame.aviatorvip=[];
 if(!data.activeGame || !data.roundsByGame[data.activeGame]) data.activeGame='aviator';
 if(data.scenario===undefined) data.scenario=null;
 if(data.managementDays===undefined) data.managementDays=null;
@@ -844,7 +845,7 @@ function newMonth(){
 
 
 /* ======================================================
-   MONITOR DE VELAS (Aviator / Aviator 2)
+   MONITOR DE VELAS (Aviator / Aviator VIP)
    Registro manual de rodadas, distribuição por cor e
    estatísticas de histórico.
 ====================================================== */
@@ -866,7 +867,7 @@ const colorMeta={
 };
 function nowTimeStr(d){d=d||new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0')}
 // Histórico compartilhado em memória, carregado exclusivamente da tabela pública `velas`.
-const sharedRoundsByGame={aviator:[],aviator2:[]};
+const sharedRoundsByGame={aviator:[],aviator2:[],aviatorvip:[]};
 function currentRounds(){return sharedRoundsByGame[data.activeGame]||[]}
 let monitorHistoryRange=storageGet('thelord_monitor_history_range')||'all';
 if(!['all','1h','6h','12h','24h'].includes(monitorHistoryRange))monitorHistoryRange='all';
@@ -926,7 +927,7 @@ function renderProbabilityCard(){
   const fmtPct=v=>Number.isFinite(v)?(v*100).toLocaleString('pt-BR',{maximumFractionDigits:1})+'%':'—';
   const fmtDuration=seconds=>{if(!Number.isFinite(seconds)||seconds<0)return '—';const n=Math.round(seconds),h=Math.floor(n/3600),m=Math.floor(n%3600/60),s=n%60;return h>0?String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'):String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');};
   if(sampleEl)sampleEl.textContent=total.toLocaleString('pt-BR')+' rodadas nas últimas 24h · '+allRounds.length.toLocaleString('pt-BR')+' no histórico total';
-  if(gameEl)gameEl.textContent=game==='aviator2'?'Aviator 2':'Aviator';
+  if(gameEl)gameEl.textContent=game==='aviatorvip'?'Aviator VIP':'Aviator';
   if(!total){grid.innerHTML='<div class="probability-empty">Ainda não há rodadas válidas nas últimas 24 horas para a análise automática.</div>';return;}
   if(!window.TheLordProbability||typeof window.TheLordProbability.analyze!=='function'){grid.innerHTML='<div class="probability-empty">O motor estatístico ainda não foi carregado. Atualize a página para tentar novamente.</div>';return;}
   const analysis=window.TheLordProbability.analyze(allRounds,{now,patternSize:4}),pattern=analysis.pattern,thresholds=analysis.thresholds;
@@ -972,11 +973,31 @@ function renderProbabilityCard(){
  </div>`;
 }
 function setActiveGame(game){
+  if(!['aviator','aviator2','aviatorvip'].includes(game))return;
   data.activeGame=game;
-  document.getElementById('gameBtnAviator').classList.toggle('active',game==='aviator');
-  document.getElementById('gameBtnAviator2').classList.toggle('active',game==='aviator2');
+  renderPlatformSelector();
   save();
   renderMonitor();
+  if(typeof renderTiming==='function')renderTiming();
+}
+function setActivePlatform(platform){
+  if(platform==='7a7')setActiveGame('aviator');
+  else if(platform==='betdopovo')setActiveGame(data.activeGame==='aviatorvip'?'aviatorvip':'aviator2');
+}
+function renderPlatformSelector(){
+  const game=data.activeGame||'aviator';
+  const bet=game!=='aviator';
+  const set=(id,visible)=>{const el=document.getElementById(id);if(el)el.classList.toggle('hidden',!visible);};
+  const active=(id,value)=>{const el=document.getElementById(id);if(el)el.classList.toggle('active',!!value);};
+  active('platformBtn7a7',!bet);active('platformBtnBetDoPovo',bet);
+  set('gameBtnAviator7a7',!bet);set('gameBtnBetDoPovoAviator',bet);set('gameBtnAviatorVip',bet);
+  set('goGraphBtn7a7',!bet);set('goGraphBtnBetDoPovo',bet&&game==='aviator2');set('goGraphBtnVip',bet&&game==='aviatorvip');
+  active('gameBtnAviator7a7',game==='aviator');active('gameBtnBetDoPovoAviator',game==='aviator2');active('gameBtnAviatorVip',game==='aviatorvip');
+  renderCollectorStatus();
+}
+function openBetDoPovoGame(vip){
+  const url=vip?'https://betdopovo.co/game/spribe/aviator?via=4':'https://betdopovo.co/game/spribe/aviator';
+  window.open(url,'_blank','noopener,noreferrer');
 }
 const AVIATOR_GAME_URL='https://7a711.com/?pid=2619439266&fromPage=AGENCY_ONE';
 function openAviatorGame(){
@@ -995,12 +1016,20 @@ function pruneOldRounds(){
   return changed;
 }
 const COLLECTOR_STALE_MS=120000;
-let lastVelaTs=0,lastSyncOk=false;
-function renderCollectorStatus(){
-  const el=document.getElementById('collectorStatus'),lb=document.getElementById('collectorLabel');if(!el||!lb)return;
-  const on=lastSyncOk&&lastVelaTs&&(Date.now()-lastVelaTs)<COLLECTOR_STALE_MS;
+const lastVelaTsByGame={aviator:0,aviator2:0,aviatorvip:0};
+let lastSyncOk=false;
+function updateCollectorBadge(el,lb,game){
+  if(!el||!lb)return;
+  const ts=lastVelaTsByGame[game]||0;
+  const on=lastSyncOk&&ts>0&&(Date.now()-ts)<COLLECTOR_STALE_MS;
   el.classList.toggle('on',!!on);el.classList.toggle('off',!on);
-  lb.textContent=on?'Coletando velas':'Off-Line';
+  lb.textContent=on?'Online · coletando':'Off-line';
+}
+function renderCollectorStatus(){
+  updateCollectorBadge(document.getElementById('collectorStatusAviator'),document.getElementById('collectorLabelAviator'),'aviator');
+  updateCollectorBadge(document.getElementById('collectorStatusBetDoPovoAviator'),document.getElementById('collectorLabelBetDoPovoAviator'),'aviator2');
+  updateCollectorBadge(document.getElementById('collectorStatusAviatorVip'),document.getElementById('collectorLabelAviatorVip'),'aviatorvip');
+  updateCollectorBadge(document.getElementById('collectorStatus'),document.getElementById('collectorLabel'),data.activeGame||'aviator');
 }
 const VELAS_PAGE_SIZE=1000;
 let initialVelasLoaded=false;
@@ -1012,10 +1041,10 @@ let velasRealtimeStarted=false;
 function upsertSharedVelaRow(r){
   if(!r)return false;
   const game=String(r.game||'').toLowerCase();
-  if(game!=='aviator'&&game!=='aviator2')return false;
+  if(game!=='aviator'&&game!=='aviator2'&&game!=='aviatorvip')return false;
   const t=new Date(r.created_at).getTime(),v=Number(r.value);
   if(!Number.isFinite(t)||!Number.isFinite(v)||v<1||v>=1000000||r.id===undefined||r.id===null)return false;
-  if(t>lastVelaTs)lastVelaTs=t;
+  if(t>(lastVelaTsByGame[game]||0))lastVelaTsByGame[game]=t;
   const list=sharedRoundsByGame[game],id='v'+r.id;
   const existing=list.findIndex(x=>x.id===id);
   const entry={id,value:v,color:classifyRound(v).key,ts:t};
@@ -1175,7 +1204,7 @@ function renderMonitor(){
   }
 
   if(!rounds.length){
-    grid.innerHTML='<div class="round-empty">'+(data.activeGame==='aviator2'?'Velas automáticas ainda não ativas para o Aviator 2.':'Nenhuma rodada registrada ainda.')+'</div>';
+    grid.innerHTML='<div class="round-empty">'+(data.activeGame==='aviatorvip'?'Aguardando as primeiras velas do Aviator VIP.':data.activeGame==='aviator2'?'Aguardando as primeiras velas do Aviator na BetDoPovo.':'Nenhuma rodada registrada ainda.')+'</div>';
   }else if(!filtered.length){
     grid.innerHTML='<div class="round-empty">Nenhuma rodada encontrada com esse filtro.</div>';
   }else{
@@ -1208,7 +1237,7 @@ function renderMonitor(){
   const withValue=rounds.filter(r=>r.value!==null && r.value!==undefined);
 
   const salaTitleEl=document.getElementById('salaTitle');
-  if(salaTitleEl) salaTitleEl.textContent=data.activeGame==='aviator2'?'✈ Aviator 2':'✈ Aviator';
+  if(salaTitleEl) salaTitleEl.textContent=data.activeGame==='aviatorvip'?'✈ Aviator VIP':'✈ Aviator';
 
   const totalRounds=withValue.length;
   const sumValues=withValue.reduce((a,r)=>a+r.value,0);
@@ -1274,9 +1303,9 @@ function runTheLordAI(){
   if(!status||!result)return;
   const gameEl=document.getElementById('timingGame'),windowEl=document.getElementById('timingWindow');
   const game=gameEl?gameEl.value:'active',windowValue=windowEl?windowEl.value:'all';
-  const games=game==='both'?['aviator','aviator2']:[game==='active'?data.activeGame:game];
+  const games=game==='both'?['aviator','aviator2','aviatorvip']:[game==='active'?data.activeGame:game];
   let rounds=[];
-  games.forEach(g=>(data.roundsByGame[g]||[]).forEach(r=>rounds.push({value:Number(r.value),ts:Number(r.ts),game:g})));
+  games.forEach(g=>(sharedRoundsByGame[g]||[]).forEach(r=>rounds.push({value:Number(r.value),ts:Number(r.ts),game:g})));
   rounds=rounds.filter(r=>Number.isFinite(r.value)&&r.value>0&&Number.isFinite(r.ts));
   if(windowValue!=='all')rounds=rounds.filter(r=>r.ts>=Date.now()-Number(windowValue)*60000);
   rounds.sort((a,b)=>a.ts-b.ts);
@@ -1454,7 +1483,7 @@ function renderTimingAnalysis(){
   if(!gameEl||!windowEl)return;
   const game=gameEl.value,windowValue=windowEl.value;
   let rounds=[];
-  const games=game==='both'?['aviator','aviator2']:[game==='active'?data.activeGame:game];
+  const games=game==='both'?['aviator','aviator2','aviatorvip']:[game==='active'?data.activeGame:game];
   games.forEach(g=>(sharedRoundsByGame[g]||[]).forEach(r=>rounds.push({...r,game:g})));
   rounds=rounds.filter(r=>Number.isFinite(Number(r.value))&&Number.isFinite(Number(r.ts)));
   if(windowValue!=='all'){
@@ -1482,7 +1511,7 @@ function renderTimingAnalysis(){
     stat('Velas rosas',pink.length,timingPct(pink.length,total)+' do total')
   ].join('');
   const updated=document.getElementById('timingUpdated');
-  if(updated)updated.textContent='Atualizado em '+new Date().toLocaleTimeString('pt-BR')+' · '+(games.length===2?'Aviator + Aviator 2':games[0]==='aviator2'?'Aviator 2':'Aviator')+' · '+(windowValue==='all'?'todo o histórico disponível':windowValue==='60'?'últimos 60 minutos':windowValue==='360'?'últimas 6 horas':'últimas 24 horas');
+  if(updated)updated.textContent='Atualizado em '+new Date().toLocaleTimeString('pt-BR')+' · '+(games.length>1?'Todos os gráficos':games[0]==='aviatorvip'?'Aviator VIP':'Aviator')+' · '+(windowValue==='all'?'todo o histórico disponível':windowValue==='60'?'últimos 60 minutos':windowValue==='360'?'últimas 6 horas':'últimas 24 horas');
   const gaps10=[],gaps50=[],gaps100=[];
   let last10=-1,last50=-1,last100=-1,runLow=0,maxLow=0,streak10=0,maxStreak10=0;
   rounds.forEach((r,i)=>{
@@ -1553,8 +1582,7 @@ function showPage(id,btn){
   if(id==='calculator')calc();
   if(id==='timing')renderTimingAnalysis();
   if(id==='monitor'){
-    document.getElementById('gameBtnAviator').classList.toggle('active',data.activeGame==='aviator');
-    document.getElementById('gameBtnAviator2').classList.toggle('active',data.activeGame==='aviator2');
+    renderPlatformSelector();
     renderMonitor();
   }
 }
@@ -1773,7 +1801,7 @@ async function syncAfterLogin(){
 }
 
 function createEmptyData(){
-  return {started:false,initial:0,current:0,wins:0,losses:0,totalWin:0,totalLoss:0,days:0,entries:[],withdrawals:[],alerts:{win:false,loss:false,date:''},scenario:null,managementDays:null,freeManagement:false,roundsByGame:{aviator:[],aviator2:[]},activeGame:'aviator'};
+  return {started:false,initial:0,current:0,wins:0,losses:0,totalWin:0,totalLoss:0,days:0,entries:[],withdrawals:[],alerts:{win:false,loss:false,date:''},scenario:null,managementDays:null,freeManagement:false,roundsByGame:{aviator:[],aviator2:[],aviatorvip:[]},activeGame:'aviator'};
 }
 
 function normalizeLoadedData(){
@@ -1785,6 +1813,7 @@ function normalizeLoadedData(){
   if(!data.roundsByGame || typeof data.roundsByGame!=='object') data.roundsByGame={aviator:data.rounds.length?data.rounds:[],aviator2:[]};
   if(!Array.isArray(data.roundsByGame.aviator)) data.roundsByGame.aviator=[];
   if(!Array.isArray(data.roundsByGame.aviator2)) data.roundsByGame.aviator2=[];
+if(!Array.isArray(data.roundsByGame.aviatorvip)) data.roundsByGame.aviatorvip=[];
   if(!data.activeGame || !data.roundsByGame[data.activeGame]) data.activeGame='aviator';
   if(data.scenario===undefined) data.scenario=null;
   if(data.managementDays===undefined) data.managementDays=null;
