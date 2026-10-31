@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TheLord Coletor Universal
 // @namespace    thelord-aviator
-// @version      2.1
+// @version      2.2
 // @description  Identifica Aviator e Aviator VIP na BetDoPovo, inclusive dentro do iframe da Spribe
 // @match        *://*/*
 // @exclude      *://7a7dd.com/*
@@ -23,7 +23,7 @@
   }
   function isBetDoPovoUrl(value) {
     const parsed = parseUrl(value);
-    return !!parsed && /(^|\\.)betdopovo\\./i.test(parsed.hostname);
+    return !!parsed && /(^|\.)betdopovo\./i.test(parsed.hostname);
   }
   function gameFromUrl(value) {
     const parsed = parseUrl(value);
