@@ -477,11 +477,12 @@
 
 </div>
 
-<nav class="bottom hidden">
-  <button class="nav active" onclick="showPage('overview',this)"><span>📊</span>Visão Geral</button>
-  <button class="nav" onclick="showPage('calculator',this)"><span>🧮</span>Calculadora</button>
-  <button class="nav" onclick="showPage('monitor',this)"><span>📈</span>Monitor</button>
-  <button class="nav" onclick="showPage('timing',this)"><span>⏱️</span>Minutagem</button>
+<nav class="bottom hidden" id="appSidebar" aria-label="Navegação principal">
+  <button type="button" class="sidebar-toggle" id="sidebarToggle" aria-label="Recolher barra de navegação" aria-expanded="true" title="Recolher barra">‹</button>
+  <button class="nav active" onclick="showPage('overview',this)"><span>📊</span><span class="nav-label">Visão Geral</span></button>
+  <button class="nav" onclick="showPage('calculator',this)"><span>🧮</span><span class="nav-label">Calculadora</span></button>
+  <button class="nav" onclick="showPage('monitor',this)"><span>📈</span><span class="nav-label">Monitor</span></button>
+  <button class="nav" onclick="showPage('timing',this)"><span>⏱️</span><span class="nav-label">Minutagem</span></button>
 </nav>
 
 <div id="appDialogOverlay" class="modal-overlay app-dialog-overlay hidden">
@@ -682,5 +683,32 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
+<script>
+/* Barra lateral recolhível: preferência local deste navegador, sem afetar os dados da conta. */
+(function () {
+  function setupSidebar() {
+    const sidebar = document.getElementById('appSidebar');
+    const toggle = document.getElementById('sidebarToggle');
+    if (!sidebar || !toggle) return;
+    let collapsed = false;
+    try { collapsed = localStorage.getItem('thelord-sidebar-collapsed') === '1'; } catch (_) {}
+    function applyState() {
+      document.body.classList.toggle('sidebar-collapsed', collapsed);
+      toggle.textContent = collapsed ? '›' : '‹';
+      toggle.setAttribute('aria-expanded', String(!collapsed));
+      toggle.setAttribute('aria-label', collapsed ? 'Expandir barra de navegação' : 'Recolher barra de navegação');
+      toggle.title = collapsed ? 'Expandir barra' : 'Recolher barra';
+    }
+    toggle.addEventListener('click', function () {
+      collapsed = !collapsed;
+      applyState();
+      try { localStorage.setItem('thelord-sidebar-collapsed', collapsed ? '1' : '0'); } catch (_) {}
+    });
+    applyState();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setupSidebar);
+  else setupSidebar();
+})();
+</script>
 </body>
 </html>

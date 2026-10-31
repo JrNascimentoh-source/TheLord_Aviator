@@ -244,3 +244,45 @@
   .app,body:not(.auth-login) .app{padding-left:238px}
   .bottom{width:204px}
 }
+
+/* Barra lateral recolhível — mantém a linguagem visual original do TheLord. */
+@media screen and (min-width:701px){
+  .sidebar-toggle{
+    display:flex;align-items:center;justify-content:center;align-self:flex-end;
+    width:30px;height:30px;margin:0 0 8px;padding:0;
+    border:1px solid var(--desktop-line);border-radius:9px;
+    background:rgba(255,192,31,.08);color:var(--gold);
+    font:900 1.25rem/1 Arial,sans-serif;cursor:pointer;
+    transition:background .18s ease,border-color .18s ease,transform .18s ease;
+  }
+  .sidebar-toggle:hover{background:rgba(255,192,31,.16);border-color:var(--gold)}
+  .nav .nav-label{min-width:0}
+  body.sidebar-collapsed .app,body:not(.auth-login).sidebar-collapsed .app{padding-left:104px}
+  body.sidebar-collapsed .bottom{
+    width:68px;padding-left:8px;padding-right:8px;gap:8px;
+  }
+  body.sidebar-collapsed .bottom::before{
+    content:'✈️';text-align:center;font-size:1.05rem;padding:8px 0 22px;
+  }
+  body.sidebar-collapsed .bottom::after{content:none}
+  body.sidebar-collapsed .sidebar-toggle{align-self:center;margin-bottom:10px}
+  body.sidebar-collapsed .nav{
+    justify-content:center;gap:0;padding-left:5px;padding-right:5px;
+  }
+  body.sidebar-collapsed .nav .nav-label{display:none}
+  body.sidebar-collapsed .nav span:first-child{margin:0;font-size:1.2rem}
+  body.sidebar-collapsed .nav.active{box-shadow:inset 0 0 0 1px var(--desktop-line)}
+}
+@media screen and (min-width:1024px) and (max-width:1320px){
+  body.sidebar-collapsed .app,body:not(.auth-login).sidebar-collapsed .app{padding-left:96px}
+  body.sidebar-collapsed .bottom{width:64px}
+}
+@media screen and (min-width:1321px){
+  body.sidebar-collapsed .app,body:not(.auth-login).sidebar-collapsed .app{padding-left:104px}
+}
+@media screen and (max-width:700px){
+  .sidebar-toggle{display:none!important}
+}
+@media (prefers-reduced-motion:reduce){
+  .sidebar-toggle{transition:none}
+}
