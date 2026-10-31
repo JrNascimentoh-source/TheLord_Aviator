@@ -326,11 +326,6 @@
 <main id="monitor" class="hidden">
   <section class="card">
     <div class="monitor-platform-selector">
-      <div class="monitor-platform-heading">Nome da plataforma</div>
-      <div class="monitor-platform-options">
-        <button type="button" id="platformBtn7a7" class="scenario-btn active" onclick="setActivePlatform('7a7')">7a7</button>
-        <button type="button" id="platformBtnBetDoPovo" class="scenario-btn" onclick="setActivePlatform('betdopovo')">BetDoPovo</button>
-      </div>
       <div class="monitor-game-options">
         <button type="button" id="gameBtnAviator7a7" class="scenario-btn active" onclick="setActiveGame('aviator')">✈️ Aviator <span id="collectorStatusAviator" class="collector-status off"><span class="collector-dot"></span><span id="collectorLabelAviator">Off-line</span></span></button>
         <button type="button" id="gameBtnBetDoPovoAviator" class="scenario-btn hidden" onclick="setActiveGame('aviator2')">✈️ Aviator <span id="collectorStatusBetDoPovoAviator" class="collector-status off"><span class="collector-dot"></span><span id="collectorLabelBetDoPovoAviator">Off-line</span></span></button>
@@ -493,7 +488,13 @@
   <div class="sidebar-brand" id="sidebarBrand" aria-label="Usuário conectado">Minha conta</div>
   <button class="nav active" title="Visão Geral" onclick="showPage('overview',this)" data-tooltip="Visão Geral"><span>📊</span><span class="nav-label">Visão Geral</span></button>
   <button class="nav" title="Calculadora" onclick="showPage('calculator',this)" data-tooltip="Calculadora"><span>🧮</span><span class="nav-label">Calculadora</span></button>
-  <button class="nav" title="Monitor" onclick="showPage('monitor',this)" data-tooltip="Monitor"><span>📈</span><span class="nav-label">Monitor</span></button>
+  <div class="nav-dropdown-wrap" id="monitorNavWrap">
+    <button type="button" class="nav" id="monitorNavBtn" title="Monitor" aria-haspopup="true" aria-expanded="false" aria-controls="monitorPlatformMenu" onclick="showPage('monitor',this);toggleMonitorPlatformMenu() " data-tooltip="Monitor"><span>📈</span><span class="nav-label">Monitor</span><span class="nav-chevron" aria-hidden="true">⌄</span></button>
+    <div class="monitor-platform-menu" id="monitorPlatformMenu" role="group" aria-label="Selecionar plataforma" hidden>
+      <button type="button" id="platformBtn7a7" class="monitor-platform-option active" onclick="setActivePlatform('7a7')">7a7</button>
+      <button type="button" id="platformBtnBetDoPovo" class="monitor-platform-option" onclick="setActivePlatform('betdopovo')">BetDoPovo</button>
+    </div>
+  </div>
   <button class="nav" title="Minutagem" onclick="showPage('timing',this)" data-tooltip="Minutagem"><span>⏱️</span><span class="nav-label">Minutagem</span></button>
 </nav>
 
