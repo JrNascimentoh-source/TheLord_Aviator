@@ -1567,6 +1567,15 @@ const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 let supabaseClient=null;
 let currentUser=null;
 
+function updateSidebarIdentity(user){
+  const brand=document.getElementById('sidebarBrand');
+  if(!brand)return;
+  const metadata=user?.user_metadata||{};
+  const displayName=String(metadata.full_name||metadata.name||user?.email?.split('@')[0]||'Minha conta').trim();
+  brand.textContent=displayName||'Minha conta';
+  brand.title=displayName||'Minha conta';
+}
+
 let syncingUserId=null;
 
 function initSupabase(){
@@ -1577,6 +1586,7 @@ function initSupabase(){
   startVelasRealtime();
   supabaseClient.auth.onAuthStateChange((event,session)=>{
     currentUser=session?session.user:null;
+    updateSidebarIdentity(currentUser);
     setAuthView(!!currentUser);
     if(currentUser && (event==='SIGNED_IN' || event==='INITIAL_SESSION')){
       setTimeout(()=>syncAfterLogin(),0);
@@ -1585,6 +1595,7 @@ function initSupabase(){
   supabaseClient.auth.getSession().then(({data:sd,error})=>{
     if(error){console.error('Erro ao recuperar sessão:',error);setAuthView(false);return}
     currentUser=sd.session?sd.session.user:null;
+    updateSidebarIdentity(currentUser);
     setAuthView(!!currentUser);
     if(currentUser) setTimeout(()=>syncAfterLogin(),0);
   }).catch(e=>{console.error('Erro ao recuperar sessão:',e);setAuthView(false)});
@@ -1713,6 +1724,7 @@ window.doLogout = async function doLogout(){
       if(error){showLoginStatus('Erro ao sair: '+translateAuthError(error.message),'error');return}
     }
     currentUser=null;
+    updateSidebarIdentity(null);
     setAuthView(false);
     showAppNotice('Você saiu da conta.','Sessão encerrada','success');
   },'Sair da conta','Sair');
