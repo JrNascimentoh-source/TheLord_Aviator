@@ -37,7 +37,7 @@
   }
   window.addEventListener('message', ev => {
     const d = ev.data;
-    if (!d || d.type !== MSG || IS_TOP || typeof d.url !== 'string') return;
+    if (!d || d.type !== MSG || IS_TOP || ev.source !== window.parent || typeof d.url !== 'string') return;
     topUrl = d.url;
     forwardToFrames(topUrl);
   });
@@ -57,7 +57,7 @@
       const referrer = document.referrer || '';
       const referrerParsed = parseUrl(referrer);
       if (isBetDoPovoUrl(referrer) && referrerParsed && referrerParsed.searchParams.get('via') === '4') return resolve('aviatorvip');
-      if (isBetDoPovoUrl(referrer) && !selfIsBet) return resolve('aviator2');
+      const referrerIsBet = isBetDoPovoUrl(referrer);
 
       let betAncestor = false;
       try {
@@ -72,7 +72,7 @@
           resolve(gameFromUrl(topUrl));
         } else if (Date.now() - started > 4000) {
           clearInterval(wait);
-          resolve(selfIsBet || betAncestor ? 'aviator2' : 'aviator');
+          resolve(selfIsBet || betAncestor || referrerIsBet ? 'aviator2' : 'aviator');
         }
       }, 200);
     });
