@@ -989,21 +989,18 @@ body.auth-login #login .login-back{display:none!important}
 /* Menu de plataformas integrado ao item Monitor da navegação */
 .nav-dropdown-wrap{position:relative;display:flex;flex-direction:column;min-width:0}
 .nav-dropdown-wrap>.nav{width:100%}
-.nav-chevron{margin-left:auto!important;font-size:.9rem!important;transition:transform .18s ease}
-#monitorNavBtn[aria-expanded="true"] .nav-chevron{transform:rotate(180deg)}
-.monitor-platform-menu{display:grid;gap:5px;margin:5px 0 7px 38px;padding:7px;border:1px solid rgba(255,192,31,.25);border-radius:11px;background:rgba(12,8,16,.94);box-shadow:0 8px 20px rgba(0,0,0,.28)}
+.monitor-platform-menu{position:absolute;top:calc(100% + 9px);left:50%;transform:translateX(-50%);z-index:1200;display:grid;gap:5px;width:min(180px,calc(100% - 12px));margin:0;padding:8px;border:1px solid rgba(255,192,31,.35);border-radius:11px;background:rgba(16,10,19,.97);box-shadow:0 8px 20px rgba(0,0,0,.35)}
 .monitor-platform-menu[hidden]{display:none}
-.monitor-platform-option{width:100%;padding:9px 10px;border:1px solid transparent;border-radius:8px;background:rgba(255,255,255,.035);color:var(--muted);font-size:.72rem;font-weight:850;text-align:left;cursor:pointer}
+.monitor-platform-option{width:100%;padding:10px 7px;border:1px solid transparent;border-radius:8px;background:rgba(255,255,255,.035);color:var(--muted);font-size:.72rem;font-weight:850;text-align:center;cursor:pointer}
 .monitor-platform-option.active{border-color:rgba(255,192,31,.38);background:rgba(255,192,31,.11);color:var(--gold)}
 .monitor-platform-selector{gap:10px}
 @media(min-width:701px){
-  .monitor-platform-menu{margin:3px 0 8px 38px}
-  body.sidebar-collapsed .monitor-platform-menu{position:absolute;left:calc(100% + 8px);top:0;z-index:1100;width:145px;margin:0}
+  .nav-dropdown-wrap{z-index:1200}
+  .monitor-platform-menu{width:180px}
+  body.sidebar-collapsed .monitor-platform-menu{left:0;top:calc(100% + 9px);transform:none;width:160px}
 }
 @media(max-width:700px){
   .nav-dropdown-wrap{align-items:stretch;min-width:0}
   .nav-dropdown-wrap>.nav{min-width:0}
-  .nav-chevron{display:none!important}
-  .monitor-platform-menu{position:absolute;left:50%;bottom:calc(100% + 9px);transform:translateX(-50%);z-index:1200;width:min(180px,48vw);margin:0;padding:8px;background:rgba(16,10,19,.97);border-color:rgba(255,192,31,.35)}
-  .monitor-platform-option{text-align:center;padding:10px 7px}
+  .monitor-platform-menu{top:auto;bottom:calc(100% + 9px);left:50%;transform:translateX(-50%);width:min(180px,48vw)}
 }
