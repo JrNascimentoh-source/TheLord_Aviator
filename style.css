@@ -968,3 +968,19 @@ body.auth-login #login .login-back{display:none!important}
     white-space:nowrap;
   }
 }
+
+/* Seletor de plataforma e gráficos do Monitor */
+.monitor-platform-selector{display:grid;gap:10px}
+.monitor-platform-heading{font-size:.76rem;font-weight:850;color:var(--muted);letter-spacing:.03em}
+.monitor-platform-options,.monitor-game-options,.monitor-graph-actions{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap}
+.monitor-platform-options .scenario-btn{flex:1;min-width:110px}
+.monitor-game-options .scenario-btn{flex:1 1 190px;min-width:0;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
+.monitor-graph-actions .btn{flex:1 1 190px;min-width:0}
+.monitor-game-options .collector-status{display:inline-flex;align-items:center;gap:5px;font-size:.58rem;font-weight:800;white-space:nowrap}
+.monitor-game-options .collector-dot{width:7px;height:7px;flex:0 0 7px;border-radius:50%;background:#ef4444;box-shadow:0 0 7px rgba(239,68,68,.65);animation:collectorPulse 1.5s ease-in-out infinite}
+.monitor-game-options .collector-status.on .collector-dot{background:#22c55e;box-shadow:0 0 8px rgba(34,197,94,.8)}
+.monitor-game-options .collector-status.on{color:#86efac}
+.monitor-game-options .collector-status.off{color:#fca5a5}
+@keyframes collectorPulse{0%,100%{opacity:1}50%{opacity:.4}}
+@media(max-width:480px){.monitor-game-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.monitor-game-options .scenario-btn{padding:9px 5px;font-size:.68rem;gap:5px}.monitor-game-options .collector-status{width:100%;justify-content:center}.monitor-graph-actions{display:grid;grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.monitor-game-options .collector-dot{animation:none}}
