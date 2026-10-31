@@ -291,3 +291,30 @@
 @media screen and (min-width:701px){
   .nav .nav-label{font-size:inherit;font-weight:inherit;line-height:inherit}
 }
+
+/* Identidade da conta e dicas visuais da barra recolhida. */
+@media screen and (min-width:701px){
+  .bottom::before{content:none!important}
+  .sidebar-brand{
+    display:block;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;
+    white-space:nowrap;color:var(--gold);font-weight:900;letter-spacing:0;
+    font-size:.88rem;padding:8px 10px 28px;line-height:1.35;
+  }
+  .sidebar-collapsed .sidebar-brand{display:none}
+  .sidebar-collapsed .nav{position:relative;overflow:visible}
+  .sidebar-collapsed .nav::after{
+    content:attr(data-tooltip);position:absolute;left:calc(100% + 12px);top:50%;
+    transform:translateY(-50%) translateX(-4px);z-index:1000;
+    padding:7px 10px;border:1px solid var(--desktop-line);border-radius:8px;
+    background:#171019;color:var(--gold);font-size:.74rem;font-weight:700;
+    line-height:1.2;white-space:nowrap;opacity:0;visibility:hidden;
+    pointer-events:none;box-shadow:0 8px 22px rgba(0,0,0,.38);
+    transition:opacity .14s ease,transform .14s ease,visibility .14s ease;
+  }
+  .sidebar-collapsed .nav:hover::after,
+  .sidebar-collapsed .nav:focus-visible::after{
+    opacity:1;visibility:visible;transform:translateY(-50%) translateX(0)
+  }
+}
+@media screen and (max-width:700px){.sidebar-brand{display:none!important}}
+@media (prefers-reduced-motion:reduce){.sidebar-collapsed .nav::after{transition:none}}
