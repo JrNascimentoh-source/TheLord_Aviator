@@ -845,7 +845,7 @@ function newMonth(){
 
 
 /* ======================================================
-   MONITOR DE VELAS (Aviator / Aviator 2)
+   MONITOR DE VELAS (Aviator / Aviator VIP)
    Registro manual de rodadas, distribuição por cor e
    estatísticas de histórico.
 ====================================================== */
