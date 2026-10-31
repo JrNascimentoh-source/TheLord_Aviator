@@ -933,3 +933,38 @@ body.auth-login #login .login-back{display:none!important}
 #probabilityLastUpdate{margin-left:auto;color:var(--muted);font-variant-numeric:tabular-nums}
 @keyframes probabilityLivePulse{0%,100%{opacity:1;box-shadow:0 0 10px rgba(34,211,238,.8)}50%{opacity:.45;box-shadow:0 0 3px rgba(34,211,238,.3)}}
 @media(max-width:480px){.probability-livebar{gap:6px 8px}.probability-livebar strong{width:calc(100% - 20px)}#probabilityLastUpdate{margin-left:0;width:100%}}
+
+/* Mobile: preservar a barra inferior original com ícone acima do rótulo.
+   Os spans internos foram separados para suportar a sidebar desktop. */
+@media screen and (max-width:700px){
+  .bottom{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    align-items:stretch;
+  }
+  .bottom .nav{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:0;
+    min-width:0;
+    text-align:center;
+    line-height:1.2;
+  }
+  .bottom .nav > span:first-child{
+    display:block;
+    flex:0 0 auto;
+    font-size:1.25rem;
+    line-height:1.25;
+    margin:0 0 3px;
+  }
+  .bottom .nav > .nav-label{
+    display:block;
+    font-size:inherit;
+    font-weight:inherit;
+    line-height:inherit;
+    margin:0;
+    white-space:nowrap;
+  }
+}
