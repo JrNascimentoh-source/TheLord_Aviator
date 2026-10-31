@@ -933,3 +933,33 @@ body.auth-login #login .login-back{display:none!important}
 #probabilityLastUpdate{margin-left:auto;color:var(--muted);font-variant-numeric:tabular-nums}
 @keyframes probabilityLivePulse{0%,100%{opacity:1;box-shadow:0 0 10px rgba(34,211,238,.8)}50%{opacity:.45;box-shadow:0 0 3px rgba(34,211,238,.3)}}
 @media(max-width:480px){.probability-livebar{gap:6px 8px}.probability-livebar strong{width:calc(100% - 20px)}#probabilityLastUpdate{margin-left:0;width:100%}}
+
+/* Compatibilidade mobile: preserva exatamente a barra inferior original.
+   Os rótulos agora são spans para a navegação desktop; no mobile eles devem
+   continuar com a aparência de texto simples abaixo do ícone. */
+@media screen and (max-width:700px){
+  .sidebar-toggle{display:none!important}
+  .sidebar-brand{display:none!important}
+  .bottom{
+    display:grid!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  }
+  .bottom .nav{
+    display:block;
+    min-width:0;
+    text-align:center;
+  }
+  .bottom .nav>span:first-child{
+    display:block;
+    font-size:1.25rem;
+    margin:0 0 3px;
+  }
+  .bottom .nav>.nav-label{
+    display:block;
+    margin:0;
+    font-size:inherit;
+    font-weight:inherit;
+    line-height:inherit;
+    white-space:nowrap;
+  }
+}
