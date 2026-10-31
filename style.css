@@ -984,3 +984,26 @@ body.auth-login #login .login-back{display:none!important}
 @keyframes collectorPulse{0%,100%{opacity:1}50%{opacity:.4}}
 @media(max-width:480px){.monitor-game-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.monitor-game-options .scenario-btn{padding:9px 5px;font-size:.68rem;gap:5px}.monitor-game-options .collector-status{width:100%;justify-content:center}.monitor-graph-actions{display:grid;grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.monitor-game-options .collector-dot{animation:none}}
+
+
+/* Menu de plataformas integrado ao item Monitor da navegação */
+.nav-dropdown-wrap{position:relative;display:flex;flex-direction:column;min-width:0}
+.nav-dropdown-wrap>.nav{width:100%}
+.nav-chevron{margin-left:auto!important;font-size:.9rem!important;transition:transform .18s ease}
+#monitorNavBtn[aria-expanded="true"] .nav-chevron{transform:rotate(180deg)}
+.monitor-platform-menu{display:grid;gap:5px;margin:5px 0 7px 38px;padding:7px;border:1px solid rgba(255,192,31,.25);border-radius:11px;background:rgba(12,8,16,.94);box-shadow:0 8px 20px rgba(0,0,0,.28)}
+.monitor-platform-menu[hidden]{display:none}
+.monitor-platform-option{width:100%;padding:9px 10px;border:1px solid transparent;border-radius:8px;background:rgba(255,255,255,.035);color:var(--muted);font-size:.72rem;font-weight:850;text-align:left;cursor:pointer}
+.monitor-platform-option.active{border-color:rgba(255,192,31,.38);background:rgba(255,192,31,.11);color:var(--gold)}
+.monitor-platform-selector{gap:10px}
+@media(min-width:701px){
+  .monitor-platform-menu{margin:3px 0 8px 38px}
+  body.sidebar-collapsed .monitor-platform-menu{position:absolute;left:calc(100% + 8px);top:0;z-index:1100;width:145px;margin:0}
+}
+@media(max-width:700px){
+  .nav-dropdown-wrap{align-items:stretch;min-width:0}
+  .nav-dropdown-wrap>.nav{min-width:0}
+  .nav-chevron{display:none!important}
+  .monitor-platform-menu{position:absolute;left:50%;bottom:calc(100% + 9px);transform:translateX(-50%);z-index:1200;width:min(180px,48vw);margin:0;padding:8px;background:rgba(16,10,19,.97);border-color:rgba(255,192,31,.35)}
+  .monitor-platform-option{text-align:center;padding:10px 7px}
+}

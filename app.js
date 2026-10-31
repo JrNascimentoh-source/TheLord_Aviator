@@ -980,9 +980,18 @@ function setActiveGame(game){
   renderMonitor();
   if(typeof renderTiming==='function')renderTiming();
 }
+function toggleMonitorPlatformMenu(force){
+  const menu=document.getElementById('monitorPlatformMenu');
+  const trigger=document.getElementById('monitorNavBtn');
+  if(!menu||!trigger)return;
+  const open=typeof force==='boolean'?force:menu.hidden;
+  menu.hidden=!open;
+  trigger.setAttribute('aria-expanded',String(open));
+}
 function setActivePlatform(platform){
   if(platform==='7a7')setActiveGame('aviator');
   else if(platform==='betdopovo')setActiveGame(data.activeGame==='aviatorvip'?'aviatorvip':'aviator2');
+  toggleMonitorPlatformMenu(false);
 }
 function renderPlatformSelector(){
   const game=data.activeGame||'aviator';
@@ -1578,7 +1587,9 @@ setInterval(()=>{const p=document.getElementById('timing');if(p&&!p.classList.co
 
 function showPage(id,btn){
   ['overview','calculator','monitor','timing'].forEach(x=>document.getElementById(x).classList.toggle('hidden',x!==id));
-  document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));btn.classList.add('active');
+  document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  if(id!=='monitor')toggleMonitorPlatformMenu(false);
   if(id==='calculator')calc();
   if(id==='timing')renderTimingAnalysis();
   if(id==='monitor'){
