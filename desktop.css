@@ -286,3 +286,8 @@
 @media (prefers-reduced-motion:reduce){
   .sidebar-toggle{transition:none}
 }
+
+/* Ajuste fino: o texto dos itens mantém o tamanho original após envolver o label. */
+@media screen and (min-width:701px){
+  .nav .nav-label{font-size:inherit;font-weight:inherit;line-height:inherit}
+}
