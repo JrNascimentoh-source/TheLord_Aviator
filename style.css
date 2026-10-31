@@ -995,9 +995,17 @@ body.auth-login #login .login-back{display:none!important}
 .monitor-platform-option.active{border-color:rgba(255,192,31,.38);background:rgba(255,192,31,.11);color:var(--gold)}
 .monitor-platform-selector{gap:10px}
 @media(min-width:701px){
-  .nav-dropdown-wrap{z-index:1200}
-  .monitor-platform-menu{width:180px}
-  body.sidebar-collapsed .monitor-platform-menu{left:0;top:calc(100% + 9px);transform:none;width:160px}
+  /* Desktop: opções fazem parte do fluxo da barra e empurram os itens seguintes. */
+  .nav-dropdown-wrap{z-index:auto}
+  .monitor-platform-menu{
+    position:static;
+    left:auto;
+    top:auto;
+    transform:none;
+    width:100%;
+    margin:5px 0 7px;
+    box-shadow:none;
+  }
 }
 @media(max-width:700px){
   .nav-dropdown-wrap{align-items:stretch;min-width:0}
