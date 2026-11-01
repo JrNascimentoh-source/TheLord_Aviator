@@ -1,54 +1,56 @@
-# Mapa de arquitetura — TheLord Aviator
+# Arquitetura — TheLord_Aviator
 
-Este documento registra as dependências observadas no código e na configuração atual do Supabase para orientar refatorações seguras. É uma auditoria estática; não substitui testes no navegador.
+Este documento descreve a estrutura observada no repositório. É uma referência de manutenção, não substitui testes no navegador nem uma auditoria do projeto Supabase em tempo real.
 
 ## Ordem de carregamento
 
-Em `index.html`, os scripts locais são carregados com `defer`, nesta ordem:
+Os scripts locais são carregados com `defer` em `index.html`, nesta ordem:
 
-1. `timing-core.js` — funções puras de minutagem, período e rótulos de sequência; publica `TheLordTiming`.
-2. `probability-core.js` — cálculos estatísticos e probabilísticos; publica `TheLordProbability`.
-3. `app.js` — estado principal, interface, gestão de banca, monitor, navegação, autenticação e integração Supabase.
-4. `timing.js` — interface da aba Minutagem; depende de `TheLordTiming` e de globais fornecidas por `app.js`, como `currentRounds`, `data` e `nowTimeStr`.
+1. `timing-core.js` — regras puras de minutagem, período e contagem de sequência; publica `TheLordTiming`.
+2. `probability-core.js` — cálculos estatísticos do monitor; publica `TheLordProbability`.
+3. `app.js` — estado principal, gestão de banca, autenticação, monitor e integração Supabase.
+4. `timing.js` — interface da aba Minutagem; utiliza `TheLordTiming` e dados/globais disponibilizados por `app.js`.
 
-Scripts inline posteriores em `index.html` registram o Service Worker, alternam login/cadastro e protegem o botão de login caso o código principal falhe.
+A biblioteca `@supabase/supabase-js` é carregada pelo CDN antes dos scripts locais. O Service Worker é registrado por código inline no HTML.
 
 ## Responsabilidades
 
-- `index.html`: estrutura, scripts e alguns handlers inline de autenticação.
-- `app.js`: arquivo central; mantém gestão de banca, monitor, navegação, autenticação, sincronização pessoal e sincronização do histórico compartilhado.
-- `timing-core.js`: regras reutilizáveis da minutagem e sequência.
-- `timing.js`: renderização da aba Minutagem.
-- `probability-core.js`: análise estatística do histórico; resultados são descritivos e não garantem nem preveem a próxima rodada.
-- `sw.js`: cache de arquivos locais para suporte offline parcial.
-- `core.test.js`: testes Node dos núcleos estatísticos e de alguns cálculos auxiliares.
+- `index.html`: estrutura e handlers declarados diretamente na interface.
+- `style.css`: estilos gerais e mobile.
+- `desktop.css`: ajustes de desktop.
+- `app.js`: gestão de banca, armazenamento local, autenticação, sincronização pessoal, leitura do histórico compartilhado e monitor.
+- `timing-core.js`: análise de períodos, agrupamentos e sequência.
+- `timing.js`: filtros, gráfico e detalhes da aba Minutagem.
+- `probability-core.js`: frequências e comparações estatísticas descritivas. Os resultados não garantem nem preveem a próxima rodada.
+- `sw.js`: cache dos recursos locais para suporte offline parcial.
+- `core.test.js`: testes Node dos módulos estatísticos e de cálculos básicos.
 
-## Dados pessoais versus dados compartilhados
+## Fluxo de dados
 
-### Gestão privada por usuário
+### Gestão pessoal
 
-A tabela `public.gestoes` tem chave primária `user_id` e políticas RLS de leitura, inserção e atualização limitadas a `auth.uid() = user_id`. O app usa `pushToCloud()` para enviar o objeto `data` inteiro em JSONB para a linha do usuário.
+A gestão é armazenada localmente e sincronizada por usuário com `public.gestoes`. O objeto de gestão contém dados de banca e registros pessoais. Preserve o formato legado e a separação por usuário ao alterar armazenamento, autenticação ou sincronização.
 
-O objeto local `data` ainda pode conter propriedades legadas como `roundsByGame`, embora a tela do Monitor e a análise atual leiam o histórico compartilhado em memória. Não remover essas propriedades de registros existentes nem alterar a rotina de sincronização pessoal sem testar a compatibilidade com versões anteriores.
+### Histórico compartilhado
 
-### Histórico compartilhado de velas
+O monitor e a minutagem leem o histórico da tabela `public.velas`. As chaves usadas pelo app são:
 
+- `aviator`: Aviator 7a7.
+- `aviator2`: Aviator BdPv / BetDoPovo.
+- `betdopovo`: chave histórica aceita na leitura e normalizada para `aviator2`.
 
-**Auditoria do banco em 31/10/2026:**
-- Histórico `aviator` (7a7): 29.742 registros.
-- Histórico `aviator2` (BetDoPovo Aviator): 10.696 registros existentes, preservados sem renomear a chave interna.
-- A policy de SELECT permanece `USING (true)` para manter a leitura compartilhada. A policy de INSERT foi atualizada para aceitar os três identificadores.
+O coletor universal `Coletor-Universal-v2.1.js` (metadados internos 2.2) identifica a plataforma e envia as velas diretamente ao Supabase. Não existe dependência operacional do TheLord CaptureCore neste fluxo.
 
+Os arquivos `coletor.user.js` e `coletor-aviator2.user.js` são alternativas legadas por plataforma. Não devem ser executados em paralelo com o universal na mesma origem, para evitar duplicidade.
 
-## Segurança e próximos passos
+## Compatibilidade e segurança
 
-1. Não extrair autenticação/sincronização de `app.js` antes de mapear todos os símbolos globais e handlers HTML que elas usam.
-2. Preservar `window.doLogin`, `window.doSignUp`, `window.doGoogleLogin`, `window.doPasswordReset` e `window.doLogout`, chamados pela interface.
-3. A gravação continua usando a chave pública no navegador; a policy de INSERT valida jogo e faixa de valores, mas não prova criptograficamente que a linha veio do coletor oficial.
-5. Ao alterar JS/CSS versionado, atualizar a query em `index.html` e a entrada correspondente em `sw.js`; incrementar o nome do cache.
-6. Rodar `node core.test.js` quando Node estiver disponível e validar login, sincronização, monitor e minutagem no navegador antes de declarar o comportamento testado.
-7. Não remover classes CSS só por parecerem sem uso em busca estática: o app cria classes e conteúdo dinamicamente.
+1. Não remover propriedades antigas de `data` nem mudar a rotina de sincronização pessoal sem verificar dados já existentes.
+2. Preservar os handlers globais usados pelo HTML, especialmente autenticação e ações da calculadora.
+3. A chave pública Supabase no navegador não substitui políticas RLS. As políticas e permissões efetivas devem ser verificadas no projeto Supabase antes de qualquer mudança.
+4. `velas.sql` é um script de criação inicial; não deve ser tratado como espelho garantido do esquema e das políticas atualmente aplicados em produção.
+5. Não remover classes CSS apenas por parecerem ausentes em busca textual: a interface também cria elementos e classes dinamicamente.
 
-## Cache
+## Cache e publicação
 
-O Service Worker deve pré-carregar os mesmos caminhos versionados que aparecem em `index.html`. Se as queries divergirem, a instalação pode guardar uma URL diferente da versão solicitada pela página.
+O `APP_SHELL` em `sw.js` deve usar exatamente as mesmas URLs versionadas de CSS e JavaScript que aparecem em `index.html`. Ao alterar esses recursos, atualize as duas referências e incremente `CACHE_NAME` para que os clientes instalados recebam a versão nova.
