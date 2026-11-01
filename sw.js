@@ -1,4 +1,4 @@
-const CACHE_NAME = 'thelord-aviator-oficial-v24-betdopovo-vip';
+const CACHE_NAME = 'thelord-aviator-oficial-v25-monitor-status';
 const APP_SHELL = [
   './',
   './index.html',
@@ -9,7 +9,7 @@ const APP_SHELL = [
   './aviator-perspectiva.jpg',
   './style.css?v=20261031-betdopovo-vip',
   './desktop.css?v=20261022m',
-  './app.js?v=20261031-betdopovo-vip',
+  './app.js?v=20261101-monitor-status',
   './probability-core.js?v=20261027-combined1',
   './timing-core.js?v=20261026b',
   './timing.js?v=20261031-betdopovo-vip'
