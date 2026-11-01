@@ -998,9 +998,6 @@ function setActivePlatform(platform){
   }else if(platform==='betdopovo'){
     selectedMonitorPlatform='betdopovo';
     setActiveGame(data.activeGame==='aviatorvip'?'aviatorvip':'aviator2');
-  }else if(platform==='betboa'){
-    selectedMonitorPlatform='betboa';
-    renderPlatformSelector();
   }
   toggleMonitorPlatformMenu(false);
 }
@@ -1008,17 +1005,13 @@ function renderPlatformSelector(){
   const game=data.activeGame||'aviator';
   const platform=selectedMonitorPlatform||(game==='aviator'?'7a7':'betdopovo');
   const bet=platform==='betdopovo';
-  const betboa=platform==='betboa';
   const set=(id,visible)=>{const el=document.getElementById(id);if(el)el.classList.toggle('hidden',!visible);};
   const active=(id,value)=>{const el=document.getElementById(id);if(el)el.classList.toggle('active',!!value);};
-  active('platformBtn7a7',platform==='7a7');active('platformBtnBetDoPovo',bet);active('platformBtnBetBoa',betboa);
+  active('platformBtn7a7',platform==='7a7');active('platformBtnBetDoPovo',bet);
   set('gameBtnAviator7a7',platform==='7a7');set('gameBtnBetDoPovoAviator',bet&&game==='aviator2');set('gameBtnAviatorVip',bet&&game==='aviatorvip');
-  set('goGraphBtn7a7',platform==='7a7');set('goGraphBtnBetDoPovo',bet&&game==='aviator2');set('goGraphBtnVip',bet&&game==='aviatorvip');set('goGraphBtnBetBoa',betboa);
+  set('goGraphBtn7a7',platform==='7a7');set('goGraphBtnBetDoPovo',bet&&game==='aviator2');set('goGraphBtnVip',bet&&game==='aviatorvip');
   active('gameBtnAviator7a7',game==='aviator');active('gameBtnBetDoPovoAviator',game==='aviator2');active('gameBtnAviatorVip',game==='aviatorvip');
   renderCollectorStatus();
-}
-function openBetBoaGame(){
-  window.open('https://betboa.net.br?affiliation_code=rQ1BAta','_blank','noopener,noreferrer');
 }
 function openBetDoPovoGame(vip){
   const url=vip?'https://betdopovo.co/game/spribe/aviator?via=4':'https://betdopovo.co/game/spribe/aviator';
