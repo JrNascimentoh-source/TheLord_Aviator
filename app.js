@@ -34,7 +34,7 @@ if(!data.roundsByGame || typeof data.roundsByGame!=='object'){
 if(!Array.isArray(data.roundsByGame.aviator)) data.roundsByGame.aviator=[];
 if(!Array.isArray(data.roundsByGame.aviator2)) data.roundsByGame.aviator2=[];
 
-if(!data.activeGame || !data.roundsByGame[data.activeGame]) data.activeGame='aviator';
+if(!['aviator','aviator2'].includes(data.activeGame)) data.activeGame='aviator';
 if(data.scenario===undefined) data.scenario=null;
 if(data.managementDays===undefined) data.managementDays=null;
 if(data.freeManagement===undefined) data.freeManagement=false;
@@ -1872,7 +1872,7 @@ function normalizeLoadedData(){
   if(!Array.isArray(data.roundsByGame.aviator)) data.roundsByGame.aviator=[];
   if(!Array.isArray(data.roundsByGame.aviator2)) data.roundsByGame.aviator2=[];
 
-  if(!data.activeGame || !data.roundsByGame[data.activeGame]) data.activeGame='aviator';
+  if(!['aviator','aviator2'].includes(data.activeGame)) data.activeGame='aviator';
   if(data.scenario===undefined) data.scenario=null;
   if(data.managementDays===undefined) data.managementDays=null;
   if(data.freeManagement===undefined) data.freeManagement=false;
