@@ -1058,6 +1058,8 @@ function pruneOldRounds(){
 }
 const COLLECTOR_STALE_MS=120000;
 const lastVelaTsByGame={aviator:0,aviator2:0,aviatorvip:0};
+// Horário em que o app recebeu uma nova inserção, separado do horário original da rodada.
+const lastVelaReceivedTsByGame={aviator:0,aviator2:0,aviatorvip:0};
 let lastSyncOk=false;
 function collectorGameDisplayName(game){
   if(game==='aviator2')return 'Aviator BdPv';
@@ -1066,7 +1068,7 @@ function collectorGameDisplayName(game){
 }
 function updateCollectorBadge(el,lb,game,includeGameName=false){
   if(!el||!lb)return;
-  const ts=lastVelaTsByGame[game]||0;
+  const ts=Math.max(lastVelaTsByGame[game]||0,lastVelaReceivedTsByGame[game]||0);
   const on=lastSyncOk&&ts>0&&(Date.now()-ts)<COLLECTOR_STALE_MS;
   el.classList.toggle('on',!!on);el.classList.toggle('off',!on);
   lb.textContent=(includeGameName?collectorGameDisplayName(game)+' ':'')+(on?'Online Coletando':'Off-Line');
@@ -1103,8 +1105,13 @@ function upsertSharedVelaRow(r){
 }
 
 function onRealtimeVela(payload){
-  const changed=upsertSharedVelaRow(payload&&payload.new);
+  const row=payload&&payload.new;
+  const changed=upsertSharedVelaRow(row);
   if(!changed)return;
+  const game=String(row.game||'').toLowerCase();
+  if(Object.prototype.hasOwnProperty.call(lastVelaReceivedTsByGame,game)){
+    lastVelaReceivedTsByGame[game]=Date.now();
+  }
   lastSyncOk=true;
   renderCollectorStatus();
   renderProbabilityCard();
