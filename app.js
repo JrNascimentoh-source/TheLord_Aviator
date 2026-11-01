@@ -1059,18 +1059,23 @@ function pruneOldRounds(){
 const COLLECTOR_STALE_MS=120000;
 const lastVelaTsByGame={aviator:0,aviator2:0,aviatorvip:0};
 let lastSyncOk=false;
-function updateCollectorBadge(el,lb,game){
+function collectorGameDisplayName(game){
+  if(game==='aviator2')return 'Aviator BdPv';
+  if(game==='aviatorvip')return 'Aviator VIP';
+  return 'Aviator 7a7';
+}
+function updateCollectorBadge(el,lb,game,includeGameName=false){
   if(!el||!lb)return;
   const ts=lastVelaTsByGame[game]||0;
   const on=lastSyncOk&&ts>0&&(Date.now()-ts)<COLLECTOR_STALE_MS;
   el.classList.toggle('on',!!on);el.classList.toggle('off',!on);
-  lb.textContent=on?'Online · coletando':'Off-line';
+  lb.textContent=(includeGameName?collectorGameDisplayName(game)+' ':'')+(on?'Online Coletando':'Off-Line');
 }
 function renderCollectorStatus(){
   updateCollectorBadge(document.getElementById('collectorStatusAviator'),document.getElementById('collectorLabelAviator'),'aviator');
   updateCollectorBadge(document.getElementById('collectorStatusBetDoPovoAviator'),document.getElementById('collectorLabelBetDoPovoAviator'),'aviator2');
   updateCollectorBadge(document.getElementById('collectorStatusAviatorVip'),document.getElementById('collectorLabelAviatorVip'),'aviatorvip');
-  updateCollectorBadge(document.getElementById('collectorStatus'),document.getElementById('collectorLabel'),data.activeGame||'aviator');
+  updateCollectorBadge(document.getElementById('collectorStatus'),document.getElementById('collectorLabel'),data.activeGame||'aviator',true);
 }
 const VELAS_PAGE_SIZE=1000;
 let initialVelasLoaded=false;
@@ -1278,7 +1283,7 @@ function renderMonitor(){
   const withValue=rounds.filter(r=>r.value!==null && r.value!==undefined);
 
   const salaTitleEl=document.getElementById('salaTitle');
-  if(salaTitleEl) salaTitleEl.textContent=data.activeGame==='aviatorvip'?'✈ Aviator VIP':'✈ Aviator';
+  if(salaTitleEl) salaTitleEl.textContent='✈ '+collectorGameDisplayName(data.activeGame||'aviator');
 
   const totalRounds=withValue.length;
   const sumValues=withValue.reduce((a,r)=>a+r.value,0);
