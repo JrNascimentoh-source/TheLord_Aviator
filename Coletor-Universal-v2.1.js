@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         TheLord Coletor Universal
 // @namespace    thelord-aviator
-// @version      2.2
-// @description  Identifica Aviator e Aviator VIP na BetDoPovo, inclusive dentro do iframe da Spribe
+// @version      2.3
+// @description  Identifica Aviator 7a7 e Aviator BdPv, inclusive dentro do iframe da Spribe
 // @match        *://*/*
 // @exclude      *://7a7dd.com/*
 // @exclude      *://*.7a7dd.com/*
@@ -28,7 +28,7 @@
   function gameFromUrl(value) {
     const parsed = parseUrl(value);
     if (!parsed || !isBetDoPovoUrl(value)) return 'aviator';
-    return parsed.searchParams.get('via') === '4' ? 'aviatorvip' : 'aviator2';
+    return 'aviator2';
   }
   function forwardToFrames(url) {
     for (let i = 0; i < window.frames.length; i++) {
@@ -50,13 +50,10 @@
     return new Promise(resolve => {
       const selfParsed = parseUrl(SELF_URL);
       const selfIsBet = isBetDoPovoUrl(SELF_URL);
-      const selfViaVip = !!selfParsed && selfParsed.searchParams.get('via') === '4';
       if (IS_TOP) return resolve(gameFromUrl(SELF_URL));
-      if (selfIsBet && selfViaVip) return resolve('aviatorvip');
 
       const referrer = document.referrer || '';
       const referrerParsed = parseUrl(referrer);
-      if (isBetDoPovoUrl(referrer) && referrerParsed && referrerParsed.searchParams.get('via') === '4') return resolve('aviatorvip');
       const referrerIsBet = isBetDoPovoUrl(referrer);
 
       let betAncestor = false;
@@ -86,7 +83,7 @@
   // Chave original da versão 1.3 — mantida exatamente como estava.
   const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5cGphcW1tbHVybHFlb3RiZXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAzMDU2MTAsImV4cCI6MjEwNTg4MTYxMH0.IeAT6gwsAfzfw2N4BIxg9gc5pRqZH0ELn3Xo9fogHnY';
 
-  const GAME_LABEL = GAME === 'aviatorvip' ? 'Aviator VIP' : 'Aviator';
+  const GAME_LABEL = GAME === 'aviator2' ? 'Aviator BdPv' : 'Aviator 7a7';
   const QUEUE_KEY = 'thelord_universal_pending_v1_' + GAME;
   const SIG_KEY = 'thelord_universal_signature_v1_' + GAME;
   const RELOAD_KEY = 'thelord_universal_reload_v1_' + GAME;
