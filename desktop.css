@@ -279,3 +279,37 @@
   }
   body.sidebar-collapsed .monitor-platform-menu[hidden]{display:none!important}
 }
+
+
+/* Expo glass effect — acabamento óptico da navegação desktop/tablet */
+@media screen and (min-width:701px){
+  .bottom{
+    background:
+      linear-gradient(155deg,rgba(255,255,255,.14) 0%,rgba(255,255,255,.035) 28%,rgba(255,30,67,.055) 72%,rgba(255,192,31,.045) 100%),
+      linear-gradient(180deg,rgba(24,18,32,.72),rgba(10,7,16,.76));
+    border:1px solid rgba(255,255,255,.22);
+    border-top-color:rgba(255,255,255,.38);
+    backdrop-filter:blur(30px) saturate(175%);
+    -webkit-backdrop-filter:blur(30px) saturate(175%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.24),inset 1px 0 0 rgba(255,255,255,.07),inset 0 -1px 0 rgba(255,255,255,.05),0 18px 48px rgba(0,0,0,.48),0 0 30px rgba(255,30,67,.09);
+    isolation:isolate;
+  }
+  .bottom .nav{
+    border:1px solid transparent;
+    transition:background .22s ease,border-color .22s ease,box-shadow .22s ease,transform .22s ease,color .22s ease;
+  }
+  .bottom .nav:hover{
+    background:rgba(255,255,255,.075);
+    border-color:rgba(255,255,255,.12);
+    color:#fff;
+  }
+  .bottom .nav:active{transform:scale(.975)}
+  .bottom .nav.active{
+    background:linear-gradient(125deg,rgba(255,255,255,.16),rgba(255,192,31,.13) 62%,rgba(255,30,67,.08));
+    border-color:rgba(255,255,255,.18);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 4px 18px rgba(255,192,31,.09);
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .bottom .nav{transition:none}
+}
