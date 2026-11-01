@@ -1,4 +1,4 @@
-const CACHE_NAME = 'thelord-aviator-oficial-v28-7a7-bdpv-no-vip';
+const CACHE_NAME = 'thelord-aviator-oficial-v29-7a7-bdpv-only';
 const APP_SHELL = [
   './',
   './index.html',
@@ -7,12 +7,12 @@ const APP_SHELL = [
   './icon-192.png',
   './icon-512.png',
   './aviator-perspectiva.jpg',
-  './style.css?v=20261101-no-vip',
+  './style.css?v=20261101-bdpv-only',
   './desktop.css?v=20261022m',
-  './app.js?v=20261101-no-vip',
+  './app.js?v=20261101-bdpv-only',
   './probability-core.js?v=20261027-combined1',
   './timing-core.js?v=20261026b',
-  './timing.js?v=20261101-no-vip'
+  './timing.js?v=20261101-bdpv-only'
 ];
 
 self.addEventListener('install', event => {
