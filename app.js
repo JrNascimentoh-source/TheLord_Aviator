@@ -1045,17 +1045,6 @@ function openAviatorGame(){
   try{window.open(AVIATOR_GAME_URL,'_blank','noopener,noreferrer');}
   catch(e){window.location.href=AVIATOR_GAME_URL;}
 }
-const ROUND_MAX_AGE_MS=24*60*60*1000;
-function pruneOldRounds(){
-  const cutoff=Date.now()-ROUND_MAX_AGE_MS;
-  let changed=false;
-  Object.keys(data.roundsByGame||{}).forEach(game=>{
-    const list=data.roundsByGame[game]||[];
-    const kept=list.filter(r=>r.ts>=cutoff);
-    if(kept.length!==list.length){data.roundsByGame[game]=kept;changed=true;}
-  });
-  return changed;
-}
 const COLLECTOR_STALE_MS=120000;
 const lastVelaTsByGame={aviator:0,aviator2:0};
 // Horário em que o app recebeu uma nova inserção, separado do horário original da rodada.
@@ -1122,7 +1111,7 @@ function onRealtimeVela(payload){
   const timing=document.getElementById('timing');
   if(timing&&!timing.classList.contains('hidden')){
     if(typeof renderTiming==='function')renderTiming();
-    else renderTimingAnalysis();
+    
   }
 }
 
@@ -1175,7 +1164,7 @@ async function syncVelas(){
     renderCollectorStatus();
     // Atualiza o card mesmo quando a sincronização não trouxe rodadas novas.
     renderProbabilityCard();
-    if(changed){renderMonitor();const timing=document.getElementById('timing');if(timing&&!timing.classList.contains('hidden')){if(typeof renderTiming==='function')renderTiming();else renderTimingAnalysis();}}
+    if(changed){renderMonitor();const timing=document.getElementById('timing');if(timing&&!timing.classList.contains('hidden')){if(typeof renderTiming==='function')renderTiming();}}
   }catch(e){console.error('Erro ao sincronizar histórico compartilhado de velas:',e);lastSyncOk=false;renderCollectorStatus();const grid=document.getElementById('probabilityGrid');if(grid)grid.innerHTML='<div class="probability-empty">Falha ao sincronizar o histórico compartilhado. Confira a conexão e recarregue a página.</div>';}
   finally{syncVelasRunning=false;}
 }
@@ -1184,27 +1173,6 @@ setInterval(syncVelas,3000);
 setInterval(()=>{if(document.getElementById('probabilityGrid'))renderProbabilityCard();},1000);
 setInterval(renderCollectorStatus,3000);
 setTimeout(syncVelas,1500);
-function pushRound(){
-  showAppNotice('O histórico oficial é compartilhado e vem do coletor central. Rodadas manuais não são adicionadas ao histórico comum.','Histórico compartilhado','info');
-}
-function registerRound(){
-  const input=document.getElementById('roundValue');
-  if(input)input.value='';
-  showAppNotice('As rodadas exibidas são sincronizadas automaticamente do histórico compartilhado. O registro manual está desativado para evitar diferenças entre usuários.','Histórico oficial','info');
-}
-function clearRounds(){
-  showAppNotice('O histórico compartilhado não pode ser apagado pela tela de um usuário. Ele é atualizado pelo coletor central.','Histórico protegido','info');
-}
-function timeAgo(ts){
-  const diff=Math.max(0,Date.now()-ts);
-  const min=Math.floor(diff/60000);
-  if(min<1)return 'agora mesmo';
-  if(min<60)return min+' minuto'+(min>1?'s':'')+' atrás';
-  const h=Math.floor(min/60);
-  if(h<24)return h+'h '+(min%60)+'min atrás';
-  const d=Math.floor(h/24);
-  return d+' dia'+(d>1?'s':'')+' atrás';
-}
 let contagemCasasEnabled=(data.contagemAtivada!==undefined)?data.contagemAtivada:true;
 let roundFilterMin=0;
 function setRoundFilter(min){
@@ -1354,291 +1322,13 @@ setInterval(()=>{const el=document.getElementById('monitorClock');if(el)el.textC
 ====================================================== */
 
 
-function runTheLordAI(){
-  const status=document.getElementById('timingAIStatus'),result=document.getElementById('timingAIResult');
-  if(!status||!result)return;
-  const gameEl=document.getElementById('timingGame'),windowEl=document.getElementById('timingWindow');
-  const game=gameEl?gameEl.value:'active',windowValue=windowEl?windowEl.value:'all';
-  const games=game==='both'?['aviator','aviator2']:[game==='active'?data.activeGame:game];
-  let rounds=[];
-  games.forEach(g=>(sharedRoundsByGame[g]||[]).forEach(r=>rounds.push({value:Number(r.value),ts:Number(r.ts),game:g})));
-  rounds=rounds.filter(r=>Number.isFinite(r.value)&&r.value>0&&Number.isFinite(r.ts));
-  if(windowValue!=='all')rounds=rounds.filter(r=>r.ts>=Date.now()-Number(windowValue)*60000);
-  rounds.sort((a,b)=>a.ts-b.ts);
-  const fmt=(n,d=2)=>Number(n).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
-  const pct=(n,total)=>total?fmt(n/total*100)+'%':'—';
-  const duration=ms=>{
-    if(!Number.isFinite(ms)||ms<0)return '—';
-    const mins=Math.round(ms/60000);
-    if(mins<60)return mins+' min';
-    if(mins<1440)return Math.floor(mins/60)+' h '+(mins%60)+' min';
-    return Math.floor(mins/1440)+' d '+Math.floor((mins%1440)/60)+' h';
-  };
-  result.classList.remove('hidden');
-  if(rounds.length<30){
-    result.textContent='Amostra insuficiente: foram encontradas '+rounds.length+' rodadas válidas neste filtro. Aguarde pelo menos 30 rodadas para gerar o relatório local.';
-    status.textContent='Análise gratuita executada no próprio navegador; nenhuma chamada externa foi feita.';
-    return;
-  }
-  const values=rounds.map(r=>r.value),n=values.length,recent=values.slice(-100);
-  const mean=values.reduce((a,b)=>a+b,0)/n;
-  const sorted=[...values].sort((a,b)=>a-b);
-  const median=n%2?sorted[Math.floor(n/2)]:(sorted[n/2-1]+sorted[n/2])/2;
-  const thresholds=[10,50,100,500,1000].map(t=>{
-    const count=values.filter(v=>v>=t).length;
-    const rc=recent.filter(v=>v>=t).length;
-    return {t,count,rc,all:count/n*100,last:rc/recent.length*100};
-  });
-  const interval=[];
-  let lastPink=null;
-  rounds.forEach((r,i)=>{
-    if(r.value>=10){
-      if(lastPink!==null)interval.push({rounds:i-lastPink,minutes:(r.ts-rounds[lastPink].ts)/60000});
-      lastPink=i;
-    }
-  });
-  const avgInterval=interval.length?interval.reduce((s,x)=>s+x.minutes,0)/interval.length:null;
-  const minInterval=interval.length?Math.min(...interval.map(x=>x.minutes)):null;
-  const maxInterval=interval.length?Math.max(...interval.map(x=>x.minutes)):null;
-  const byHour=Array.from({length:24},(_,hour)=>({hour,count:0,hits:0}));
-  rounds.forEach(r=>{const h=new Date(r.ts).getHours();byHour[h].count++;if(r.value>=10)byHour[h].hits++;});
-  const hourRows=byHour.filter(x=>x.count>=10).map(x=>({...x,rate:x.hits/x.count*100})).sort((a,b)=>b.rate-a.rate);
-  const latest=rounds[rounds.length-1];
-  const max=Math.max(...values);
-  const consecutive=[];
-  let run=0,runStart=0;
-  values.forEach((v,i)=>{
-    if(v<2){if(!run)runStart=i;run++;}
-    else if(run){consecutive.push({length:run,start:runStart,end:i-1});run=0;}
-  });
-  if(run)consecutive.push({length:run,start:runStart,end:n-1});
-  consecutive.sort((a,b)=>b.length-a.length);
-  const lowStreak=consecutive[0];
-  const lines=[];
-  lines.push('RELATÓRIO ESTATÍSTICO LOCAL — GRATUITO');
-  lines.push('Jogo: '+games.join(' + ')+' | Período: '+(windowValue==='all'?'todo o histórico disponível':windowValue+' minutos'));
-  lines.push('Amostra: '+n+' rodadas | Última rodada registrada: '+new Date(latest.ts).toLocaleString('pt-BR'));
-  lines.push('');
-  lines.push('1. VISÃO GERAL');
-  lines.push('• Média: '+fmt(mean)+'x | Mediana: '+fmt(median)+'x | Maior resultado observado: '+fmt(max)+'x');
-  lines.push('• Resultados abaixo de 2x: '+values.filter(v=>v<2).length+' ('+pct(values.filter(v=>v<2).length,n)+')');
-  lines.push('• Resultados de 2x a 9,99x: '+values.filter(v=>v>=2&&v<10).length+' ('+pct(values.filter(v=>v>=2&&v<10).length,n)+')');
-  lines.push('• Resultados de 10x a 99,99x: '+values.filter(v=>v>=10&&v<100).length+' ('+pct(values.filter(v=>v>=10&&v<100).length,n)+')');
-  lines.push('');
-  lines.push('2. FREQUÊNCIAS HISTÓRICAS');
-  thresholds.forEach(t=>lines.push('• ≥ '+t.t+'x: '+t.count+'/'+n+' ('+fmt(t.all)+'%); últimas '+recent.length+': '+t.rc+'/'+recent.length+' ('+fmt(t.last)+'%).'));
-  lines.push('');
-  lines.push('3. INTERVALOS ENTRE RESULTADOS ≥ 10x');
-  if(interval.length)lines.push('• Intervalos calculáveis: '+interval.length+' | média de tempo: '+duration(avgInterval*60000)+' | menor: '+duration(minInterval*60000)+' | maior: '+duration(maxInterval*60000)+'.');
-  else lines.push('• Ainda não há dois resultados ≥ 10x para calcular intervalos.');
-  lines.push('');
-  lines.push('4. HORÁRIOS OBSERVADOS (hora local do dispositivo)');
-  if(hourRows.length)lines.push(...hourRows.slice(0,3).map(x=>'• '+String(x.hour).padStart(2,'0')+'h: '+fmt(x.rate)+'% de resultados ≥ 10x ('+x.hits+'/'+x.count+' rodadas).'));
-  else lines.push('• Não há amostras suficientes por hora (mínimo de 10 rodadas por faixa).');
-  if(lowStreak&&lowStreak.length>=3){
-    lines.push('');
-    lines.push('5. SEQUÊNCIA OBSERVADA');
-    lines.push('• Maior sequência consecutiva de resultados abaixo de 2x nesta amostra: '+lowStreak.length+'. É apenas um registro histórico, não um sinal de que o próximo resultado será alto ou baixo.');
-  }
-  lines.push('');
-  lines.push('LIMITAÇÕES IMPORTANTES');
-  lines.push('Este relatório é calculado por regras estatísticas no seu navegador; não é uma IA generativa nem prevê a próxima rodada. Frequências e intervalos passados não garantem repetição futura, e diferenças por horário podem refletir acaso ou tamanhos de amostra. Use os números como descrição do histórico, não como promessa de lucro.');
-  result.textContent=lines.join('\n');
-  status.textContent='Relatório concluído no dispositivo. 100% gratuito: sem API, sem cobrança e sem envio de dados para análise externa.';
-}
-function timingWilson(success,total){
-  if(!total)return {low:0,high:0};
-  const z=1.96,p=success/total,den=1+z*z/total;
-  const center=(p+z*z/(2*total))/den;
-  const margin=z*Math.sqrt((p*(1-p)+z*z/(4*total))/total)/den;
-  return {low:Math.max(0,center-margin)*100,high:Math.min(1,center+margin)*100};
-}
-function renderTimingRadar(rounds){
-  const root=document.getElementById('timingRadar'),signal=document.getElementById('timingSignal');
-  if(!root||!signal)return;
-  const values=rounds.map(r=>Number(r.value)).filter(Number.isFinite);
-  const recent=values.slice(-100);
-  const thresholds=[{v:10,label:'≥ 10x'},{v:50,label:'≥ 50x'},{v:100,label:'≥ 100x'}];
-  if(values.length<30){
-    root.innerHTML='<div class="timing-note">Precisamos de pelo menos 30 rodadas válidas para mostrar uma estimativa inicial. Atualmente: '+values.length+'.</div>';
-    signal.textContent='Amostra insuficiente: aguarde mais rodadas antes de interpretar qualquer frequência.';
-    return;
-  }
-  root.innerHTML=thresholds.map(t=>{
-    const hits=values.filter(v=>v>=t.v).length,recHits=recent.filter(v=>v>=t.v).length;
-    const p=hits/values.length*100,rp=recent.length?recHits/recent.length*100:0;
-    const ci=timingWilson(hits,values.length);
-    const delta=rp-p;
-    const label=recent.length<30?'Poucos dados recentes':Math.abs(delta)<1?'Próximo da frequência histórica':delta>0?'Acima da frequência histórica recente':'Abaixo da frequência histórica recente';
-    const cls=recent.length<30||Math.abs(delta)<1?'neutral':delta>0?'up':'down';
-    return '<div class="timing-radar-card"><div class="timing-radar-head"><b>Resultado '+t.label+'</b><span class="timing-radar-tag '+cls+'">'+label+'</span></div><div class="timing-radar-prob">'+timingPct(hits,values.length)+'</div><div class="timing-radar-detail">Histórico: '+hits+' de '+values.length+' rodadas</div><div class="timing-radar-detail">Últimas '+recent.length+': '+timingPct(recHits,recent.length)+'</div><div class="timing-radar-detail">Intervalo de confiança 95%: '+timingFmt(ci.low)+'%–'+timingFmt(ci.high)+'%</div><div class="timing-radar-bar"><span style="width:'+Math.max(0,Math.min(100,p))+'%"></span></div></div>';
-  }).join('');
-  const nudge=thresholds.map(t=>{
-    const all=values.filter(v=>v>=t.v).length/values.length*100;
-    const rr=recent.filter(v=>v>=t.v).length/recent.length*100;
-    return {label:t.label,delta:rr-all,all,recent:rr};
-  }).sort((a,b)=>b.delta-a.delta)[0];
-  if(recent.length>=30&&Math.abs(nudge.delta)>=2){
-    signal.innerHTML='<b>Variação observada:</b> nas últimas '+recent.length+' rodadas, a frequência de '+nudge.label+' ficou '+(nudge.delta>0?'acima':'abaixo')+' da frequência do histórico em '+timingFmt(Math.abs(nudge.delta))+' pontos percentuais. Isso descreve o passado recente, não aumenta de forma comprovada a chance da próxima rodada.';
-  }else{
-    signal.textContent='Não há diferença recente forte o bastante para destacar. Frequências passadas não indicam que uma vela esteja “atrasada” nem garantem a próxima rodada.';
-  }
-}
-
-function renderMinuteEndingRadar(rounds){
-  const root=document.getElementById('timingMinuteCombinedRows');
-  const summary=document.getElementById('timingMinuteEndingSummary');
-  if(!root||!summary)return;
-  const valid=rounds.filter(r=>Number.isFinite(Number(r.value))&&Number(r.value)>0&&Number.isFinite(Number(r.ts)));
-  if(valid.length<30){
-    root.innerHTML='<tr><td colspan="8">Amostra insuficiente: são necessárias pelo menos 30 rodadas válidas.</td></tr>';
-    summary.textContent='Ainda há poucas rodadas para comparar os minutos e finais de minuto.';
-    return;
-  }
-  const overall10=valid.filter(r=>Number(r.value)>=10).length/valid.length*100;
-  const overall50=valid.filter(r=>Number(r.value)>=50).length/valid.length*100;
-  const overall100=valid.filter(r=>Number(r.value)>=100).length/valid.length*100;
-  const minuteMap=Array.from({length:60},(_,minute)=>({minute,total:0,hits10:0,hits50:0,hits100:0}));
-  const buckets=Array.from({length:10},(_,digit)=>({digit,total:0,hits10:0,hits50:0,hits100:0}));
-  valid.forEach(r=>{
-    const minute=new Date(Number(r.ts)).getMinutes(),digit=minute%10,v=Number(r.value);
-    const m=minuteMap[minute],b=buckets[digit];
-    [m,b].forEach(x=>{x.total++;if(v>=10)x.hits10++;if(v>=50)x.hits50++;if(v>=100)x.hits100++;});
-  });
-  const minuteRows=minuteMap.filter(x=>x.total>0).sort((a,b)=>(b.hits10/b.total)-(a.hits10/a.total)||b.hits10-a.hits10||b.total-a.total).slice(0,10);
-  const rows=[];
-  minuteRows.forEach(x=>{
-    const rate=x.hits10/x.total*100, enough=x.total>=30;
-    const label=!enough?'Poucos dados':rate>overall10+2?'Acima da média':rate<overall10-2?'Abaixo da média':'Próximo da média';
-    const cls=!enough?'neutral':rate>overall10+2?'up':rate<overall10-2?'down':'neutral';
-    rows.push({kind:'Minuto',name:'Min '+String(x.minute).padStart(2,'0'),...x,rate,label,cls});
-  });
-  buckets.forEach(x=>{
-    const rate=x.total?x.hits10/x.total*100:0,enough=x.total>=30;
-    const label=!enough?'Poucos dados':rate>overall10+2?'Acima da média':rate<overall10-2?'Abaixo da média':'Próximo da média';
-    const cls=!enough?'neutral':rate>overall10+2?'up':rate<overall10-2?'down':'neutral';
-    rows.push({kind:'Final',name:'…'+x.digit,...x,rate,label,cls});
-  });
-  root.innerHTML=rows.map(x=>'<tr><td>'+x.kind+'</td><td><b>'+x.name+'</b></td><td>'+x.hits10+'</td><td>'+x.total+'</td><td><b>'+timingPct(x.hits10,x.total)+'</b></td><td>'+timingPct(x.hits50,x.total)+'</td><td>'+timingPct(x.hits100,x.total)+'</td><td><span class="timing-radar-tag '+x.cls+'">'+x.label+'</span></td></tr>').join('');
-  const leader=minuteRows.find(x=>x.total>=30);
-  const bestFinal=[...buckets].filter(x=>x.total>=30).sort((a,b)=>(b.hits10/b.total)-(a.hits10/a.total))[0];
-  let msg='Referência geral: ≥10x '+timingFmt(overall10)+'% · ≥50x '+timingFmt(overall50)+'% · ≥100x '+timingFmt(overall100)+'%. ';
-  if(leader)msg+='Minuto com maior taxa observada (entre os 10 exibidos): '+String(leader.minute).padStart(2,'0')+' ('+timingPct(leader.hits10,leader.total)+', '+leader.hits10+'/'+leader.total+'). ';
-  if(bestFinal)msg+='Final com maior taxa observada: …'+bestFinal.digit+' ('+timingPct(bestFinal.hits10,bestFinal.total)+', '+bestFinal.hits10+'/'+bestFinal.total+'). ';
-  msg+='“Acima da média” descreve o histórico observado e não prevê a próxima rodada.';
-  summary.textContent=msg;
-}
-
-function timingPct(n,d){return d?((n/d)*100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%':'—'}
-function timingMean(arr){return arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0}
-function timingFmt(n){return Number(n).toLocaleString('pt-BR',{maximumFractionDigits:2})}
-
-
-function renderTimingAnalysis(){
-  const gameEl=document.getElementById('timingGame'),windowEl=document.getElementById('timingWindow');
-  if(!gameEl||!windowEl)return;
-  const game=gameEl.value,windowValue=windowEl.value;
-  let rounds=[];
-  const games=game==='both'?['aviator','aviator2']:[game==='active'?data.activeGame:game];
-  games.forEach(g=>(sharedRoundsByGame[g]||[]).forEach(r=>rounds.push({...r,game:g})));
-  rounds=rounds.filter(r=>Number.isFinite(Number(r.value))&&Number.isFinite(Number(r.ts)));
-  if(windowValue!=='all'){
-    const cutoff=Date.now()-Number(windowValue)*60000;
-    rounds=rounds.filter(r=>r.ts>=cutoff);
-  }
-  rounds.sort((a,b)=>a.ts-b.ts);
-  renderProbabilityCard();
-  const values=rounds.map(r=>Number(r.value));
-  renderTimingRadar(rounds);
-  renderMinuteEndingRadar(rounds);
-  enableTimingTableSorting();
-  const total=values.length,above10=values.filter(v=>v>=10),above50=values.filter(v=>v>=50),above100=values.filter(v=>v>=100);
-  const pink=values.filter(v=>v>=10&&v<100);
-  const avg=timingMean(values),pinkAvg=timingMean(pink);
-  const fmtTime=ts=>new Date(ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-  const stat=(label,value,detail)=>'<div class="timing-stat"><div class="timing-stat-label">'+label+'</div><div class="timing-stat-value">'+value+'</div><div class="timing-stat-detail">'+detail+'</div></div>';
-  const stats=document.getElementById('timingStats');
-  if(stats)stats.innerHTML=[
-    stat('Rodadas analisadas',timingFmt(total),'no período escolhido'),
-    stat('≥ 10x',timingPct(above10.length,total),above10.length+' ocorrência(s)'),
-    stat('≥ 50x',timingPct(above50.length,total),above50.length+' ocorrência(s)'),
-    stat('≥ 100x',timingPct(above100.length,total),above100.length+' ocorrência(s)'),
-    stat('Média de todos os resultados',total?timingFmt(avg)+'x':'—','média aritmética'),
-    stat('Velas rosas',pink.length,timingPct(pink.length,total)+' do total')
-  ].join('');
-  const updated=document.getElementById('timingUpdated');
-  if(updated)updated.textContent='Atualizado em '+new Date().toLocaleTimeString('pt-BR')+' · '+(games.length>1?'Todos os gráficos':games[0]==='aviator2'?'Aviator BdPv':'Aviator 7a7')+' · '+(windowValue==='all'?'todo o histórico disponível':windowValue==='60'?'últimos 60 minutos':windowValue==='360'?'últimas 6 horas':'últimas 24 horas');
-  const gaps10=[],gaps50=[],gaps100=[];
-  let last10=-1,last50=-1,last100=-1,runLow=0,maxLow=0,streak10=0,maxStreak10=0;
-  rounds.forEach((r,i)=>{
-    const v=Number(r.value);
-    if(v>=10){if(last10>=0)gaps10.push(i-last10);last10=i;streak10++;maxStreak10=Math.max(maxStreak10,streak10);}else{runLow++;maxLow=Math.max(maxLow,runLow);streak10=0;}
-    if(v>=50){if(last50>=0)gaps50.push(i-last50);last50=i;}
-    if(v>=100){if(last100>=0)gaps100.push(i-last100);last100=i;}
-  });
-  const meanGap=a=>a.length?timingFmt(timingMean(a))+' rodadas':'Ainda sem ocorrências repetidas';
-  const patterns=document.getElementById('timingPatterns');
-  if(patterns)patterns.innerHTML=[
-    stat('Intervalo médio entre ≥ 10x',meanGap(gaps10),gaps10.length+' intervalo(s) calculado(s)'),
-    stat('Intervalo médio entre ≥ 50x',meanGap(gaps50),gaps50.length+' intervalo(s) calculado(s)'),
-    stat('Intervalo médio entre ≥ 100x',meanGap(gaps100),gaps100.length+' intervalo(s) calculado(s)'),
-    stat('Maior sequência abaixo de 10x',maxLow+' rodada(s)','no histórico selecionado'),
-    stat('Maior sequência consecutiva ≥ 10x',maxStreak10+' rodada(s)','no histórico selecionado')
-  ].join('');
-  const pinkEl=document.getElementById('timingPink');
-  if(pinkEl) pinkEl.innerHTML=pink.length
-    ? '<div class="timing-pink-grid">'+stat('Quantidade',pink.length,'de '+total+' rodadas')+stat('Média',timingFmt(pinkAvg)+'x','média aritmética')+stat('Mediana',timingFmt([...pink].sort((a,b)=>a-b)[Math.floor((pink.length-1)/2)])+'x','valor central da amostra')+stat('Maior rosa',timingFmt(Math.max(...pink))+'x','limite da amostra')+'</div>'
-    : 'Nenhuma vela rosa (10x a 99,99x) encontrada no período selecionado.';
-  const summary=document.getElementById('timingSummary');
-  if(summary){
-    if(!total)summary.textContent='Nenhuma rodada disponível para os filtros escolhidos. Confirme que o coletor está conectado e que o histórico aparece na aba Monitor.';
-    else summary.innerHTML='<p>Foram analisadas <b>'+total+'</b> rodadas. A frequência observada foi de <b>'+timingPct(above10.length,total)+'</b> para resultados ≥ 10x, <b>'+timingPct(above50.length,total)+'</b> para ≥ 50x e <b>'+timingPct(above100.length,total)+'</b> para ≥ 100x.</p><p>Essas proporções descrevem apenas a amostra selecionada. Não são garantia nem previsão da próxima rodada.</p>';
-  }
-}
-function enableTimingTableSorting(){
-  document.querySelectorAll('#timing .timing-table thead th[data-sort]').forEach(th=>{
-    if(th.dataset.sortReady)return;
-    th.dataset.sortReady='1';
-    th.style.cursor='pointer';
-    th.addEventListener('click',()=>{
-      const table=th.closest('table'),tbody=table&&table.tBodies[0];
-      if(!tbody)return;
-      const index=Array.from(th.parentElement.children).indexOf(th);
-      const dir=th.dataset.sortDir==='asc'?'desc':'asc';
-      th.dataset.sortDir=dir;
-      const headers=Array.from(th.parentElement.children);
-      headers.forEach(h=>{if(h!==th)delete h.dataset.sortDir;});
-      const rows=Array.from(tbody.rows).filter(row=>row.cells.length>1);
-      const value=row=>{
-        const cell=row.cells[index];
-        if(!cell)return '';
-        const text=(cell.innerText||cell.textContent||'').trim();
-        if(th.dataset.sort==='number')return Number(text.replace(/[^0-9,.-]/g,'').replace(',','.'))||0;
-        if(th.dataset.sort==='percent'){
-          const m=text.match(/-?\\d+(?:[,.]\\d+)?/);
-          return m?Number(m[0].replace(',','.')):0;
-        }
-        return text.toLocaleLowerCase('pt-BR');
-      };
-      rows.sort((a,b)=>{
-        const av=value(a),bv=value(b);
-        const cmp=typeof av==='number'&&typeof bv==='number'?av-bv:String(av).localeCompare(String(bv),'pt-BR');
-        return dir==='asc'?cmp:-cmp;
-      });
-      rows.forEach(row=>tbody.appendChild(row));
-      th.setAttribute('aria-sort',dir==='asc'?'ascending':'descending');
-    });
-  });
-}
-setInterval(()=>{const p=document.getElementById('timing');if(p&&!p.classList.contains('hidden'))renderTimingAnalysis();},10000);
-
 function showPage(id,btn){
   ['overview','calculator','monitor','timing'].forEach(x=>document.getElementById(x).classList.toggle('hidden',x!==id));
   document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));
   if(btn)btn.classList.add('active');
   if(id!=='monitor')toggleMonitorPlatformMenu(false);
   if(id==='calculator')calc();
-  if(id==='timing')renderTimingAnalysis();
+  if(id==='timing'&&typeof renderTiming==='function')renderTiming();
   if(id==='monitor'){
     renderPlatformSelector();
     renderMonitor();
@@ -1889,9 +1579,6 @@ async function pushToCloud(){
   }catch(e){console.error('Erro ao sincronizar com a nuvem:',e);return false}
 }
 
-function openLoginPreview(){
-  setAuthView(false);
-}
 function closeLoginPreview(){
   /* Nunca abre o app sem uma sessão autenticada. */
   if(currentUser) setAuthView(true);
