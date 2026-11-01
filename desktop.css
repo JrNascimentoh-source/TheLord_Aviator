@@ -321,7 +321,7 @@
  
 /* Menu lateral do Monitor no desktop recolhido: o JS o posiciona no viewport,
    fora da árvore da barra, para impedir qualquer recorte por overflow ou backdrop-filter. */
-@media screen and (min-width:1024px){
+@media screen and (min-width:701px){
   body.sidebar-collapsed .nav-dropdown-wrap{position:relative;z-index:1400;overflow:visible}
   body.sidebar-collapsed .monitor-platform-menu{
     position:fixed!important;display:grid;right:auto;bottom:auto;
