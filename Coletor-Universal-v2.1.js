@@ -48,12 +48,10 @@
 
   function resolveGame() {
     return new Promise(resolve => {
-      const selfParsed = parseUrl(SELF_URL);
       const selfIsBet = isBetDoPovoUrl(SELF_URL);
       if (IS_TOP) return resolve(gameFromUrl(SELF_URL));
 
       const referrer = document.referrer || '';
-      const referrerParsed = parseUrl(referrer);
       const referrerIsBet = isBetDoPovoUrl(referrer);
 
       let betAncestor = false;
