@@ -322,10 +322,16 @@
 /* No desktop, com a barra recolhida, as plataformas aparecem em um menu lateral
    sem reabrir ou alargar a navegação. Na barra expandida, mantém o menu original. */
 @media screen and (min-width:1024px){
-  body.sidebar-collapsed .nav-dropdown-wrap{position:relative;overflow:visible}
-  body.sidebar-collapsed .monitor-platform-menu{
-    position:absolute;top:0;left:calc(100% + 10px);bottom:auto;
-    transform:none;width:156px;max-width:calc(100vw - 120px);
-    margin:0;z-index:1300;
+  /* A barra recolhida não pode recortar o menu que abre para fora dela. */
+  body.sidebar-collapsed .bottom{overflow:visible!important}
+  body.sidebar-collapsed .nav-dropdown-wrap{
+    position:relative;z-index:1400;overflow:visible;
   }
+  body.sidebar-collapsed .monitor-platform-menu{
+    position:absolute!important;display:grid;top:0;right:auto;
+    left:calc(100% + 10px);bottom:auto;transform:none;
+    width:156px;max-width:calc(100vw - 120px);
+    margin:0;padding:8px;z-index:1500;
+  }
+  body.sidebar-collapsed .monitor-platform-menu[hidden]{display:none!important}
 }
