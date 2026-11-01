@@ -1086,11 +1086,8 @@ let velasRealtimeStarted=false;
 
 function normalizeSharedGameKey(value){
   const game=String(value||'').trim().toLowerCase();
-  // Chaves técnicas recebidas do CaptureCore/Supabase: 7a7 -> aviator; BetDoPovo -> aviator2.
-  // Mantém compatibilidade com o valor histórico `betdopovo` e aliases legados.
-  if(['betdopovo','aviator (betdopovo)','aviator betdopovo'].includes(game))return 'aviator2';
-  if(['7a7','aviator 7a7'].includes(game))return 'aviator';
-  return game;
+  // Compatibilidade com a chave histórica usada pelo Coletor Universal.
+  return game==='betdopovo'?'aviator2':game;
 }
 function upsertSharedVelaRow(r){
   if(!r)return false;
