@@ -1021,7 +1021,7 @@ function openBetBoaGame(){
   window.open('https://betboa.net.br?affiliation_code=rQ1BAta','_blank','noopener,noreferrer');
 }
 function openBetDoPovoGame(vip){
-  const url=vip?'https://betdopovo.co/game/spribe/aviator?via=4':'https://betdopovo.co/game/spribe/aviator';
+  const url='https://betdopovo.co/?ref=8924408';
   window.open(url,'_blank','noopener,noreferrer');
 }
 const AVIATOR_GAME_URL='https://7a711.com/?pid=2619439266&fromPage=AGENCY_ONE';
