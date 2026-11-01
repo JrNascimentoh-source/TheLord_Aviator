@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         TheLord Coletor Universal
 // @namespace    thelord-aviator
-// @version      2.3
-// @description  Identifica Aviator 7a7 e Aviator BdPv, inclusive dentro do iframe da Spribe
+// @version      2.2
+// @description  Identifica automaticamente Aviator ou Aviator 2 (inclusive dentro do iframe da Spribe) e envia as velas para o jogo correto
 // @match        *://*/*
 // @exclude      *://7a7dd.com/*
 // @exclude      *://*.7a7dd.com/*
@@ -13,62 +13,63 @@
 (function () {
   'use strict';
 
-  const IS_TOP = window.top === window.self;
-  const MSG = 'thelord-coletor-top-url';
-  const SELF_URL = location.href;
-  let topUrl = IS_TOP ? SELF_URL : '';
+  // Qualquer endereço que contenha estes nomes é tratado como Aviator 2
+  // (vale para betdopovo.co, betdopovo.com, www.betdopovo..., etc.).
+  const AVIATOR2_NAMES = ['betdopovo'];
 
-  function parseUrl(value) {
-    try { return new window.URL(value); } catch (_) { return null; }
+  function isAviator2Host(host) {
+    host = String(host || '').toLowerCase();
+    return AVIATOR2_NAMES.some(n => host.indexOf(n) !== -1);
   }
-  function isBetDoPovoUrl(value) {
-    const parsed = parseUrl(value);
-    return !!parsed && /(^|\.)betdopovo\./i.test(parsed.hostname);
+  function hostOf(url) {
+    try { return new window.URL(url).hostname.toLowerCase(); } catch (_) { return ''; }
   }
-  function gameFromUrl(value) {
-    const parsed = parseUrl(value);
-    if (!parsed || !isBetDoPovoUrl(value)) return 'aviator';
-    return 'aviator2';
-  }
-  function forwardToFrames(url) {
+
+  const SELF_HOST = location.hostname.toLowerCase();
+  const IS_TOP = window.top === window.self;
+  const MSG = 'thelord-coletor-top-host';
+
+  // Endereço da página principal, quando já for conhecido.
+  let topHost = IS_TOP ? SELF_HOST : '';
+
+  function forwardToFrames(h) {
     for (let i = 0; i < window.frames.length; i++) {
-      try { window.frames[i].postMessage({ type: MSG, url: url }, '*'); } catch (_) {}
+      try { window.frames[i].postMessage({ type: MSG, host: h }, '*'); } catch (_) {}
     }
   }
+
+  // A página principal avisa os quadros (o jogo) em qual site eles estão,
+  // e cada quadro repassa o aviso para os quadros dentro dele.
   window.addEventListener('message', ev => {
     const d = ev.data;
-    if (!d || d.type !== MSG || IS_TOP || ev.source !== window.parent || typeof d.url !== 'string') return;
-    topUrl = d.url;
-    forwardToFrames(topUrl);
+    if (!d || d.type !== MSG || IS_TOP) return;
+    topHost = String(d.host || '').toLowerCase();
+    forwardToFrames(topHost);
   });
   if (IS_TOP) {
-    forwardToFrames(SELF_URL);
-    setInterval(() => forwardToFrames(SELF_URL), 1500);
+    forwardToFrames(SELF_HOST);
+    setInterval(() => forwardToFrames(SELF_HOST), 1500);
   }
 
+  // Igual ao coletor original: roda em qualquer página.
+  // Aviator 2 = página principal (ou o próprio quadro) no betdopovo; senão, Aviator.
   function resolveGame() {
     return new Promise(resolve => {
-      const selfIsBet = isBetDoPovoUrl(SELF_URL);
-      if (IS_TOP) return resolve(gameFromUrl(SELF_URL));
+      if (isAviator2Host(SELF_HOST)) return resolve('aviator2');
+      if (IS_TOP) return resolve('aviator');
 
-      const referrer = document.referrer || '';
-      const referrerIsBet = isBetDoPovoUrl(referrer);
-
-      let betAncestor = false;
+      // Chrome/Edge: ancestorOrigins. Firefox: document.referrer.
       try {
         const anc = location.ancestorOrigins;
-        betAncestor = !!(anc && Array.from(anc).some(origin => isBetDoPovoUrl(origin)));
+        if (anc && anc.length) return resolve(isAviator2Host(hostOf(anc[anc.length - 1])) ? 'aviator2' : 'aviator');
       } catch (_) {}
+      if (isAviator2Host(hostOf(document.referrer))) return resolve('aviator2');
 
-      const started = Date.now();
+      // Aguarda o aviso da página principal; sem aviso em 4 s, assume Aviator.
+      const t0 = Date.now();
       const wait = setInterval(() => {
-        if (topUrl) {
-          clearInterval(wait);
-          resolve(gameFromUrl(topUrl));
-        } else if (Date.now() - started > 4000) {
-          clearInterval(wait);
-          resolve(selfIsBet || betAncestor || referrerIsBet ? 'aviator2' : 'aviator');
-        }
+        if (topHost) { clearInterval(wait); resolve(isAviator2Host(topHost) ? 'aviator2' : 'aviator'); }
+        else if (Date.now() - t0 > 4000) { clearInterval(wait); resolve('aviator'); }
       }, 200);
     });
   }
@@ -81,7 +82,6 @@
   // Chave original da versão 1.3 — mantida exatamente como estava.
   const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5cGphcW1tbHVybHFlb3RiZXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAzMDU2MTAsImV4cCI6MjEwNTg4MTYxMH0.IeAT6gwsAfzfw2N4BIxg9gc5pRqZH0ELn3Xo9fogHnY';
 
-  const GAME_LABEL = GAME === 'aviator2' ? 'Aviator BdPv' : 'Aviator 7a7';
   const QUEUE_KEY = 'thelord_universal_pending_v1_' + GAME;
   const SIG_KEY = 'thelord_universal_signature_v1_' + GAME;
   const RELOAD_KEY = 'thelord_universal_reload_v1_' + GAME;
@@ -122,7 +122,7 @@
     'background:#000c;color:#ffc72c;font:11px sans-serif;' +
     'padding:3px 6px;border-radius:6px;pointer-events:none';
 
-  badge.textContent = 'TheLord [' + GAME_LABEL + ']: aguardando velas';
+  badge.textContent = 'TheLord [' + GAME + ']: aguardando velas';
 
   function showBadge() {
     if (document.body && !document.body.contains(badge)) {
@@ -286,7 +286,7 @@
         location.reload();
       }, delay);
 
-      badge.textContent = 'TheLord [' + GAME_LABEL + ']: ativo; recarga em até 5 min';
+      badge.textContent = 'TheLord [' + GAME + ']: ativo; recarga em até 5 min';
     } catch (_) {
       badge.textContent = 'TheLord: armazenamento indisponível';
     }
