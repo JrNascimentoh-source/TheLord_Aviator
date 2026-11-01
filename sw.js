@@ -1,4 +1,4 @@
-const CACHE_NAME = 'thelord-aviator-oficial-v26-bdpv-game-key';
+const CACHE_NAME = 'thelord-aviator-oficial-v27-7a7-bdpv-sources';
 const APP_SHELL = [
   './',
   './index.html',
@@ -9,7 +9,7 @@ const APP_SHELL = [
   './aviator-perspectiva.jpg',
   './style.css?v=20261031-betdopovo-vip',
   './desktop.css?v=20261022m',
-  './app.js?v=20261101-bdpv-game-key',
+  './app.js?v=20261101-7a7-bdpv-sources',
   './probability-core.js?v=20261027-combined1',
   './timing-core.js?v=20261026b',
   './timing.js?v=20261031-betdopovo-vip'
