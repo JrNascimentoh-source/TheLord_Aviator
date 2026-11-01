@@ -984,8 +984,24 @@ function setActiveGame(game){
 function toggleMonitorPlatformMenu(force){
   const menu=document.getElementById('monitorPlatformMenu');
   const trigger=document.getElementById('monitorNavBtn');
-  if(!menu||!trigger)return;
+  const wrap=document.getElementById('monitorNavWrap');
+  if(!menu||!trigger||!wrap)return;
   const open=typeof force==='boolean'?force:menu.hidden;
+  const collapsed=window.matchMedia('(min-width:1024px)').matches&&document.body.classList.contains('sidebar-collapsed');
+  if(open&&collapsed){
+    // Fora da árvore da barra lateral: evita recorte por overflow/backdrop-filter.
+    if(menu.parentElement!==document.body)document.body.appendChild(menu);
+    const rect=trigger.getBoundingClientRect();
+    menu.style.position='fixed';
+    menu.style.top=Math.max(8,Math.min(rect.top,window.innerHeight- menu.offsetHeight-8))+'px';
+    menu.style.left=Math.min(rect.right+10,window.innerWidth-170)+'px';
+    menu.style.right='auto';
+    menu.style.bottom='auto';
+    menu.style.transform='none';
+  }else{
+    if(menu.parentElement!==wrap)wrap.appendChild(menu);
+    menu.removeAttribute('style');
+  }
   menu.hidden=!open;
   trigger.setAttribute('aria-expanded',String(open));
 }
