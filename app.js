@@ -1040,7 +1040,7 @@ function openBetDoPovoGame(vip){
   const url=vip?'https://betdopovo.co/game/spribe/aviator?via=4':'https://betdopovo.co/game/spribe/aviator';
   window.open(url,'_blank','noopener,noreferrer');
 }
-const AVIATOR_GAME_URL='https://7a711.com/?pid=2619439266&fromPage=AGENCY_ONE';
+const AVIATOR_GAME_URL='https://7a7agent.com/?pid=2619439266&fromPage=AGENCY_ONE';
 function openAviatorGame(){
   try{window.open(AVIATOR_GAME_URL,'_blank','noopener,noreferrer');}
   catch(e){window.location.href=AVIATOR_GAME_URL;}
