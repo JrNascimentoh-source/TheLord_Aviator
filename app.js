@@ -1086,8 +1086,11 @@ let velasRealtimeStarted=false;
 
 function normalizeSharedGameKey(value){
   const game=String(value||'').trim().toLowerCase();
-  // O banco histórico usa `betdopovo`; no app, esse fluxo corresponde ao Aviator BdPv (`aviator2`).
-  return game==='betdopovo'?'aviator2':game;
+  // Chaves técnicas recebidas do CaptureCore/Supabase: 7a7 -> aviator; BetDoPovo -> aviator2.
+  // Mantém compatibilidade com o valor histórico `betdopovo` e aliases legados.
+  if(['betdopovo','aviator (betdopovo)','aviator betdopovo'].includes(game))return 'aviator2';
+  if(['7a7','aviator 7a7'].includes(game))return 'aviator';
+  return game;
 }
 function upsertSharedVelaRow(r){
   if(!r)return false;
