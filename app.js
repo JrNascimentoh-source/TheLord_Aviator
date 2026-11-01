@@ -987,7 +987,7 @@ function toggleMonitorPlatformMenu(force){
   const wrap=document.getElementById('monitorNavWrap');
   if(!menu||!trigger||!wrap)return;
   const open=typeof force==='boolean'?force:menu.hidden;
-  const collapsed=window.matchMedia('(min-width:1024px)').matches&&document.body.classList.contains('sidebar-collapsed');
+  const collapsed=window.matchMedia('(min-width:701px)').matches&&document.body.classList.contains('sidebar-collapsed');
   if(open&&collapsed){
     // Portal no body para escapar do recorte da barra e de contextos de empilhamento.
     if(menu.parentElement!==document.body)document.body.appendChild(menu);
