@@ -1164,7 +1164,7 @@ async function syncVelas(){
     const since=initialVelasLoaded?new Date(Date.now()-10*60*1000).toISOString():null;
     let offset=0,rows=[],page=[];
     do{
-      let query=supabaseClient.from('velas').select('id,game,value,created_at').order('id',{ascending:true});
+      let query=supabaseClient.from('velas').select('id,game,value,created_at').in('game',['aviator','aviator2','betdopovo']).order('id',{ascending:true});
       if(since) query=query.gte('created_at',since);
       const result=await query.range(offset,offset+VELAS_PAGE_SIZE-1);
       if(result.error||!result.data){lastSyncOk=false;renderCollectorStatus();const grid=document.getElementById('probabilityGrid');if(grid)grid.innerHTML='<div class="probability-empty">Não foi possível carregar o histórico compartilhado. Verifique a conexão e as permissões de leitura.</div>';console.error('Erro ao consultar histórico compartilhado de velas:',result.error);return;}
