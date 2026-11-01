@@ -12,4 +12,4 @@ alter table public.velas enable row level security;
 drop policy if exists "ler velas" on public.velas;
 create policy "ler velas" on public.velas for select using (true);
 drop policy if exists "inserir velas" on public.velas;
-create policy "inserir velas" on public.velas for insert with check (value >= 1 and value < 1000000 and game in ('aviator','aviator2','aviatorvip'));
+create policy "inserir velas" on public.velas for insert with check (value >= 1 and value < 1000000 and game in ('aviator','aviator2'));
