@@ -1,4 +1,4 @@
-const CACHE_NAME = 'thelord-aviator-oficial-v29-7a7-bdpv-only';
+const CACHE_NAME = 'thelord-aviator-oficial-v30-cleanup';
 const APP_SHELL = [
   './',
   './index.html',
@@ -8,8 +8,8 @@ const APP_SHELL = [
   './icon-512.png',
   './aviator-perspectiva.jpg',
   './style.css?v=20261101-bdpv-only',
-  './desktop.css?v=20261022m',
-  './app.js?v=20261101-bdpv-only',
+  './desktop.css?v=20261101-monitor-flyout4',
+  './app.js?v=20261101-7a7-bdpv-sources',
   './probability-core.js?v=20261027-combined1',
   './timing-core.js?v=20261026b',
   './timing.js?v=20261101-bdpv-only'
