@@ -1086,9 +1086,14 @@ let velasRealtimeChannel=null;
 let velasRealtimeStatus='CONNECTING';
 let velasRealtimeStarted=false;
 
+function normalizeSharedGameKey(value){
+  const game=String(value||'').trim().toLowerCase();
+  // O banco histórico usa `betdopovo`; no app, esse fluxo corresponde ao Aviator BdPv (`aviator2`).
+  return game==='betdopovo'?'aviator2':game;
+}
 function upsertSharedVelaRow(r){
   if(!r)return false;
-  const game=String(r.game||'').toLowerCase();
+  const game=normalizeSharedGameKey(r.game);
   if(game!=='aviator'&&game!=='aviator2'&&game!=='aviatorvip')return false;
   const t=new Date(r.created_at).getTime(),v=Number(r.value);
   if(!Number.isFinite(t)||!Number.isFinite(v)||v<1||v>=1000000||r.id===undefined||r.id===null)return false;
@@ -1108,7 +1113,7 @@ function onRealtimeVela(payload){
   const row=payload&&payload.new;
   const changed=upsertSharedVelaRow(row);
   if(!changed)return;
-  const game=String(row.game||'').toLowerCase();
+  const game=normalizeSharedGameKey(row.game);
   if(Object.prototype.hasOwnProperty.call(lastVelaReceivedTsByGame,game)){
     lastVelaReceivedTsByGame[game]=Date.now();
   }
