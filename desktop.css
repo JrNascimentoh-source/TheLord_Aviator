@@ -80,9 +80,7 @@
   body.auth-login #login .btn,body.auth-login #login .btn.btn-google{min-height:58px;font-size:.95rem;border-radius:16px}
   body.auth-login #login .login-links button{font-size:.82rem}
   body.auth-login #login .login-footnote{font-size:.72rem}
-}
-
-/* Layout desktop adaptativo: tela cheia e janela dividida */
+}/* Layout desktop adaptativo: tela cheia e janela dividida */
 @media screen and (min-width:1024px) and (max-width:1320px){
   body,body.auth-login{padding:16px 16px 24px}
   .app,body:not(.auth-login) .app{max-width:none;padding-left:196px}
@@ -105,13 +103,8 @@
   #monitor .round-grid .round-chip-val{font-size:.88rem}
   .timing-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
-@media screen and (min-width:1321px){
-  .app,body:not(.auth-login) .app{max-width:1680px;padding-left:228px}
-  .bottom{left:max(28px,calc((100vw - 1680px)/2 + 28px))}
-}
-
-
-/* Desktop compacto: navegador em tela dividida a 100% de zoom.
+@media screen and (min-width:1321px){.app, body:not(.auth-login) .app{max-width:1680px;padding-left:228px}.bottom{left:max(28px,calc((100vw - 1680px)/2 + 28px))}
+}/* Desktop compacto: navegador em tela dividida a 100% de zoom.
    A decisão usa a largura CSS disponível, não o tamanho físico do monitor. */
 @media screen and (min-width:701px) and (max-width:1023px){
   body,body.auth-login{
@@ -146,10 +139,7 @@
   #monitor .round-grid .round-chip-val{font-size:.8rem}
   #monitor .round-grid .round-chip-time,#monitor .round-grid .round-chip-idx{font-size:.58rem}
   .timing-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
-}
-
-
-/* Corrige fundo no desktop em janela dividida: manter o cenário cobrindo
+}/* Corrige fundo no desktop em janela dividida: manter o cenário cobrindo
    toda a área visível sem depender do zoom do navegador. */
 @media screen and (min-width:701px) and (max-width:1023px){
   html{min-height:100%;background:#08060c}
@@ -163,10 +153,7 @@
     background-attachment:fixed,fixed,fixed;
   }
   body:not(.auth-login) .app{min-height:calc(100vh - 38px)}
-}
-
-
-/* A variável do cenário também precisa existir abaixo de 1024px:
+}/* A variável do cenário também precisa existir abaixo de 1024px:
    em tela dividida o bloco desktop principal não é aplicado. */
 @media screen and (min-width:701px) and (max-width:1023px){
   :root{--desktop-background-image:url('aviator-perspectiva.jpg')}
@@ -176,10 +163,7 @@
     background-position:center center,center,center;
     background-repeat:no-repeat,no-repeat,no-repeat;
   }
-}
-
-
-/* Breakpoints fluidos para que o desktop não se desmonte ao alterar o zoom.
+}/* Breakpoints fluidos para que o desktop não se desmonte ao alterar o zoom.
    A composição muda pela largura útil, com colunas sempre limitadas pelo espaço. */
 @media screen and (min-width:1024px){
   .app,body:not(.auth-login) .app{width:100%;box-sizing:border-box}
@@ -191,25 +175,10 @@
   #monitor .round-grid{grid-template-columns:repeat(auto-fit,minmax(76px,1fr))}
   img,svg,canvas,video{max-width:100%}
 }
-@media screen and (min-width:1024px) and (max-width:1500px){
-  .app,body:not(.auth-login) .app{max-width:none;padding-left:190px}
-  .bottom{width:166px;padding:20px 10px}
-  .bottom::before{font-size:.86rem;padding:6px 7px 20px}
-  .nav{gap:8px;padding:12px 8px;font-size:.7rem}
-  body,body.auth-login{padding:18px 18px 28px}
-  main:not(.hidden):not(#login){grid-template-columns:minmax(0,1fr)}
-  main>.card{grid-column:1!important;grid-row:auto!important;padding:18px}
-  #overview>.card:first-child>.grid{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
-  #monitor .round-grid{grid-template-columns:repeat(auto-fit,minmax(72px,1fr))}
+@media screen and (min-width:1024px) and (max-width:1500px){.app, body:not(.auth-login) .app{max-width:none;padding-left:190px}.bottom{width:166px;padding:20px 10px}.bottom::before{font-size:.86rem;padding:6px 7px 20px}.nav{gap:8px;padding:12px 8px;font-size:.7rem}body, body.auth-login{padding:18px 18px 28px}main:not(.hidden):not(#login){grid-template-columns:minmax(0,1fr)}main>.card{grid-column:1!important;grid-row:auto!important;padding:18px}#overview>.card:first-child>.grid{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}#monitor .round-grid{grid-template-columns:repeat(auto-fit,minmax(72px,1fr))}
 }
-@media screen and (min-width:1501px){
-  .app,body:not(.auth-login) .app{max-width:1680px;padding-left:228px}
-  main:not(.hidden):not(#login){grid-template-columns:minmax(0,1.4fr) minmax(320px,1fr)}
-  #overview>.card:first-child>.grid{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
-}
-
-
-/* Alinhamento final: a sidebar ocupa uma faixa própria e o conteúdo começa
+@media screen and (min-width:1501px){.app, body:not(.auth-login) .app{max-width:1680px;padding-left:228px}main:not(.hidden):not(#login){grid-template-columns:minmax(0,1.4fr) minmax(320px,1fr)}#overview>.card:first-child>.grid{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+}/* Alinhamento final: a sidebar ocupa uma faixa própria e o conteúdo começa
    depois dela em qualquer largura CSS (incluindo zoom de 75% em tela cheia). */
 @media screen and (min-width:1024px){
   .app,body:not(.auth-login) .app{
@@ -234,18 +203,10 @@
   main>.card{box-sizing:border-box;min-width:0;max-width:100%}
   #monitor .round-grid{grid-template-columns:repeat(auto-fit,minmax(74px,1fr))}
 }
-@media screen and (min-width:1024px) and (max-width:1320px){
-  .app,body:not(.auth-login) .app{padding-left:194px}
-  .bottom{width:174px}
-  main:not(.hidden):not(#login){grid-template-columns:minmax(0,1fr);gap:14px}
-  main>.card{grid-column:1!important;grid-row:auto!important}
+@media screen and (min-width:1024px) and (max-width:1320px){.app, body:not(.auth-login) .app{padding-left:194px}.bottom{width:174px}main:not(.hidden):not(#login){grid-template-columns:minmax(0,1fr);gap:14px}main>.card{grid-column:1!important;grid-row:auto!important}
 }
-@media screen and (min-width:1321px) and (max-width:1680px){
-  .app,body:not(.auth-login) .app{padding-left:238px}
-  .bottom{width:204px}
-}
-
-/* Barra lateral recolhível — mantém a linguagem visual original do TheLord. */
+@media screen and (min-width:1321px) and (max-width:1680px){.app, body:not(.auth-login) .app{padding-left:238px}.bottom{width:204px}
+}/* Barra lateral recolhível — mantém a linguagem visual original do TheLord. */
 @media screen and (min-width:701px){
   .sidebar-toggle{
     display:flex;align-items:center;justify-content:center;align-self:flex-end;
@@ -273,26 +234,17 @@
   body.sidebar-collapsed .nav span:first-child{margin:0;font-size:1.2rem}
   body.sidebar-collapsed .nav.active{box-shadow:inset 0 0 0 1px var(--desktop-line)}
 }
-@media screen and (min-width:1024px) and (max-width:1320px){
-  body.sidebar-collapsed .app,body:not(.auth-login).sidebar-collapsed .app{padding-left:96px}
-  body.sidebar-collapsed .bottom{width:64px}
+@media screen and (min-width:1024px) and (max-width:1320px){body.sidebar-collapsed .app, body:not(.auth-login).sidebar-collapsed .app{padding-left:96px}body.sidebar-collapsed .bottom{width:64px}
 }
-@media screen and (min-width:1321px){
-  body.sidebar-collapsed .app,body:not(.auth-login).sidebar-collapsed .app{padding-left:104px}
+@media screen and (min-width:1321px){body.sidebar-collapsed .app, body:not(.auth-login).sidebar-collapsed .app{padding-left:104px}
 }
-@media screen and (max-width:700px){
-  .sidebar-toggle{display:none!important}
+@media screen and (max-width:700px){.sidebar-toggle{display:none!important}
 }
-@media (prefers-reduced-motion:reduce){
-  .sidebar-toggle{transition:none}
-}
-
-/* Ajuste fino: o texto dos itens mantém o tamanho original após envolver o label. */
+@media (prefers-reduced-motion:reduce){.sidebar-toggle{transition:none}
+}/* Ajuste fino: o texto dos itens mantém o tamanho original após envolver o label. */
 @media screen and (min-width:701px){
   .nav .nav-label{font-size:inherit;font-weight:inherit;line-height:inherit}
-}
-
-/* Identidade da conta e dicas visuais da barra recolhida. */
+}/* Identidade da conta e dicas visuais da barra recolhida. */
 @media screen and (min-width:701px){
   .bottom::before{content:none!important}
   .sidebar-brand{
@@ -317,10 +269,7 @@
   }
 }
 @media screen and (max-width:700px){.sidebar-brand{display:none!important}}
-@media (prefers-reduced-motion:reduce){.sidebar-collapsed .nav::after{transition:none}}
- 
-/* Menu lateral do Monitor no desktop recolhido: o JS o posiciona no viewport,
-   fora da árvore da barra, para impedir qualquer recorte por overflow ou backdrop-filter. */
+@media (prefers-reduced-motion:reduce){.sidebar-collapsed .nav::after{transition:none}}/* Menu lateral do Monitor no desktop recolhido: o JS o posiciona no viewport, fora da árvore da barra, para impedir qualquer recorte por overflow ou backdrop-filter. */
 @media screen and (min-width:701px){
   body.sidebar-collapsed .nav-dropdown-wrap{position:relative;z-index:1400;overflow:visible}
   body.sidebar-collapsed .monitor-platform-menu{
