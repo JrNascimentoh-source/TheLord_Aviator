@@ -869,6 +869,19 @@ function nowTimeStr(d){d=d||new Date();return String(d.getHours()).padStart(2,'0
 // Histórico compartilhado em memória, carregado exclusivamente da tabela pública `velas`.
 const sharedRoundsByGame={aviator:[],aviator2:[]};
 function currentRounds(){return sharedRoundsByGame[data.activeGame]||[]}
+let kittenHistoryRange=storageGet('thelord_kitten_history_range')||'24';
+if(!['6','12','24'].includes(kittenHistoryRange))kittenHistoryRange='24';
+function setKittenHistoryRange(hours){
+  const value=String(hours);
+  if(!['6','12','24'].includes(value))return;
+  kittenHistoryRange=value;
+  storageSet('thelord_kitten_history_range',value);
+  renderProbabilityCard();
+}
+document.addEventListener('click',event=>{
+  const button=event.target.closest('[data-kitten-range]');
+  if(button)setKittenHistoryRange(button.dataset.kittenRange);
+});
 let monitorHistoryRange=storageGet('thelord_monitor_history_range')||'all';
 if(!['all','1h','6h','12h','24h'].includes(monitorHistoryRange))monitorHistoryRange='all';
 const monitorHistoryOptions=[['all','Histórico Completo'],['1h','Última 1 Hora'],['6h','Últimas 6 Horas'],['12h','Últimas 12 Horas'],['24h','Últimas 24 Horas']];
@@ -920,7 +933,9 @@ function renderProbabilityCard(){
  if(!window.TheLordProbability||typeof window.TheLordProbability.analyze!=='function'||typeof window.TheLordProbability.analyzeNamedPatterns!=='function'){grid.innerHTML='<div class="probability-empty">O motor de padrões ainda não foi carregado. Atualize a página.</div>';return;}
  const analysis=window.TheLordProbability.analyze(allRounds,{now}),pattern=analysis.pattern,named=window.TheLordProbability.analyzeNamedPatterns(allRounds,{now,windowMs:86400000});
  const high=window.TheLordProbability.analyzeHighMultiplierRecurrence(allRounds,{now});
- const kitten=window.TheLordProbability.analyzeKittenTriggers(allRounds,{now});
+ const kittenHours=Number(kittenHistoryRange),kittenCutoff=now-kittenHours*60*60*1000;
+ const kittenRounds=allRounds.filter(r=>r.ts>=kittenCutoff);
+ const kitten=window.TheLordProbability.analyzeKittenTriggers(kittenRounds,{now});
  const enough=Number.isFinite(pattern.minimum)&&Number.isFinite(pattern.maximum),min=enough?pattern.minimum:null,max=enough?pattern.maximum:null;
  const formation=named.formation,quality=window.TheLordProbability.analyzeGraphQuality(allRounds,{now,windowSize:50,lookahead:10}),names={espelho:'Espelho',xadrez:'Xadrez',quinta:'Quinta casa'};
  let signal='RADAR EM OBSERVAÇÃO',cls='wait',formationText='Aguardando uma nova sequência rosa para iniciar o acompanhamento.';
@@ -935,8 +950,9 @@ function renderProbabilityCard(){
  const highLabel={'acima-da-média':'Atividade acima da média','na-média':'Atividade na média','abaixo-da-média':'Atividade abaixo da média','sem-base':'Sem base histórica'};
  const highHtml='<div class="high-recurrence-panel"><div class="high-recurrence-head"><b>🔥 AUSÊNCIA E RECORRÊNCIA · VELAS ALTAS</b><span>'+fmtCount(high.roundCount)+' rodadas no histórico</span></div><div class="high-recurrence-grid">'+high.targets.map(t=>'<div class="high-recurrence-item"><div class="high-recurrence-target">'+t.target+'x</div><div class="high-recurrence-absence">Ausência: <b>'+(t.count?elapsed(t.absenceMs)+' · '+fmtCount(t.absenceRounds)+' rod.':(t.absenceMs===null?'sem histórico':'sem ocorrência no histórico · cobertura '+elapsed(t.absenceMs)))+'</b></div><div class="high-recurrence-frequency">Frequência: <b>'+(t.count?'1 a cada '+fmtCount(Math.round(t.averageEveryRounds))+' rod.':'sem ocorrência')+'</b></div><div class="high-recurrence-prob">Chance empírica: 10 rod. <b>'+highPct(t.probabilityNext10)+'</b> · 50 rod. <b>'+highPct(t.probabilityNext50)+'</b></div><div class="high-recurrence-activity '+(t.activity==='acima-da-média'?'is-up':t.activity==='abaixo-da-média'?'is-down':'')+'">'+highLabel[t.activity]+'</div></div>').join('')+'</div><div class="high-recurrence-foot">A frequência e as chances são estimativas empíricas do histórico. A atividade recente compara o ritmo atual com a própria média; ausência prolongada, sozinha, não aumenta a chance da próxima rodada.</div></div>';
 
- const kittenQuoteHtml=kitten.quotes.length?kitten.quotes.map(q=>'<div class="kitten-quote-item"><b>'+q.quote+'</b><span>'+fmtCount(q.count)+' ocorr. · rosas associadas: '+fmtX(q.averagePink)+'</span></div>').join(''):'<div class="kitten-empty">Ainda não há gatinhos suficientes no histórico.</div>';
- const kittenHtml='<div class="kitten-panel"><div class="kitten-head"><b>🐾 VELA GATINHO · COTAÇÕES</b><span>'+fmtCount(kitten.triggerCount)+' gatilho(s) no histórico</span></div><div class="kitten-kpis"><div><small>Média das velas rosas após gatilhos</small><strong>'+fmtX(kitten.averagePink)+'</strong></div><div><small>Cotação predominante</small><strong>'+(kitten.predominantQuote?kitten.predominantQuote.quote:'—')+'</strong><small>'+(kitten.predominantQuote?fmtCount(kitten.predominantQuote.count)+' ocorrências':'Sem base histórica')+'</small></div><div><small>Média da vela gatinho</small><strong>'+fmtX(kitten.averageTrigger)+'</strong></div></div><div class="kitten-quotes-title">Cotações mais recorrentes · original e invertida</div><div class="kitten-quote-grid">'+kittenQuoteHtml+'</div><div class="kitten-foot">Gatilho = vela imediatamente anterior, abaixo de 10x, a uma rosa (≥10x). A cotação usa os dois decimais e sua inversão: 1,72x → 72 e 27. Médias e frequências descrevem associações históricas; não são previsão da próxima rodada.</div></div>';
+ const kittenQuoteHtml=kitten.quotes.length?kitten.quotes.map(q=>'<div class="kitten-quote-item"><b>'+q.quote+'</b><span>'+fmtCount(q.count)+' ocorr. · rosas associadas: '+fmtX(q.averagePink)+'</span></div>').join(''):'<div class="kitten-empty">Ainda não há gatinhos suficientes neste período.</div>';
+ const kittenRangeButtons=[['24','24 HORAS'],['12','12 HORAS'],['6','6 HORAS']].map(([hours,label])=>'<button type="button" class="kitten-range-btn '+(kittenHistoryRange===hours?'active':'')+'" data-kitten-range="'+hours+'" aria-pressed="'+(kittenHistoryRange===hours?'true':'false')+'">'+label+'</button>').join('');
+ const kittenHtml='<div class="kitten-panel"><div class="kitten-head"><b>🐾 VELA GATINHO · COTAÇÕES</b><span>'+fmtCount(kitten.triggerCount)+' gatilho(s) · '+kittenHistoryRange+'h</span></div><div class="kitten-range-picker" role="group" aria-label="Período das cotações">'+kittenRangeButtons+'</div><div class="kitten-kpis"><div><small>Média das velas rosas após gatilhos</small><strong>'+fmtX(kitten.averagePink)+'</strong></div><div><small>Cotação predominante</small><strong>'+(kitten.predominantQuote?kitten.predominantQuote.quote:'—')+'</strong><small>'+(kitten.predominantQuote?fmtCount(kitten.predominantQuote.count)+' ocorrências':'Sem base histórica')+'</small></div><div><small>Média da vela gatinho</small><strong>'+fmtX(kitten.averageTrigger)+'</strong></div></div><div class="kitten-quotes-title">Cotações mais recorrentes · original e invertida</div><div class="kitten-quote-grid">'+kittenQuoteHtml+'</div><div class="kitten-foot">Gatilho = vela imediatamente anterior, abaixo de 10x, a uma rosa (≥10x). A cotação usa os dois decimais e sua inversão: 1,72x → 72 e 27. Análise limitada às últimas '+kittenHistoryRange+' horas; médias e frequências descrevem associações históricas, não previsão da próxima rodada.</div></div>';
 
  const qualityLabel=quality.status==='insufficient'?'AMOSTRA EM FORMAÇÃO':quality.label;
  const pct=v=>Number.isFinite(v)?(v*100).toFixed(1).replace('.',',')+'%':'—';
