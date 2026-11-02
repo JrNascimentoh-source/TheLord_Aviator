@@ -174,6 +174,7 @@ check('vela gatinho mede a vela anterior, cotação decimal e inversão',()=>{
  const now=Date.now(),values=[1.72,50,2.05,20,1.27,100],rounds=values.map((value,i)=>({id:'k'+i,value,ts:now-(values.length-i)*1000}));
  const r=probability.analyzeKittenTriggers(rounds,{now}),q=Object.fromEntries(r.quotes.map(x=>[x.quote,x.count]));
  assert.strictEqual(r.triggerCount,3);assert.ok(Math.abs(r.averagePink-(50+20+100)/3)<1e-9);
+ assert.deepStrictEqual(r.triggers,[1.72,1.90,1.49]);
  assert.strictEqual(q['72'],2);assert.strictEqual(q['27'],2);assert.strictEqual(q['05'],1);assert.strictEqual(q['50'],1);
 });
 check('vela gatinho ignora rosas como gatilho e não inventa cotação sem pares válidos',()=>{
