@@ -299,3 +299,11 @@ body.auth-login{background:radial-gradient(ellipse at top,#260711 0%,#10060f 48%
 }
 @media(max-width:700px){.nav-dropdown-wrap{align-items:stretch;min-width:0}.nav-dropdown-wrap>.nav{min-width:0}.monitor-platform-menu{top:auto;bottom:calc(100% + 9px);left:50%;transform:translateX(-50%);width:min(180px,48vw)}
 }
+
+/* Radar de padrões recorrentes no card de repetição */
+.pattern-frequency-list{display:grid;gap:5px;width:100%;margin:8px 0 2px;text-align:left}
+.pattern-frequency-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px;border:1px solid rgba(255,255,255,.08);border-radius:8px;background:rgba(255,255,255,.035)}
+.pattern-frequency-row>span{display:flex;flex-direction:column;gap:2px;min-width:0}.pattern-frequency-row b{font-size:.66rem;color:var(--text)}
+.pattern-frequency-row span small{font-size:.56rem;color:var(--muted);line-height:1.3}.pattern-frequency-row>strong{white-space:nowrap;font-size:.67rem;color:var(--gold);font-variant-numeric:tabular-nums}.pattern-frequency-row>strong small{font-size:.55rem;color:var(--muted);font-weight:600}
+.probability-note-inline{margin-top:8px;font-size:.62rem;line-height:1.45;color:var(--muted);text-align:center}
+@media(max-width:380px){.pattern-frequency-row{padding:5px 6px}.pattern-frequency-row b{font-size:.61rem}.pattern-frequency-row span small{font-size:.52rem}}

@@ -908,69 +908,32 @@ function getMonitorRounds(){
   return rounds.filter(r=>Number.isFinite(Number(r.ts))&&Number(r.ts)>=cutoff);
 }
 function renderProbabilityCard(){
-  const grid=document.getElementById('probabilityGrid'),sampleEl=document.getElementById('probabilitySample'),gameEl=document.getElementById('probabilityGame');
-  if(!grid)return;
-  const sel=document.getElementById('timingGame'),selected=sel?sel.value:'active';
-  const game=selected==='both'?(data.activeGame||'aviator'):(selected==='active'?data.activeGame:selected);
-  const now=Date.now(),cutoff=now-86400000;
-  const allRounds=(sharedRoundsByGame[game]||[]).filter(r=>Number.isFinite(Number(r.value))&&Number(r.value)>=1&&Number.isFinite(Number(r.ts))&&Number(r.ts)<=now).map(r=>({id:r.id,value:Number(r.value),ts:Number(r.ts),game})).sort((a,b)=>a.ts-b.ts);
-  const recent=allRounds.filter(r=>r.ts>=cutoff),total=recent.length;
-  const liveStatusEl=document.getElementById('probabilityLiveStatus'),lastUpdateEl=document.getElementById('probabilityLastUpdate');
-  const latestRound=allRounds.length?allRounds[allRounds.length-1]:null;
-  if(liveStatusEl){
-    if(velasRealtimeStatus==='SUBSCRIBED') liveStatusEl.textContent='Canal em tempo real conectado';
-    else if(velasRealtimeStatus==='CHANNEL_ERROR'||velasRealtimeStatus==='TIMED_OUT'||velasRealtimeStatus==='CLOSED'||velasRealtimeStatus==='UNAVAILABLE') liveStatusEl.textContent='Consulta periódica ativa · canal ao vivo indisponível';
-    else liveStatusEl.textContent='Conectando canal ao vivo · consulta periódica ativa';
-  }
-  if(lastUpdateEl) lastUpdateEl.textContent='Última vela: '+(latestRound?new Date(latestRound.ts).toLocaleTimeString('pt-BR'):'—');
-  const fmtX=v=>Number.isFinite(v)?new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v)+'x':'—';
-  const fmtPct=v=>Number.isFinite(v)?(v*100).toLocaleString('pt-BR',{maximumFractionDigits:1})+'%':'—';
-  const fmtDuration=seconds=>{if(!Number.isFinite(seconds)||seconds<0)return '—';const n=Math.round(seconds),h=Math.floor(n/3600),m=Math.floor(n%3600/60),s=n%60;return h>0?String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'):String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');};
-  if(sampleEl)sampleEl.textContent=total.toLocaleString('pt-BR')+' rodadas nas últimas 24h · '+allRounds.length.toLocaleString('pt-BR')+' no histórico total';
-  if(gameEl)gameEl.textContent=game==='aviator2'?'Aviator BdPv':'Aviator 7a7';
-  if(!total){grid.innerHTML='<div class="probability-empty">Ainda não há rodadas válidas nas últimas 24 horas para a análise automática.</div>';return;}
-  if(!window.TheLordProbability||typeof window.TheLordProbability.analyze!=='function'){grid.innerHTML='<div class="probability-empty">O motor estatístico ainda não foi carregado. Atualize a página para tentar novamente.</div>';return;}
-  const analysis=window.TheLordProbability.analyze(allRounds,{now,patternSize:4}),pattern=analysis.pattern,thresholds=analysis.thresholds;
-  const combined=analysis.combined||null;
-  const combinedText=combined?'<div class="probability-main-detail"><b>🧪 Estimativa combinada experimental:</b> sequência '+combined.colorSequence+' · '+combined.roundsSincePink.toLocaleString('pt-BR')+' rodada(s) desde a última rosa no histórico usado. '+[10,50,100].map(t=>'≥'+t+'x: '+fmtPct(combined.rates[t])+' (base '+fmtPct(combined.baselineRates[t])+')').join(' · ')+'. Combina sequência de cores, distância desde a última rosa e frequência recente. Ainda não é um sinal validado de entrada.</div>':'';
-
-  const enoughPattern=pattern.matches>=10&&Number.isFinite(pattern.minimum)&&Number.isFinite(pattern.maximum)&&(pattern.effectiveSampleSize||0)>=5;
-  const minimum=enoughPattern?pattern.minimum:null,maximum=enoughPattern?pattern.maximum:null;
-  const enoughRoseMaximum=Number.isFinite(pattern.roseMaximum)&&Number.isFinite(pattern.roseMinimum)&&pattern.roseMatches>=5,roseMinimum=enoughRoseMaximum?pattern.roseMinimum:null,roseMaximum=enoughRoseMaximum?pattern.roseMaximum:null;
-  const enoughGaps=pattern.gapCount>=5&&Number.isFinite(pattern.gapMedian)&&pattern.gapMedian>0&&Number.isFinite(pattern.lastSimilarTs);
-  const sinceLast=enoughGaps?Math.max(0,(now-pattern.lastSimilarTs)/1000):null;
-  const countdown=enoughGaps?Math.max(0,pattern.gapMedian-sinceLast):null;
-  let signal='RADAR',signalClass='wait';
-  let detail='O relógio depende do intervalo histórico entre ocorrências do padrão atual, não de um alvo fixo como 2x.';
-  if(enoughGaps&&sinceLast!==null){
-    if(sinceLast>=pattern.gapP20&&sinceLast<=pattern.gapP80){signal='POSSÍVEL ENTRADA';signalClass='observe';detail='O tempo desde a última ocorrência semelhante está dentro da faixa central dos intervalos históricos. Isso descreve o passado e não garante a próxima rodada.';}
-    else if(sinceLast>pattern.gapP80){detail='O intervalo atual ultrapassou o percentil 80% histórico desse padrão. Atraso não torna uma vela mais provável.';}
-    else{detail='O padrão ocorreu mais recentemente que o intervalo central histórico; continue observando a sequência atual.';}
-  }else{detail='Amostra insuficiente para estimar o intervalo de repetição deste padrão. O relógio fica indisponível até haver ocorrências suficientes.';}
-  const clock=countdown===null?'—':fmtDuration(countdown);
-  const patternLabel=pattern.labels.length?pattern.labels.join(' → '):'Aguardando sequência';
-  const probabilityLine=enoughPattern?'Com '+pattern.matches.toLocaleString('pt-BR')+' sequências semelhantes (amostra efetiva ponderada: '+(pattern.effectiveSampleSize||0).toLocaleString('pt-BR',{maximumFractionDigits:1})+'), a faixa experimental P20–P80 estimada é '+fmtX(minimum)+' a '+fmtX(maximum)+'. Frequência condicional ponderada observada: ≥2x '+fmtPct(pattern.rates[2])+' · ≥10x '+fmtPct(pattern.rates[10])+' · ≥20x '+fmtPct(pattern.rates[20])+' · ≥50x '+fmtPct(pattern.rates[50])+'. Rosas observadas após padrões semelhantes: '+pattern.roseMatches+'.':'Amostra insuficiente: '+pattern.matches.toLocaleString('pt-BR')+' sequência(s) semelhante(s); precisamos de pelo menos 10 correspondências e tamanho efetivo ≥5. Nenhum valor foi inventado.';
-  const gapText=window.TheLordProbability.TARGETS.map(t=>thresholds[t]).filter(Boolean).map(x=>'≥'+x.target+'x: '+(x.gapCount>=3?fmtDuration(x.gapMedian):'amostra curta')).join(' · ');
-  const pink=analysis.pinkIntervals||{},pinkGapEnough=pink.count>=5&&Number.isFinite(pink.median),pinkSince=pink.lastTs?Math.max(0,(now-pink.lastTs)/1000):null;
-  const pinkText=pinkGapEnough?'Intervalo mediano entre rosas: '+fmtDuration(pink.median)+' · P20: '+fmtDuration(pink.p20)+' · P80: '+fmtDuration(pink.p80)+'. Foram observados '+pink.count.toLocaleString('pt-BR')+' intervalos completos entre rosas.':'Amostra insuficiente entre rosas: '+(pink.count||0).toLocaleString('pt-BR')+' intervalo(s); são necessários pelo menos 5 para resumir a distribuição.';
-  grid.innerHTML=`<div class="probability-single"><div class="probability-range-layout">
-   <div class="probability-range-button minimum"><span>TETO MÍNIMO</span><strong>${minimum===null?'—':fmtX(minimum)}</strong><small>${enoughPattern?'Percentil 20 ponderado após padrões semelhantes':'Aguardando correspondência histórica'}</small></div>
-   <div class="probability-single-main">
-    <div class="probability-signal ${signalClass}">${signal}</div>
-    <div class="probability-main-label">PADRÃO ATUAL</div>
-    <div class="probability-main-detail">${pattern.matches.toLocaleString('pt-BR')} sequências semelhantes no histórico · ${total.toLocaleString('pt-BR')} rodadas nas últimas 24h</div>
-    <div class="probability-countdown" style="display:flex;flex-direction:column;align-items:center;gap:3px;margin:8px auto;padding:7px 10px;border:1px solid rgba(255,192,31,.28);border-radius:12px;background:rgba(255,192,31,.07);max-width:180px">
-     <span style="font-size:10px;letter-spacing:.06em;color:#e8c979;font-weight:700">◷ TEMPO ESTIMADO DO PADRÃO</span>
-     <strong style="font-size:22px;font-variant-numeric:tabular-nums;color:#ffc01f">${clock}</strong>
-    </div>
-    <div class="probability-signal-detail">${detail}</div>
-   </div>
-   <div class="probability-range-button maximum"><span>TETO MÁXIMO</span><strong>${maximum===null?'—':fmtX(maximum)}</strong><small>${enoughRoseMaximum?'Faixa rosa estimada P20–P80: '+fmtX(roseMinimum)+'–'+fmtX(roseMaximum):'Aguardando rosa após padrão semelhante'}</small></div>
-  </div>
-  <div class="probability-pattern-line"><b>PADRÃO ATUAL:</b> ${patternLabel} · ${pattern.matches.toLocaleString('pt-BR')} sequências semelhantes no histórico.
-   ${pattern.matches>=20?'Frequência histórica após padrões semelhantes: ≥10x '+fmtPct(pattern.rates[10])+' · ≥50x '+fmtPct(pattern.rates[50])+' · ≥100x '+fmtPct(pattern.rates[100])+'.':'Amostra insuficiente para resumir frequências de 10x, 50x e 100x; são necessárias pelo menos 20 sequências semelhantes.'}
-  </div>
- </div>`;
+ const grid=document.getElementById('probabilityGrid'),sampleEl=document.getElementById('probabilitySample'),gameEl=document.getElementById('probabilityGame');if(!grid)return;
+ const sel=document.getElementById('timingGame'),selected=sel?sel.value:'active',game=selected==='both'?(data.activeGame||'aviator'):(selected==='active'?data.activeGame:selected),now=Date.now(),cutoff=now-86400000;
+ const allRounds=(sharedRoundsByGame[game]||[]).filter(r=>Number.isFinite(Number(r.value))&&Number(r.value)>=1&&Number.isFinite(Number(r.ts))&&Number(r.ts)<=now).map(r=>({id:r.id,value:Number(r.value),ts:Number(r.ts),game})).sort((x,y)=>x.ts-y.ts),recent=allRounds.filter(r=>r.ts>=cutoff),total=recent.length;
+ const live=document.getElementById('probabilityLiveStatus'),last=document.getElementById('probabilityLastUpdate'),latest=allRounds[allRounds.length-1];
+ if(live)live.textContent=velasRealtimeStatus==='SUBSCRIBED'?'Canal em tempo real conectado':['CHANNEL_ERROR','TIMED_OUT','CLOSED','UNAVAILABLE'].includes(velasRealtimeStatus)?'Consulta periódica ativa · canal ao vivo indisponível':'Conectando canal ao vivo · consulta periódica ativa';
+ if(last)last.textContent='Última vela: '+(latest?new Date(latest.ts).toLocaleTimeString('pt-BR'):'—');
+ const fmtX=v=>Number.isFinite(v)?new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v)+'x':'—',fmtCount=n=>Number(n||0).toLocaleString('pt-BR');
+ if(sampleEl)sampleEl.textContent=fmtCount(total)+' rodadas nas últimas 24h · '+fmtCount(allRounds.length)+' no histórico total';if(gameEl)gameEl.textContent=game==='aviator2'?'Aviator BdPv':'Aviator 7a7';
+ if(!total){grid.innerHTML='<div class="probability-empty">Ainda não há rodadas válidas nas últimas 24 horas para a análise automática.</div>';return;}
+ if(!window.TheLordProbability||typeof window.TheLordProbability.analyze!=='function'||typeof window.TheLordProbability.analyzeNamedPatterns!=='function'){grid.innerHTML='<div class="probability-empty">O motor de padrões ainda não foi carregado. Atualize a página.</div>';return;}
+ const analysis=window.TheLordProbability.analyze(allRounds,{now,patternSize:4}),pattern=analysis.pattern,named=window.TheLordProbability.analyzeNamedPatterns(allRounds,{now,windowMs:86400000});
+ const enough=pattern.matches>=10&&Number.isFinite(pattern.minimum)&&Number.isFinite(pattern.maximum)&&(pattern.effectiveSampleSize||0)>=5,min=enough?pattern.minimum:null,max=enough?pattern.maximum:null,roseEnough=pattern.roseMatches>=5&&Number.isFinite(pattern.roseMinimum)&&Number.isFinite(pattern.roseMaximum);
+ const formation=named.formation,names={espelho:'Espelho',xadrez:'Xadrez',quinta:'Quinta casa'};
+ let signal='RADAR EM OBSERVAÇÃO',cls='wait',formationText='Aguardando uma nova sequência rosa para iniciar o acompanhamento.';
+ if(formation&&formation.candidates.length){signal='PADRÃO EM FORMAÇÃO';cls='observe';const n=formation.housesSincePink;formationText=n===0?'Uma rosa identificada. Observando a próxima vela para verificar espelho, xadrez ou quinta casa.':n===1?'1 casa intermediária identificada. Xadrez ou quinta casa ainda podem se completar.':n<4?n+' casas intermediárias identificadas. Acompanhando a possibilidade de quinta casa.':'4 casas intermediárias identificadas. A próxima vela completaria a quinta casa, caso seja rosa.';}
+ else if(formation){signal='SEQUÊNCIA FORA DOS PADRÕES';formationText='A sequência atual ultrapassou as estruturas conhecidas. O histórico continua sendo analisado.';}
+ const frequencyHtml=named.frequencies.map(x=>'<div class="pattern-frequency-row"><span><b>'+x.name+'</b><small>'+x.description+'</small></span><strong>'+fmtCount(x.count)+' <small>ocorrências</small></strong></div>').join('');
+ let minuteText='Minutagem histórica indisponível.';
+ if(window.TheLordTiming&&typeof window.TheLordTiming.analyze==='function'){const minute=window.TheLordTiming.analyze(recent,{now,hours:24,minimum:10,maximum:100,mode:'minute'}),m=new Date(now).getMinutes(),current=minute.bins.find(x=>x.key===m),top=minute.ranked[0];minuteText='Minuto atual '+String(m).padStart(2,'0')+' · '+(current?current.hits+' rosas em '+current.total+' rodadas':'sem amostra')+'. '+(top?'Minuto mais frequente: '+String(top.key).padStart(2,'0')+'h ('+top.hits+' rosas em '+top.total+' rodadas).':'Sem minuto com ocorrências.');}
+ const patternLabel=pattern.labels.length?pattern.labels.join(' → '):'Aguardando sequência',detail=enough?'Faixa histórica P20–P80 após sequências semelhantes: '+fmtX(min)+' a '+fmtX(max)+'. Amostra: '+fmtCount(pattern.matches)+' correspondências.':'Amostra insuficiente para atualizar os tetos com segurança.';
+ grid.innerHTML=`<div class="probability-single"><div class="probability-range-layout">
+ <div class="probability-range-button minimum"><span>TETO MÍNIMO</span><strong>${min===null?'—':fmtX(min)}</strong><small>${enough?'Percentil 20 ponderado após padrões semelhantes':'Aguardando correspondência histórica'}</small></div>
+ <div class="probability-single-main"><div class="probability-signal ${cls}">${signal}</div><div class="probability-main-label">RADAR DE PADRÕES · ${fmtCount(total)} RODADAS / 24H</div><div class="probability-main-detail">${formationText}</div><div class="pattern-frequency-list">${frequencyHtml}</div><div class="probability-signal-detail">${named.mostFrequent?'Mais frequente: '+named.mostFrequent.name+' · '+fmtCount(named.mostFrequent.count)+' ocorrência(s).':'Ainda não há ocorrência completa dos três padrões conhecidos nas últimas 24h.'}</div></div>
+ <div class="probability-range-button maximum"><span>TETO MÁXIMO</span><strong>${max===null?'—':fmtX(max)}</strong><small>${roseEnough?'Faixa rosa estimada P20–P80: '+fmtX(pattern.roseMinimum)+'–'+fmtX(pattern.roseMaximum):'Aguardando rosa após padrão semelhante'}</small></div></div>
+ <div class="probability-pattern-line"><b>PADRÃO RECORRENTE:</b> ${patternLabel} · ${fmtCount(pattern.matches)} sequências semelhantes. ${detail}</div>
+ <div class="probability-pattern-line"><b>HORÁRIOS E VOLUME:</b> ${minuteText}</div><div class="probability-note-inline">Frequências calculadas sobre o histórico real. Padrões descrevem recorrências passadas e não garantem a próxima vela.</div></div>`;
 }
 function setActiveGame(game){
   if(!['aviator','aviator2'].includes(game))return;
