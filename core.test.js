@@ -33,6 +33,13 @@ function check(label, fn) {
   console.log('✓ ' + label);
 }
 
+check('vela gatinho exibe seis cotações recorrentes e suas velas de origem',()=>{
+ const now=Date.now(),values=[1.11,10,1.22,10,1.33,10,1.44,10,1.55,10,1.66,10],rounds=values.map((value,i)=>({id:'k6-'+i,value,ts:now-(values.length-i)*1000}));
+ const r=probability.analyzeKittenTriggers(rounds,{now});
+ assert.strictEqual(r.quotes.length,6);
+ assert.deepStrictEqual(r.quotes.map(x=>x.quote),['11','22','33','44','55','66']);
+ assert.deepStrictEqual(r.quotes.map(x=>x.triggerValue),[1.11,1.22,1.33,1.44,1.55,1.66]);
+});
 check('money formata em Real com 2 casas decimais', () => {
   assert.strictEqual(money(100), 'R$ 100,00');
   assert.strictEqual(money(0), 'R$ 0,00');
