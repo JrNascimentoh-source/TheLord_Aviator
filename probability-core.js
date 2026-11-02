@@ -6,73 +6,36 @@ function label(v){return v==='baixa'?'Azul (1–1,99x)':v==='media'?'Roxo (2–9
 function weightedQuantile(items,q){const a=items.filter(x=>Number.isFinite(x.value)&&Number.isFinite(x.weight)&&x.weight>0).sort((x,y)=>x.value-y.value);if(!a.length)return null;const total=a.reduce((s,x)=>s+x.weight,0);let acc=0;for(const x of a){acc+=x.weight;if(acc>=total*q)return x.value;}return a[a.length-1].value;}
 function analyze(input,options={}) {
  const now=Number(options.now)||Date.now(),size=Math.max(3,Math.min(6,Number(options.patternSize)||4));
- const rounds=(Array.isArray(input)?input:[]).filter(r=>r&&Number.isFinite(Number(r.value))&&Number(r.value)>=1&&Number.isFinite(Number(r.ts))&&Number(r.ts)<=now).map(r=>({id:r.id,value:Number(r.value),ts:Number(r.ts)})).sort((a,b)=>a.ts-b.ts);
- const currentRounds=rounds.slice(-size),current=currentRounds.map(r=>category(r.value)),currentLog=currentRounds.map(r=>Math.log(r.value)),matches=[];
- // Busca janelas anteriores semelhantes; cada correspondência contribui com o resultado imediatamente seguinte.
- for(let i=size;i<rounds.length-size;i++){
-  const prev=rounds.slice(i-size,i),logs=prev.map(r=>Math.log(r.value)),cats=prev.map(r=>category(r.value));
-  let distance=0;
-  for(let j=0;j<size;j++){
-   const scale=Math.abs(logs[j]-currentLog[j]);
-   const categoryPenalty=cats[j]===current[j]?0:0.45;
-   distance+=(scale+categoryPenalty)*(j+1)/(size*(size+1)/2);
-  }
-  const weight=Math.exp(-distance/0.8);
-  if(weight>=0.025)matches.push({value:rounds[i].value,ts:rounds[i].ts,patternTs:prev[prev.length-1].ts,weight,distance});
- }
- const next=matches.map(x=>x.value),pinkNext=matches.filter(x=>x.value>=10);
- const minimum=weightedQuantile(matches,.2),median=weightedQuantile(matches,.5),maximum=weightedQuantile(matches,.8);
- const roseMinimum=weightedQuantile(pinkNext,.2),roseMedian=weightedQuantile(pinkNext,.5),roseMaximum=weightedQuantile(pinkNext,.8);
- const occurrences=matches.map(x=>x.patternTs).filter(Number.isFinite),patternGaps=[];
- for(let i=1;i<occurrences.length;i++){const gap=(occurrences[i]-occurrences[i-1])/1000;if(gap>0&&Number.isFinite(gap))patternGaps.push(gap);}
+ const rounds=(Array.isArray(input)?input:[]).filter(r=>r&&Number.isFinite(Number(r.value))&&Number(r.value)>=1&&Number.isFinite(Number(r.ts))&&Number(r.ts)<=now).map(r=>({id:r.id,value:Number(r.value),ts:Number(r.ts)})).sort((x,y)=>x.ts-y.ts);
+ const currentRounds=rounds.slice(-size),current=currentRounds.map(r=>category(r.value));
+ const logs=rounds.map(r=>Math.log(r.value));
+ const changes=[];for(let i=1;i<logs.length;i++)changes.push(Math.abs(logs[i]-logs[i-1]));
+ const volatility=changes.length?quantile(changes,.5):0;
+ // A memória cresce com o histórico e encurta quando o gráfico fica mais volátil.
+ // Todas as rodadas participam; o decaimento reduz gradualmente o peso das antigas, sem corte fixo.
+ const halfLifeRounds=rounds.length?Math.max(8,Math.sqrt(rounds.length)*4/(1+volatility*2)):0;
+ const weighted=rounds.map((r,i)=>({value:Math.log(r.value),weight:halfLifeRounds?Math.exp(-Math.LN2*(rounds.length-1-i)/halfLifeRounds):0}));
+ const weightedLogQuantile=q=>{
+   const valid=weighted.filter(x=>Number.isFinite(x.value)&&x.weight>0).sort((x,y)=>x.value-y.value);
+   if(!valid.length)return null;
+   const total=valid.reduce((sum,x)=>sum+x.weight,0),target=total*q;let accumulated=0;
+   for(const item of valid){accumulated+=item.weight;if(accumulated>=target)return Math.exp(item.value);}
+   return Math.exp(valid[valid.length-1].value);
+ };
+ const totalWeight=weighted.reduce((sum,x)=>sum+x.weight,0),squaredWeight=weighted.reduce((sum,x)=>sum+x.weight*x.weight,0);
+ const effectiveSampleSize=squaredWeight?totalWeight*totalWeight/squaredWeight:0;
+ const minimum=weightedLogQuantile(.2),median=weightedLogQuantile(.5),maximum=weightedLogQuantile(.8);
+ const rates={};TARGETS.forEach(target=>{rates[target]=totalWeight?weighted.reduce((sum,item,i)=>sum+(rounds[i].value>=target?item.weight:0),0)/totalWeight:null;});
  const pinkRounds=rounds.filter(r=>r.value>=10),pinkGaps=[];
  for(let i=1;i<pinkRounds.length;i++){const gap=(pinkRounds[i].ts-pinkRounds[i-1].ts)/1000;if(gap>0&&Number.isFinite(gap))pinkGaps.push(gap);}
- const lastPinkTs=pinkRounds.length?pinkRounds[pinkRounds.length-1].ts:null,roundsSincePink=lastPinkTs===null?rounds.length:rounds.filter(r=>r.ts>lastPinkTs).length;
- const pinkIntervals={count:pinkGaps.length,roseCount:pinkRounds.length,lastTs:lastPinkTs,roundsSinceLast:roundsSincePink,median:quantile(pinkGaps,.5),p20:quantile(pinkGaps,.2),p80:quantile(pinkGaps,.8),mean:pinkGaps.length?pinkGaps.reduce((a,v)=>a+v,0)/pinkGaps.length:null};
- const thresholds={};TARGETS.forEach(target=>{const hits=rounds.filter(r=>r.value>=target),gaps=[];for(let i=1;i<hits.length;i++){const g=(hits[i].ts-hits[i-1].ts)/1000;if(g>0&&Number.isFinite(g))gaps.push(g);}thresholds[target]={target,count:hits.length,rate:rounds.length?hits.length/rounds.length:null,lastTs:hits.length?hits[hits.length-1].ts:null,gapCount:gaps.length,gapMedian:quantile(gaps,.5),gapP20:quantile(gaps,.2),gapP80:quantile(gaps,.8),gapMean:gaps.length?gaps.reduce((a,v)=>a+v,0)/gaps.length:null};});
- const rates={};TARGETS.forEach(t=>{rates[t]=matches.length?matches.filter(x=>x.value>=t).reduce((s,x)=>s+x.weight,0)/matches.reduce((s,x)=>s+x.weight,0):null;});
- // Estimativa combinada experimental: frequência histórica + padrão de cores + distância desde a última rosa + frequência recente.
- // Apenas resultados anteriores à sequência atual entram nas estimativas condicionais.
- const colorCode=v=>v<2?'A':v<10?'P':'R';
- const colorSeq=currentRounds.map(r=>colorCode(r.value)).join('');
- const history=rounds.slice(0,Math.max(0,rounds.length-size));
- const baseRates={},recentRates={},sequenceRates={},gapRates={},combinedRates={},signalDetails={};
- const recent=history.slice(-300);
- const recentHitCounts={};TARGETS.forEach(t=>{recentHitCounts[t]=recent.filter(r=>r.value>=t).length;});
- const sequenceCounts={};TARGETS.forEach(t=>sequenceCounts[t]={n:0,hits:0});
- const gapCounts={};TARGETS.forEach(t=>gapCounts[t]={});
- let gapSincePink=0;
- for(let i=0;i<history.length;i++){
-   const r=history[i];
-   if(i>=size){
-     const prior=history.slice(i-size,i).map(x=>colorCode(x.value)).join('');
-     if(prior===colorSeq)TARGETS.forEach(t=>{sequenceCounts[t].n++;if(r.value>=t)sequenceCounts[t].hits++;});
-   }
-   const bucket=gapSincePink<=5?'1-5':gapSincePink<=10?'6-10':gapSincePink<=20?'11-20':gapSincePink<=50?'21-50':'51+';
-   TARGETS.forEach(t=>{
-     if(!gapCounts[t][bucket])gapCounts[t][bucket]={n:0,hits:0};
-     gapCounts[t][bucket].n++;if(r.value>=t)gapCounts[t][bucket].hits++;
-   });
-   if(r.value>=10)gapSincePink=0;else gapSincePink++;
- }
- const roundsSincePinkNow=(()=>{let g=0;for(let i=history.length-1;i>=0;i--){if(history[i].value>=10)break;g++;}return g;})();
- const gapBucketNow=roundsSincePinkNow<=5?'1-5':roundsSincePinkNow<=10?'6-10':roundsSincePinkNow<=20?'11-20':roundsSincePinkNow<=50?'21-50':'51+';
- TARGETS.forEach(target=>{
-   const baseN=history.length,baseHits=history.reduce((s,r)=>s+(r.value>=target?1:0),0),base=baseN?baseHits/baseN:null;
-   const recentRate=recent.length?recentHitCounts[target]/recent.length:null;
-   const sc=sequenceCounts[target],seq=base===null?null:(sc.hits+base*20)/(sc.n+20);
-   const gc=gapCounts[target][gapBucketNow]||{n:0,hits:0},gap=base===null?null:(gc.hits+base*20)/(gc.n+20);
-   const recentBlend=base===null||recentRate===null?base:base+.25*(recentRate-base);
-   const combined=base===null?null:Math.max(0,Math.min(1,base+.20*(seq-base)+.15*(gap-base)+(recentBlend-base)));
-   baseRates[target]=base;recentRates[target]=recentRate;sequenceRates[target]=seq;gapRates[target]=gap;combinedRates[target]=combined;
-   signalDetails[target]={baseline:base,recent:recentRate,sequence:seq,gap:gap,combined,sequenceSamples:sc.n,gapSamples:gc.n};
- });
- const lastPink=history.reduce((last,r,i)=>r.value>=10?i:last,-1);
- const combinedRoundsSincePink=lastPink<0?history.length:history.length-1-lastPink;
- const combined={colorSequence:colorSeq,roundsSincePink:combinedRoundsSincePink,historyCount:history.length,rates:combinedRates,baselineRates:baseRates,recentRates,sequenceRates,gapRates,details:signalDetails,method:'experimental-shrunk-combination-v1',warning:'Experimental descriptive estimate; not a guarantee or a validated entry signal.'};
- return {roundCount:rounds.length,pinkIntervals,combined,pattern:{labels:current.map(label),categories:current,matches:next.length,minimum,median,maximum,roseMinimum,roseMedian,roseMaximum,roseMatches:pinkNext.length,rates,lastSimilarTs:occurrences.length?occurrences[occurrences.length-1]:null,gapCount:patternGaps.length,gapMedian:quantile(patternGaps,.5),gapP20:quantile(patternGaps,.2),gapP80:quantile(patternGaps,.8),effectiveSampleSize:matches.length?Math.pow(matches.reduce((s,x)=>s+x.weight,0),2)/matches.reduce((s,x)=>s+x.weight*x.weight,0):0,method:'weighted-log-similarity-quantiles'} ,thresholds};
+ const lastPinkTs=pinkRounds.length?pinkRounds[pinkRounds.length-1].ts:null;
+ const roundsSincePink=lastPinkTs===null?rounds.length:rounds.filter(r=>r.ts>lastPinkTs).length;
+ const pinkIntervals={count:pinkGaps.length,roseCount:pinkRounds.length,lastTs:lastPinkTs,roundsSinceLast:roundsSincePink,median:quantile(pinkGaps,.5),p20:quantile(pinkGaps,.2),p80:quantile(pinkGaps,.8),mean:pinkGaps.length?pinkGaps.reduce((sum,v)=>sum+v,0)/pinkGaps.length:null};
+ const thresholds={};TARGETS.forEach(target=>{const hits=rounds.filter(r=>r.value>=target),gaps=[];for(let i=1;i<hits.length;i++){const gap=(hits[i].ts-hits[i-1].ts)/1000;if(gap>0&&Number.isFinite(gap))gaps.push(gap);}thresholds[target]={target,count:hits.length,rate:rounds.length?hits.length/rounds.length:null,lastTs:hits.length?hits[hits.length-1].ts:null,gapCount:gaps.length,gapMedian:quantile(gaps,.5),gapP20:quantile(gaps,.2),gapP80:quantile(gaps,.8),gapMean:gaps.length?gaps.reduce((sum,v)=>sum+v,0)/gaps.length:null};});
+ const enough=rounds.length>=8&&effectiveSampleSize>=5;
+ const combined={historyCount:Math.max(0,rounds.length-size),method:'historical-descriptive-only',warning:'Historical metrics are descriptive and do not drive the adaptive ceilings.'};
+ return {roundCount:rounds.length,pinkIntervals,combined,pattern:{labels:current.map(label),categories:current,matches:rounds.length,sampleCount:rounds.length,minimum:enough?minimum:null,median:enough?median:null,maximum:enough?maximum:null,roseMinimum:null,roseMedian:null,roseMaximum:null,roseMatches:0,rates,lastSimilarTs:null,gapCount:0,gapMedian:null,gapP20:null,gapP80:null,effectiveSampleSize,halfLifeRounds,volatility,status:enough?'ready':'warming',method:'adaptive-decayed-current-volume-quantiles'},thresholds};
 }
-
 function analyzeNamedPatterns(input,options={}){
  const now=Number(options.now)||Date.now(),cutoff=now-(Number(options.windowMs)||86400000);
  const rounds=(Array.isArray(input)?input:[]).filter(r=>r&&Number.isFinite(Number(r.value))&&Number(r.value)>=1&&Number.isFinite(Number(r.ts))&&Number(r.ts)<=now).map(r=>({id:r.id,value:Number(r.value),ts:Number(r.ts)})).sort((a,b)=>a.ts-b.ts);

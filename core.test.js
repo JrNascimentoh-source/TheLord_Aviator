@@ -129,4 +129,30 @@ check('qualidade do gráfico aprende composição de azuis roxas e rosas',()=>{
  const r=probability.analyzeGraphQuality(rounds,{now,windowSize:30,lookahead:10});
  assert.strictEqual(r.status,'ready');assert.ok(r.blue+r.purple+r.pink===30);assert.ok(r.historySamples>0);
 });
+
+check('tetos usam quantis adaptativos de todas as velas, sem depender de sequências semelhantes',()=>{
+ const now=Date.now(),values=[1.2,1.4,2.1,3.5,8,1.1,14,2.8,4.2,1.3,25,3.1,1.8,6,2.2,18,1.5,4.5,9,2.4,35,1.7,5.5,2.6,12,3.8,1.9,7,2.9,22];
+ const rounds=values.map((value,i)=>({id:'a'+i,value,ts:now-(values.length-i)*1000}));
+ const result=probability.analyze(rounds,{now});
+ assert.strictEqual(result.pattern.status,'ready');
+ assert.strictEqual(result.pattern.sampleCount,values.length);
+ assert.ok(result.pattern.minimum>=1);
+ assert.ok(result.pattern.maximum>=result.pattern.minimum);
+ assert.ok(result.pattern.effectiveSampleSize>5);
+ assert.strictEqual(result.pattern.method,'adaptive-decayed-current-volume-quantiles');
+});
+check('tetos adaptam a memória à volatilidade e aceitam todas as categorias de vela',()=>{
+ const now=Date.now(),stable=Array.from({length:100},(_,i)=>({id:'s'+i,value:i%2?2.2:2.4,ts:now-(100-i)*1000}));
+ const volatile=Array.from({length:100},(_,i)=>({id:'v'+i,value:i%2?1.2:80,ts:now-(100-i)*1000}));
+ const a=probability.analyze(stable,{now}).pattern,b=probability.analyze(volatile,{now}).pattern;
+ assert.ok(a.halfLifeRounds>b.halfLifeRounds);
+ assert.ok(b.maximum>a.maximum);
+});
+check('tetos permanecem em formação com poucas rodadas e não inventam uma faixa',()=>{
+ const now=Date.now(),rounds=[1.2,2.4,3.1,1.8,4.2].map((value,i)=>({id:'w'+i,value,ts:now-(5-i)*1000}));
+ const p=probability.analyze(rounds,{now}).pattern;
+ assert.strictEqual(p.status,'warming');
+ assert.strictEqual(p.minimum,null);
+ assert.strictEqual(p.maximum,null);
+});
 console.log(`\n${passed} teste(s) passaram.`);
