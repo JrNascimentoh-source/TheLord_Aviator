@@ -159,4 +159,14 @@ check('tetos exibem estimativa desde a primeira vela e atualizam com cada rodada
  assert.ok(updated.minimum<=updated.maximum);
  assert.strictEqual(updated.sampleCount,2);
 });
+check('recorrência de velas altas mede ausência, frequência e atividade sem prever por atraso',()=>{
+ const now=Date.now(),values=[2,55,3,4,105,2,3,60,2,2,4,220,2,55],rounds=values.map((value,i)=>({id:'h'+i,value,ts:now-(values.length-i)*60000}));
+ const result=probability.analyzeHighMultiplierRecurrence(rounds,{now}),h50=result.targets.find(x=>x.target===50),h100=result.targets.find(x=>x.target===100),h500=result.targets.find(x=>x.target===500);
+ assert.strictEqual(h50.count,5);assert.strictEqual(h50.absenceRounds,0);assert.ok(h50.averageEveryRounds>0);assert.ok(h50.probabilityNext10>0&&h50.probabilityNext10<1);
+ assert.strictEqual(h100.count,2);assert.strictEqual(h500.count,0);assert.strictEqual(h500.probabilityNext10,null);assert.ok(['acima-da-média','na-média','abaixo-da-média','sem-base'].includes(h50.activity));
+});
+check('recorrência de velas altas inicia sem inventar probabilidade quando não há histórico',()=>{
+ const result=probability.analyzeHighMultiplierRecurrence([],{now:Date.now()});assert.strictEqual(result.roundCount,0);
+ result.targets.forEach(t=>{assert.strictEqual(t.count,0);assert.strictEqual(t.probabilityNext10,null);assert.strictEqual(t.absenceMs,null);});
+});
 console.log(`\n${passed} teste(s) passaram.`);
