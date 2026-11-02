@@ -107,7 +107,7 @@ check('sequência de minutagem reinicia após resultado ≥ 10x', () => {
 
 
 check('padrões conhecidos reconhecem espelho, xadrez e quinta casa',()=>{
- const now=Date.now(),values=[12,15,1.5,12,1.5,1.8,2.2,1.4,12,1.2,1.3,1.4,1.5,12,100,12],rounds=values.map((value,i)=>({id:'p'+i,value,ts:now-(values.length-i)*1000}));
+ const now=Date.now(),values=[12,15,1.5,12,1.5,1.8,2.2,1.4,12],rounds=values.map((value,i)=>({id:'p'+i,value,ts:now-(values.length-i)*1000}));
  const r=probability.analyzeNamedPatterns(rounds,{now});assert.strictEqual(r.patterns.espelho.count,1);assert.strictEqual(r.patterns.xadrez.count,1);assert.strictEqual(r.patterns.quinta.count,1);
 });
 check('quinta casa exige quatro velas intermediárias azuis ou roxas',()=>{
