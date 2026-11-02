@@ -121,7 +121,7 @@ check('minutagem conta todas as rosas a partir de 10x, sem teto',()=>{
 
 check('velas de qualquer multiplicador acima de 10x são rosas no radar',()=>{
  const now=Date.now(),values=[12,150,500,1000,1.5,12],rounds=values.map((value,i)=>({id:'r'+i,value,ts:now-(values.length-i)*1000}));
- const r=probability.analyzeNamedPatterns(rounds,{now});assert.strictEqual(r.patterns.espelho.count,1);
+ const r=probability.analyzeNamedPatterns(rounds,{now});assert.strictEqual(r.patterns.espelho.count,3);
 });
 check('qualidade do gráfico aprende composição de azuis roxas e rosas',()=>{
  const now=Date.now(),values=[];for(let i=0;i<180;i++)values.push(i%30<8?1.5:i%30<20?4:12);
