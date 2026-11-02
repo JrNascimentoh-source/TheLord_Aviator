@@ -79,11 +79,11 @@ function analyzeKittenTriggers(input,options={}){
   events.push({triggerValue:trigger.value,pinkValue:pink.value,ts:pink.ts,codes});
   codes.forEach((code,index)=>{
    if(!quotes.has(code))quotes.set(code,{quote:code,count:0,originalCount:0,invertedCount:0,pinkValues:[],lastTs:null});
-   const item=quotes.get(code);item.count++;item.pinkValues.push(pink.value);item.lastTs=pink.ts;
+   const item=quotes.get(code);item.count++;item.pinkValues.push(pink.value);item.lastTs=pink.ts;item.triggerValue=trigger.value;
    if(index===0)item.originalCount++;else item.invertedCount++;
   });
  }
- const ranked=[...quotes.values()].map(q=>({quote:q.quote,count:q.count,originalCount:q.originalCount,invertedCount:q.invertedCount,averagePink:q.pinkValues.reduce((a,b)=>a+b,0)/q.pinkValues.length,medianPink:quantile(q.pinkValues,.5),lastTs:q.lastTs,share:events.length?q.count/(events.length+events.filter(e=>e.codes.length===2).length):null})).sort((a,b)=>b.count-a.count||a.quote.localeCompare(b.quote));
+ const ranked=[...quotes.values()].map(q=>({quote:q.quote,count:q.count,originalCount:q.originalCount,invertedCount:q.invertedCount,triggerValue:q.triggerValue,averagePink:q.pinkValues.reduce((a,b)=>a+b,0)/q.pinkValues.length,medianPink:quantile(q.pinkValues,.5),lastTs:q.lastTs,share:events.length?q.count/(events.length+events.filter(e=>e.codes.length===2).length):null})).sort((a,b)=>b.count-a.count||a.quote.localeCompare(b.quote));
  const pinkValues=events.map(e=>e.pinkValue),triggerValues=events.map(e=>e.triggerValue);
  return {roundCount:rounds.length,triggerCount:events.length,averagePink:pinkValues.length?pinkValues.reduce((a,b)=>a+b,0)/pinkValues.length:null,medianPink:quantile(pinkValues,.5),averageTrigger:triggerValues.length?triggerValues.reduce((a,b)=>a+b,0)/triggerValues.length:null,triggers:events.slice(-5).map(e=>e.triggerValue),predominantQuote:ranked[0]||null,quotes:ranked.slice(0,5),method:'immediate-predecessor-decimal-pair-and-reverse'};
 }
