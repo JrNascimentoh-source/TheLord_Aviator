@@ -114,8 +114,19 @@ check('quinta casa exige quatro velas intermediárias azuis ou roxas',()=>{
  const now=Date.now(),values=[12,1.5,2.5,1.8,1.2,12],rounds=values.map((value,i)=>({id:'q'+i,value,ts:now-(values.length-i)*1000}));
  const r=probability.analyzeNamedPatterns(rounds,{now});assert.strictEqual(r.patterns.quinta.count,1);assert.strictEqual(r.patterns.xadrez.count,0);
 });
-check('minutagem limita rosa a 10x–99,99x quando há máximo',()=>{
- const now=new Date(2026,0,1,10,15,0).getTime(),r=timing.analyze([{id:'p',value:12,ts:now-60000},{id:'y',value:120,ts:now-30000},{id:'b',value:3,ts:now-15000}],{now,hours:1,minimum:10,maximum:100,mode:'minute'});assert.strictEqual(r.hits,1);
+check('minutagem conta todas as rosas a partir de 10x, sem teto',()=>{
+ const now=new Date(2026,0,1,10,15,0).getTime(),r=timing.analyze([{id:'p',value:12,ts:now-60000},{id:'y',value:120,ts:now-30000},{id:'b',value:3,ts:now-15000}],{now,hours:1,minimum:10,mode:'minute'});assert.strictEqual(r.hits,2);
 });
 
+
+check('velas de qualquer multiplicador acima de 10x são rosas no radar',()=>{
+ const now=Date.now(),values=[12,150,500,1000,1.5,12],rounds=values.map((value,i)=>({id:'r'+i,value,ts:now-(values.length-i)*1000}));
+ const r=probability.analyzeNamedPatterns(rounds,{now});assert.strictEqual(r.patterns.espelho.count,3);
+});
+check('qualidade do gráfico aprende composição de azuis roxas e rosas',()=>{
+ const now=Date.now(),values=[];for(let i=0;i<180;i++)values.push(i%30<8?1.5:i%30<20?4:12);
+ const rounds=values.map((value,i)=>({id:'g'+i,value,ts:now-(values.length-i)*1000}));
+ const r=probability.analyzeGraphQuality(rounds,{now,windowSize:30,lookahead:10});
+ assert.strictEqual(r.status,'ready');assert.ok(r.blue+r.purple+r.pink===30);assert.ok(r.historySamples>0);
+});
 console.log(`\n${passed} teste(s) passaram.`);
