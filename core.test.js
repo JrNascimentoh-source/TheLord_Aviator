@@ -199,4 +199,13 @@ check('vela gatinho exibe somente a cotação invertida no ranking',()=>{
  assert.strictEqual(r.quotes.find(x=>x.quote==='71').triggerValue,2.17);
 });
 
+
+check('vela gatinho guarda as cinco ocorrências mais recentes por cotação em ordem decrescente',()=>{
+ const now=Date.now(),values=[1.71,12,1.72,15,1.71,20,1.71,25,1.71,30,1.71,40],rounds=values.map((value,i)=>({id:'hist'+i,value,ts:now-(values.length-i)*1000}));
+ const r=probability.analyzeKittenTriggers(rounds,{now}),q=r.quotes.find(x=>x.quote==='17');
+ assert.ok(q);assert.strictEqual(q.count,5);assert.strictEqual(q.occurrences.length,5);
+ assert.ok(q.occurrences[0].pinkTs>q.occurrences[4].pinkTs);
+ assert.strictEqual(q.occurrences[0].triggerValue,1.71);assert.strictEqual(q.occurrences[0].pinkValue,40);
+});
+
 console.log(`\n${passed} teste(s) passaram.`);
