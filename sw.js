@@ -1,4 +1,4 @@
-const CACHE_NAME = 'thelord-aviator-oficial-v30-cleanup';
+const CACHE_NAME = 'thelord-aviator-oficial-v31-pattern-radar';
 const APP_SHELL = [
   './',
   './index.html',
@@ -9,8 +9,8 @@ const APP_SHELL = [
   './aviator-perspectiva.jpg',
   './style.css?v=20261101-bdpv-only',
   './desktop.css?v=20261101-monitor-flyout4',
-  './app.js?v=20261101-7a7-bdpv-sources',
-  './probability-core.js?v=20261027-combined1',
+  './app.js?v=20261102-pattern-radar1',
+  './probability-core.js?v=20261102-pattern-radar1',
   './timing-core.js?v=20261026b',
   './timing.js?v=20261101-bdpv-only'
 ];
