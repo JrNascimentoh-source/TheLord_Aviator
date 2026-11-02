@@ -66,5 +66,23 @@ function analyzeGraphQuality(input,options={}){
  return {status:'ready',label,sample:rounds.length,windowSize,blue:current.blue,purple:current.purple,pink:current.pink,blueRate:current.blueRate,purpleRate:current.purpleRate,pinkRate:current.pinkRate,score:current.score,historySamples:windows.length,comparableSamples:comparable.length,nextPinkRate,q25,q75,historyScope:'complete'};
 }
 
-root.TheLordProbability={analyze,analyzeNamedPatterns,analyzeGraphQuality,quantile,TARGETS};
+function analyzeHighMultiplierRecurrence(input,options={}){
+ const now=Number(options.now)||Date.now(),targets=[50,100,200,500,1000];
+ const rounds=(Array.isArray(input)?input:[]).filter(r=>r&&Number.isFinite(Number(r.value))&&Number(r.value)>=1&&Number.isFinite(Number(r.ts))&&Number(r.ts)<=now).map(r=>({value:Number(r.value),ts:Number(r.ts)})).sort((a,b)=>a.ts-b.ts);
+ const n=rounds.length,changes=[];for(let i=1;i<n;i++)changes.push(Math.abs(Math.log(rounds[i].value)-Math.log(rounds[i-1].value)));
+ const volatility=changes.length?quantile(changes,.5):0,halfLifeRounds=n?Math.max(4,Math.sqrt(n)*4/(1+volatility*2)):0;
+ const weights=rounds.map((r,i)=>halfLifeRounds?Math.exp(-Math.LN2*(n-1-i)/halfLifeRounds):0),weightTotal=weights.reduce((a,b)=>a+b,0);
+ const metrics=targets.map(target=>{
+  const hitIndexes=[];rounds.forEach((r,i)=>{if(r.value>=target)hitIndexes.push(i);});
+  const hits=hitIndexes.length,lastIndex=hits?hitIndexes[hits-1]:-1,lastTs=hits?rounds[lastIndex].ts:null,gapsRounds=[],gapsMs=[];
+  for(let i=1;i<hitIndexes.length;i++){const gap=hitIndexes[i]-hitIndexes[i-1],ms=rounds[hitIndexes[i]].ts-rounds[hitIndexes[i-1]].ts;if(gap>0)gapsRounds.push(gap);if(ms>0)gapsMs.push(ms);}
+  const rate=n?hits/n:null,weightedHits=rounds.reduce((sum,r,i)=>sum+(r.value>=target?weights[i]:0),0),recentRate=weightTotal?weightedHits/weightTotal:null;
+  const probability=h=>rate===null||hits===0?null:1-Math.pow(1-rate,h),ratio=rate>0&&recentRate!==null?recentRate/rate:null;
+  const activity=ratio===null?'sem-base':ratio>=1.25?'acima-da-média':ratio<=.75?'abaixo-da-média':'na-média';
+  return {target,count:hits,roundCount:n,rate,frequencyPer1000:n?hits/n*1000:null,averageEveryRounds:hits?n/hits:null,averageGapRounds:gapsRounds.length?gapsRounds.reduce((a,b)=>a+b,0)/gapsRounds.length:null,medianGapRounds:quantile(gapsRounds,.5),averageGapMs:gapsMs.length?gapsMs.reduce((a,b)=>a+b,0)/gapsMs.length:null,lastTs,absenceRounds:lastIndex>=0?n-1-lastIndex:n,absenceMs:lastTs!==null?Math.max(0,now-lastTs):(n?Math.max(0,now-rounds[0].ts):null),probabilityNext10:probability(10),probabilityNext50:probability(50),probabilityNext100:probability(100),recentRate,activity,activityRatio:ratio,halfLifeRounds};
+ });
+ return {roundCount:n,firstTs:n?rounds[0].ts:null,lastTs:n?rounds[n-1].ts:null,targets:metrics,method:'empirical-frequency-with-adaptive-recency'};
+}
+
+root.TheLordProbability={analyze,analyzeNamedPatterns,analyzeGraphQuality,analyzeHighMultiplierRecurrence,quantile,TARGETS};
 })(typeof globalThis==='object'?globalThis:this);

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'thelord-aviator-oficial-v36-adaptive-ceilings';
+const CACHE_NAME = 'thelord-aviator-oficial-v37-high-recurrence';
 const APP_SHELL = [
   './',
   './index.html',
@@ -9,8 +9,8 @@ const APP_SHELL = [
   './aviator-perspectiva.jpg',
   './style.css?v=20261101-bdpv-only',
   './desktop.css?v=20261101-monitor-flyout4',
-  './app.js?v=20261102-adaptive-ceilings1',
-  './probability-core.js?v=20261102-adaptive-ceilings1',
+  './app.js?v=20261102-high-recurrence1',
+  './probability-core.js?v=20261102-high-recurrence1',
   './timing-core.js?v=20261026b',
   './timing.js?v=20261101-bdpv-only'
 ];

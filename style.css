@@ -323,3 +323,18 @@ body.auth-login{background:radial-gradient(ellipse at top,#260711 0%,#10060f 48%
 .probability-title-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .probability-clock{flex:0 0 auto;padding:7px 12px;border:1px solid rgba(255,192,31,.3);border-radius:9px;background:rgba(255,192,31,.075);color:var(--gold);font-size:.88rem;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:.06em;white-space:nowrap;text-shadow:0 0 12px rgba(255,192,31,.2)}
 @media(max-width:520px){.probability-title-row{align-items:flex-start}.probability-clock{font-size:.72rem;padding:6px 8px}}
+
+/* Card compacto de ausência e recorrência de multiplicadores altos */
+.high-recurrence-panel{width:100%;margin:9px 0 3px;padding:9px 10px;border:1px solid rgba(255,255,255,.1);border-radius:9px;background:rgba(255,255,255,.035);text-align:left}
+.high-recurrence-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px;font-size:.65rem}
+.high-recurrence-head>b{color:var(--text);letter-spacing:.025em}.high-recurrence-head>span{color:var(--muted);font-size:.56rem;white-space:nowrap}
+.high-recurrence-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+.high-recurrence-item{min-width:0;padding:6px;border-radius:7px;background:rgba(0,0,0,.13);border:1px solid rgba(255,255,255,.055)}
+.high-recurrence-target{font-size:.75rem;font-weight:950;color:var(--gold);margin-bottom:4px}
+.high-recurrence-absence,.high-recurrence-frequency,.high-recurrence-prob{font-size:.53rem;line-height:1.4;color:var(--muted);margin-top:3px}
+.high-recurrence-absence b,.high-recurrence-frequency b,.high-recurrence-prob b{color:var(--text);font-variant-numeric:tabular-nums}
+.high-recurrence-activity{margin-top:5px;font-size:.51rem;font-weight:850;color:var(--gold);line-height:1.3}
+.high-recurrence-activity.is-up{color:#42c99a}.high-recurrence-activity.is-down{color:#f0a36b}
+.high-recurrence-foot{margin-top:7px;font-size:.56rem;line-height:1.4;color:var(--muted)}
+@media(max-width:620px){.high-recurrence-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.high-recurrence-item:last-child{grid-column:span 2}}
+@media(max-width:380px){.high-recurrence-head{align-items:flex-start;flex-direction:column;gap:3px}.high-recurrence-item{padding:5px}.high-recurrence-absence,.high-recurrence-frequency,.high-recurrence-prob{font-size:.51rem}}
