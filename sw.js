@@ -1,4 +1,4 @@
-const CACHE_NAME = 'thelord-aviator-oficial-v34-current-100';
+const CACHE_NAME = 'thelord-aviator-oficial-v35-live-clock';
 const APP_SHELL = [
   './',
   './index.html',
@@ -9,7 +9,7 @@ const APP_SHELL = [
   './aviator-perspectiva.jpg',
   './style.css?v=20261101-bdpv-only',
   './desktop.css?v=20261101-monitor-flyout4',
-  './app.js?v=20261102-pattern-radar4',
+  './app.js?v=20261102-pattern-radar5',
   './probability-core.js?v=20261102-pattern-radar3',
   './timing-core.js?v=20261026b',
   './timing.js?v=20261101-bdpv-only'
