@@ -1276,7 +1276,7 @@ function toggleDistribution(){
   panel.classList.toggle('hidden',!willShow);
   if(btn) btn.textContent=willShow?'🧭 Distribuição ▴':'🧭 Distribuição ▾';
 }
-setInterval(()=>{const el=document.getElementById('monitorClock');if(el)el.textContent=nowTimeStr();},1000);
+function updateLiveClocks(){const format={hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false};const clock=document.getElementById('probabilityClock');if(clock)clock.textContent=new Date().toLocaleTimeString('pt-BR',format);const monitor=document.getElementById('monitorClock');if(monitor)monitor.textContent=nowTimeStr();}updateLiveClocks();setInterval(updateLiveClocks,1000);
 /* Não remover rodadas automaticamente: a contagem do monitor e a distribuição
    devem ser monotônicas durante a sessão. O usuário pode limpar manualmente. */
 
