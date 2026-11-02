@@ -85,7 +85,7 @@ function analyzeKittenTriggers(input,options={}){
  }
  const ranked=[...quotes.values()].map(q=>({quote:q.quote,count:q.count,originalCount:q.originalCount,invertedCount:q.invertedCount,averagePink:q.pinkValues.reduce((a,b)=>a+b,0)/q.pinkValues.length,medianPink:quantile(q.pinkValues,.5),lastTs:q.lastTs,share:events.length?q.count/(events.length+events.filter(e=>e.codes.length===2).length):null})).sort((a,b)=>b.count-a.count||a.quote.localeCompare(b.quote));
  const pinkValues=events.map(e=>e.pinkValue),triggerValues=events.map(e=>e.triggerValue);
- return {roundCount:rounds.length,triggerCount:events.length,averagePink:pinkValues.length?pinkValues.reduce((a,b)=>a+b,0)/pinkValues.length:null,medianPink:quantile(pinkValues,.5),averageTrigger:triggerValues.length?triggerValues.reduce((a,b)=>a+b,0)/triggerValues.length:null,predominantQuote:ranked[0]||null,quotes:ranked.slice(0,5),method:'immediate-predecessor-decimal-pair-and-reverse'};
+ return {roundCount:rounds.length,triggerCount:events.length,averagePink:pinkValues.length?pinkValues.reduce((a,b)=>a+b,0)/pinkValues.length:null,medianPink:quantile(pinkValues,.5),averageTrigger:triggerValues.length?triggerValues.reduce((a,b)=>a+b,0)/triggerValues.length:null,triggers:events.slice(-5).map(e=>e.triggerValue),predominantQuote:ranked[0]||null,quotes:ranked.slice(0,5),method:'immediate-predecessor-decimal-pair-and-reverse'};
 }
 
 function analyzeHighMultiplierRecurrence(input,options={}){
