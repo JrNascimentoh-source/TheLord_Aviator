@@ -76,7 +76,7 @@ function analyze(input,options={}) {
 function analyzeNamedPatterns(input,options={}){
  const now=Number(options.now)||Date.now(),cutoff=now-(Number(options.windowMs)||86400000);
  const rounds=(Array.isArray(input)?input:[]).filter(r=>r&&Number.isFinite(Number(r.value))&&Number(r.value)>=1&&Number.isFinite(Number(r.ts))&&Number(r.ts)<=now).map(r=>({id:r.id,value:Number(r.value),ts:Number(r.ts)})).sort((a,b)=>a.ts-b.ts);
- const token=r=>r.value>=10&&r.value<100?'R':r.value<10?'B':'X';
+ const token=r=>r.value>=10?'R':r.value<10?'B':'X';
  const recent=rounds.filter(r=>r.ts>=cutoff),rt=recent.map(token),at=rounds.map(token);
  const defs=[{id:'espelho',name:'Espelho',sequence:['R','R'],description:'Rosa → Rosa'},{id:'xadrez',name:'Xadrez',sequence:['R','B','R'],description:'Rosa → Azul/Roxa → Rosa'},{id:'quinta',name:'Quinta casa',sequence:['R','B','B','B','B','R'],description:'Rosa → 4 azuis/roxas → Rosa'}];
  const frequencies=defs.map(d=>{const hits=[];for(let i=0;i<=rt.length-d.sequence.length;i++)if(d.sequence.every((v,j)=>rt[i+j]===v))hits.push(recent[i+d.sequence.length-1].ts);return {...d,count:hits.length,lastTs:hits.length?hits[hits.length-1]:null,frequencyPer1000:recent.length?hits.length/recent.length*1000:0};}).sort((a,b)=>b.count-a.count||a.sequence.length-b.sequence.length);
@@ -86,5 +86,22 @@ function analyzeNamedPatterns(input,options={}){
  return {windowRounds:recent.length,frequencies,mostFrequent:frequencies[0]&&frequencies[0].count?frequencies[0]:null,formation,patterns:Object.fromEntries(frequencies.map(x=>[x.id,x]))};
 }
 
-root.TheLordProbability={analyze,analyzeNamedPatterns,quantile,TARGETS};
+
+function analyzeGraphQuality(input,options={}){
+ const now=Number(options.now)||Date.now(),cutoff=now-(Number(options.windowMs)||86400000);
+ const windowSize=Math.max(10,Math.min(100,Number(options.windowSize)||30)),lookahead=Math.max(3,Math.min(30,Number(options.lookahead)||10));
+ const rounds=(Array.isArray(input)?input:[]).filter(r=>r&&Number.isFinite(Number(r.value))&&Number(r.value)>=1&&Number.isFinite(Number(r.ts))&&Number(r.ts)<=now&&Number(r.ts)>=cutoff).map(r=>({value:Number(r.value),ts:Number(r.ts)})).sort((a,b)=>a.ts-b.ts);
+ const scoreWindow=items=>{let blue=0,purple=0,pink=0;items.forEach(r=>{if(r.value<2)blue++;else if(r.value<10)purple++;else pink++;});const n=items.length||1;return {blue,purple,pink,total:items.length,blueRate:blue/n,purpleRate:purple/n,pinkRate:pink/n,score:(2*pink+purple-1.5*blue)/n};};
+ if(rounds.length<windowSize)return {status:'insufficient',label:'Amostra em formação',sample:rounds.length,windowSize,blue:0,purple:0,pink:0,blueRate:null,purpleRate:null,pinkRate:null,score:null,historySamples:0,comparableSamples:0,nextPinkRate:null};
+ const windows=[];
+ for(let i=0;i+windowSize+lookahead<=rounds.length;i+=lookahead){const current=scoreWindow(rounds.slice(i,i+windowSize)),future=rounds.slice(i+windowSize,i+windowSize+lookahead);windows.push({...current,nextPinkRate:future.filter(r=>r.value>=10).length/lookahead});}
+ const current=scoreWindow(rounds.slice(-windowSize)),scores=windows.map(w=>w.score);
+ const q25=quantile(scores,.25),q75=quantile(scores,.75);
+ const label=scores.length>=4&&current.score>=q75?'ÓTIMO':scores.length>=4&&current.score<=q25?'RUIM':'REGULAR';
+ const comparable=windows.filter(w=>label==='ÓTIMO'?w.score>=q75:label==='RUIM'?w.score<=q25:w.score>q25&&w.score<q75);
+ const nextPinkRate=comparable.length?comparable.reduce((s,w)=>s+w.nextPinkRate,0)/comparable.length:null;
+ return {status:'ready',label,sample:rounds.length,windowSize,blue:current.blue,purple:current.purple,pink:current.pink,blueRate:current.blueRate,purpleRate:current.purpleRate,pinkRate:current.pinkRate,score:current.score,historySamples:windows.length,comparableSamples:comparable.length,nextPinkRate,q25,q75};
+}
+
+root.TheLordProbability={analyze,analyzeNamedPatterns,analyzeGraphQuality,quantile,TARGETS};
 })(typeof globalThis==='object'?globalThis:this);
