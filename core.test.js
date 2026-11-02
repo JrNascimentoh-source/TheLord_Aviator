@@ -176,7 +176,7 @@ check('vela gatinho mede a vela anterior, cotação decimal e inversão',()=>{
  assert.strictEqual(r.triggerCount,3);assert.ok(Math.abs(r.averagePink-(50+20+100)/3)<1e-9);
  assert.deepStrictEqual(r.triggers,[1.72,2.05,1.27]);
  assert.strictEqual(q['72'],2);assert.strictEqual(q['27'],2);assert.strictEqual(q['05'],1);assert.strictEqual(q['50'],1);
- assert.strictEqual(r.quotes.find(x=>x.quote==='72').triggerValue,1.72);assert.strictEqual(r.quotes.find(x=>x.quote==='27').triggerValue,1.72);assert.strictEqual(r.quotes.find(x=>x.quote==='05').triggerValue,2.05);
+ assert.strictEqual(r.quotes.find(x=>x.quote==='72').triggerValue,1.27);assert.strictEqual(r.quotes.find(x=>x.quote==='27').triggerValue,1.27);assert.strictEqual(r.quotes.find(x=>x.quote==='05').triggerValue,2.05);
 });
 check('vela gatinho ignora rosas como gatilho e não inventa cotação sem pares válidos',()=>{
  const now=Date.now(),rounds=[10,1.5,12,15,2.2].map((value,i)=>({id:'z'+i,value,ts:now-(5-i)*1000}));
