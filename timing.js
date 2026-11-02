@@ -1,5 +1,5 @@
 'use strict';
-const timingOptions={hours:1,minimum:10,mode:'digit',period:'all'};
+const timingOptions={hours:1,minimum:2,mode:'digit',period:'all'};
 let timingSelected=null;
 const timingPickerOptions={"hours":[["1","Última hora"],["6","Últimas 6 Hrs"],["12","Últimas 12 Hrs"],["24","Últimas 24 Hrs"]],"minimum":[["2","⚡ ≥2x"],["10","🌀 ≥10x"],["50","🔥 ≥50x"],["100","🚀 ≥100x"],["500","⭐ ≥500x"],["1000","🌟 ≥1000x"]],"period":[["all","Todo o dia"],["Manhã","Manhã (05–11h)"],["Tarde","Tarde (12–17h)"],["Noite","Noite (18–04h)"]]};
 function toggleTimingPicker(id,force){
