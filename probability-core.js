@@ -80,8 +80,10 @@ function analyzeKittenTriggers(input,options={}){
   events.push({triggerValue:trigger.value,pinkValue:pink.value,ts:pink.ts,quote:inverse});
   if(!quotes.has(inverse))quotes.set(inverse,{quote:inverse,count:0,originalCount:0,invertedCount:0,pinkValues:[],lastTs:null});
   const item=quotes.get(inverse);item.count++;item.invertedCount++;item.pinkValues.push(pink.value);item.lastTs=pink.ts;item.triggerValue=trigger.value;
+  if(!item.occurrences)item.occurrences=[];
+  item.occurrences.push({triggerValue:trigger.value,pinkValue:pink.value,triggerTs:trigger.ts,pinkTs:pink.ts});
  }
- const ranked=[...quotes.values()].map(q=>({quote:q.quote,count:q.count,originalCount:q.originalCount,invertedCount:q.invertedCount,triggerValue:q.triggerValue,averagePink:q.pinkValues.reduce((a,b)=>a+b,0)/q.pinkValues.length,medianPink:quantile(q.pinkValues,.5),lastTs:q.lastTs,share:events.length?q.count/events.length:null})).sort((a,b)=>b.count-a.count||a.quote.localeCompare(b.quote));
+ const ranked=[...quotes.values()].map(q=>({quote:q.quote,count:q.count,originalCount:q.originalCount,invertedCount:q.invertedCount,triggerValue:q.triggerValue,averagePink:q.pinkValues.reduce((a,b)=>a+b,0)/q.pinkValues.length,medianPink:quantile(q.pinkValues,.5),lastTs:q.lastTs,occurrences:q.occurrences.slice(-5).reverse(),share:events.length?q.count/events.length:null})).sort((a,b)=>b.count-a.count||a.quote.localeCompare(b.quote));
  const pinkValues=events.map(e=>e.pinkValue),triggerValues=events.map(e=>e.triggerValue);
  return {roundCount:rounds.length,triggerCount:events.length,averagePink:pinkValues.length?pinkValues.reduce((a,b)=>a+b,0)/pinkValues.length:null,medianPink:quantile(pinkValues,.5),averageTrigger:triggerValues.length?triggerValues.reduce((a,b)=>a+b,0)/triggerValues.length:null,triggers:events.slice(-6).map(e=>e.triggerValue),predominantQuote:ranked[0]||null,quotes:ranked.slice(0,6),method:'immediate-predecessor-decimal-pair-and-reverse'};
 }
