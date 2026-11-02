@@ -88,11 +88,11 @@ function analyzeNamedPatterns(input,options={}){
 
 
 function analyzeGraphQuality(input,options={}){
- const now=Number(options.now)||Date.now(),cutoff=now-(Number(options.windowMs)||86400000);
+ const now=Number(options.now)||Date.now();
  const windowSize=Math.max(10,Math.min(100,Number(options.windowSize)||30)),lookahead=Math.max(3,Math.min(30,Number(options.lookahead)||10));
- const rounds=(Array.isArray(input)?input:[]).filter(r=>r&&Number.isFinite(Number(r.value))&&Number(r.value)>=1&&Number.isFinite(Number(r.ts))&&Number(r.ts)<=now&&Number(r.ts)>=cutoff).map(r=>({value:Number(r.value),ts:Number(r.ts)})).sort((a,b)=>a.ts-b.ts);
+ const rounds=(Array.isArray(input)?input:[]).filter(r=>r&&Number.isFinite(Number(r.value))&&Number(r.value)>=1&&Number.isFinite(Number(r.ts))&&Number(r.ts)<=now).map(r=>({value:Number(r.value),ts:Number(r.ts)})).sort((a,b)=>a.ts-b.ts);
  const scoreWindow=items=>{let blue=0,purple=0,pink=0;items.forEach(r=>{if(r.value<2)blue++;else if(r.value<10)purple++;else pink++;});const n=items.length||1;return {blue,purple,pink,total:items.length,blueRate:blue/n,purpleRate:purple/n,pinkRate:pink/n,score:(2*pink+purple-1.5*blue)/n};};
- if(rounds.length<windowSize)return {status:'insufficient',label:'Amostra em formação',sample:rounds.length,windowSize,blue:0,purple:0,pink:0,blueRate:null,purpleRate:null,pinkRate:null,score:null,historySamples:0,comparableSamples:0,nextPinkRate:null};
+ if(rounds.length<windowSize)return {status:'insufficient',label:'Amostra em formação',sample:rounds.length,windowSize,blue:0,purple:0,pink:0,blueRate:null,purpleRate:null,pinkRate:null,score:null,historySamples:0,comparableSamples:0,nextPinkRate:null,historyScope:'complete'};
  const windows=[];
  for(let i=0;i+windowSize+lookahead<=rounds.length;i+=lookahead){const current=scoreWindow(rounds.slice(i,i+windowSize)),future=rounds.slice(i+windowSize,i+windowSize+lookahead);windows.push({...current,nextPinkRate:future.filter(r=>r.value>=10).length/lookahead});}
  const current=scoreWindow(rounds.slice(-windowSize)),scores=windows.map(w=>w.score);
@@ -100,7 +100,7 @@ function analyzeGraphQuality(input,options={}){
  const label=scores.length>=4&&current.score>=q75?'ÓTIMO':scores.length>=4&&current.score<=q25?'RUIM':'REGULAR';
  const comparable=windows.filter(w=>label==='ÓTIMO'?w.score>=q75:label==='RUIM'?w.score<=q25:w.score>q25&&w.score<q75);
  const nextPinkRate=comparable.length?comparable.reduce((s,w)=>s+w.nextPinkRate,0)/comparable.length:null;
- return {status:'ready',label,sample:rounds.length,windowSize,blue:current.blue,purple:current.purple,pink:current.pink,blueRate:current.blueRate,purpleRate:current.purpleRate,pinkRate:current.pinkRate,score:current.score,historySamples:windows.length,comparableSamples:comparable.length,nextPinkRate,q25,q75};
+ return {status:'ready',label,sample:rounds.length,windowSize,blue:current.blue,purple:current.purple,pink:current.pink,blueRate:current.blueRate,purpleRate:current.purpleRate,pinkRate:current.pinkRate,score:current.score,historySamples:windows.length,comparableSamples:comparable.length,nextPinkRate,q25,q75,historyScope:'complete'};
 }
 
 root.TheLordProbability={analyze,analyzeNamedPatterns,analyzeGraphQuality,quantile,TARGETS};
