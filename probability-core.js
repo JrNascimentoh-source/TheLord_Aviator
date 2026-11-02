@@ -5,9 +5,9 @@ function category(v){return v<2?'baixa':v<10?'media':v<100?'rosa':v<500?'amarela
 function label(v){return v==='baixa'?'Azul (1–1,99x)':v==='media'?'Roxo (2–9,99x)':v==='rosa'?'Rosa (10–99,99x)':v==='amarela'?'Amarela (100–499,99x)':v==='vermelha'?'Vermelha (500–999,99x)':'Fogo (≥1000x)';}
 function weightedQuantile(items,q){const a=items.filter(x=>Number.isFinite(x.value)&&Number.isFinite(x.weight)&&x.weight>0).sort((x,y)=>x.value-y.value);if(!a.length)return null;const total=a.reduce((s,x)=>s+x.weight,0);let acc=0;for(const x of a){acc+=x.weight;if(acc>=total*q)return x.value;}return a[a.length-1].value;}
 function analyze(input,options={}) {
- const now=Number(options.now)||Date.now();
+ const now=Number(options.now)||Date.now(),size=Math.max(3,Math.min(6,Number(options.patternSize)||4));
  const rounds=(Array.isArray(input)?input:[]).filter(r=>r&&Number.isFinite(Number(r.value))&&Number(r.value)>=1&&Number.isFinite(Number(r.ts))&&Number(r.ts)<=now).map(r=>({id:r.id,value:Number(r.value),ts:Number(r.ts)})).sort((x,y)=>x.ts-y.ts);
- const currentRounds=rounds.slice(-4),current=currentRounds.map(r=>category(r.value));
+ const currentRounds=rounds.slice(-size),current=currentRounds.map(r=>category(r.value));
  const logs=rounds.map(r=>Math.log(r.value));
  const changes=[];for(let i=1;i<logs.length;i++)changes.push(Math.abs(logs[i]-logs[i-1]));
  const volatility=changes.length?quantile(changes,.5):0;
@@ -33,7 +33,8 @@ function analyze(input,options={}) {
  const pinkIntervals={count:pinkGaps.length,roseCount:pinkRounds.length,lastTs:lastPinkTs,roundsSinceLast:roundsSincePink,median:quantile(pinkGaps,.5),p20:quantile(pinkGaps,.2),p80:quantile(pinkGaps,.8),mean:pinkGaps.length?pinkGaps.reduce((sum,v)=>sum+v,0)/pinkGaps.length:null};
  const thresholds={};TARGETS.forEach(target=>{const hits=rounds.filter(r=>r.value>=target),gaps=[];for(let i=1;i<hits.length;i++){const gap=(hits[i].ts-hits[i-1].ts)/1000;if(gap>0&&Number.isFinite(gap))gaps.push(gap);}thresholds[target]={target,count:hits.length,rate:rounds.length?hits.length/rounds.length:null,lastTs:hits.length?hits[hits.length-1].ts:null,gapCount:gaps.length,gapMedian:quantile(gaps,.5),gapP20:quantile(gaps,.2),gapP80:quantile(gaps,.8),gapMean:gaps.length?gaps.reduce((sum,v)=>sum+v,0)/gaps.length:null};});
  const enough=rounds.length>=8&&effectiveSampleSize>=5;
- return {roundCount:rounds.length,pinkIntervals,pattern:{labels:current.map(label),categories:current,matches:rounds.length,sampleCount:rounds.length,minimum:enough?minimum:null,median:enough?median:null,maximum:enough?maximum:null,roseMinimum:null,roseMedian:null,roseMaximum:null,roseMatches:0,rates,lastSimilarTs:null,gapCount:0,gapMedian:null,gapP20:null,gapP80:null,effectiveSampleSize,halfLifeRounds,volatility,status:enough?'ready':'warming',method:'adaptive-decayed-current-volume-quantiles'},thresholds};
+ const combined={historyCount:Math.max(0,rounds.length-size),method:'historical-descriptive-only',warning:'Historical metrics are descriptive and do not drive the adaptive ceilings.'};
+ return {roundCount:rounds.length,pinkIntervals,combined,pattern:{labels:current.map(label),categories:current,matches:rounds.length,sampleCount:rounds.length,minimum:enough?minimum:null,median:enough?median:null,maximum:enough?maximum:null,roseMinimum:null,roseMedian:null,roseMaximum:null,roseMatches:0,rates,lastSimilarTs:null,gapCount:0,gapMedian:null,gapP20:null,gapP80:null,effectiveSampleSize,halfLifeRounds,volatility,status:enough?'ready':'warming',method:'adaptive-decayed-current-volume-quantiles'},thresholds};
 }
 function analyzeNamedPatterns(input,options={}){
  const now=Number(options.now)||Date.now(),cutoff=now-(Number(options.windowMs)||86400000);
