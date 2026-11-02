@@ -182,12 +182,21 @@ check('vela gatinho mede a vela anterior, cotação decimal e inversão',()=>{
  const r=probability.analyzeKittenTriggers(rounds,{now}),q=Object.fromEntries(r.quotes.map(x=>[x.quote,x.count]));
  assert.strictEqual(r.triggerCount,3);assert.ok(Math.abs(r.averagePink-(50+20+100)/3)<1e-9);
  assert.deepStrictEqual(r.triggers,[1.72,2.05,1.27]);
- assert.strictEqual(q['72'],2);assert.strictEqual(q['27'],2);assert.strictEqual(q['05'],1);assert.strictEqual(q['50'],1);
- assert.strictEqual(r.quotes.find(x=>x.quote==='72').triggerValue,1.27);assert.strictEqual(r.quotes.find(x=>x.quote==='27').triggerValue,1.27);assert.strictEqual(r.quotes.find(x=>x.quote==='05').triggerValue,2.05);
+ assert.strictEqual(q['27'],1);assert.strictEqual(q['50'],1);assert.strictEqual(q['72'],1);
+ assert.strictEqual(r.quotes.find(x=>x.quote==='27').triggerValue,1.72);assert.strictEqual(r.quotes.find(x=>x.quote==='50').triggerValue,2.05);assert.strictEqual(r.quotes.find(x=>x.quote==='72').triggerValue,1.27);
 });
 check('vela gatinho ignora rosas como gatilho e não inventa cotação sem pares válidos',()=>{
  const now=Date.now(),rounds=[10,1.5,12,15,2.2].map((value,i)=>({id:'z'+i,value,ts:now-(5-i)*1000}));
  const r=probability.analyzeKittenTriggers(rounds,{now});assert.strictEqual(r.triggerCount,1);assert.strictEqual(r.averagePink,12);
+});
+
+
+check('vela gatinho exibe somente a cotação invertida no ranking',()=>{
+ const now=Date.now(),values=[1.20,12,2.17,20],rounds=values.map((value,i)=>({id:'inv'+i,value,ts:now-(values.length-i)*1000}));
+ const r=probability.analyzeKittenTriggers(rounds,{now});
+ assert.deepStrictEqual(r.quotes.map(x=>x.quote).sort(),['02','71']);
+ assert.strictEqual(r.quotes.find(x=>x.quote==='02').triggerValue,1.2);
+ assert.strictEqual(r.quotes.find(x=>x.quote==='71').triggerValue,2.17);
 });
 
 console.log(`\n${passed} teste(s) passaram.`);
