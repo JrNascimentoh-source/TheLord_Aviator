@@ -349,3 +349,9 @@ body.auth-login{background:radial-gradient(ellipse at top,#260711 0%,#10060f 48%
 .kitten-empty{grid-column:1/-1;padding:8px;border-radius:7px;background:rgba(0,0,0,.12);font-size:.6rem;color:var(--muted)}.kitten-foot{margin-top:7px;font-size:.56rem;line-height:1.4;color:var(--muted)}
 @media(max-width:620px){.kitten-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.kitten-kpis>div:last-child{grid-column:1/-1}.kitten-quote-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:380px){.kitten-head{align-items:flex-start;flex-direction:column;gap:3px}.kitten-kpis>div{padding:6px}.kitten-kpis strong{font-size:.75rem}}
+
+/* Seletor de período — Vela Gatinho · Cotações */
+.kitten-range-picker{display:flex;gap:7px;margin:12px 0 14px;flex-wrap:wrap}
+.kitten-range-btn{flex:1;min-width:82px;padding:9px 10px;border-radius:11px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:var(--muted);font-size:.66rem;font-weight:900;letter-spacing:.035em;cursor:pointer;transition:background .18s ease,border-color .18s ease,color .18s ease,box-shadow .18s ease}
+.kitten-range-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(255,192,31,.13);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 12px rgba(255,192,31,.08)}
+.kitten-range-btn:active{transform:scale(.98)}
