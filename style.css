@@ -338,3 +338,14 @@ body.auth-login{background:radial-gradient(ellipse at top,#260711 0%,#10060f 48%
 .high-recurrence-foot{margin-top:7px;font-size:.56rem;line-height:1.4;color:var(--muted)}
 @media(max-width:620px){.high-recurrence-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.high-recurrence-item:last-child{grid-column:span 2}}
 @media(max-width:380px){.high-recurrence-head{align-items:flex-start;flex-direction:column;gap:3px}.high-recurrence-item{padding:5px}.high-recurrence-absence,.high-recurrence-frequency,.high-recurrence-prob{font-size:.51rem}}
+
+/* Card compacto de vela gatinho e cotações, alinhado à Qualidade do Gráfico */
+.kitten-panel{width:100%;margin:9px 0 3px;padding:9px 10px;border:1px solid rgba(255,255,255,.1);border-radius:9px;background:rgba(255,255,255,.035);text-align:left}
+.kitten-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px;font-size:.66rem}.kitten-head>b{color:var(--text);letter-spacing:.03em}.kitten-head>span{font-size:.56rem;color:var(--muted)}
+.kitten-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.kitten-kpis>div{display:flex;flex-direction:column;gap:4px;min-width:0;padding:7px;border-radius:7px;background:rgba(0,0,0,.13);border:1px solid rgba(255,255,255,.055)}
+.kitten-kpis small{font-size:.54rem;line-height:1.35;color:var(--muted)}.kitten-kpis strong{font-size:.82rem;color:var(--gold);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.kitten-quotes-title{margin:8px 0 5px;font-size:.58rem;font-weight:800;color:var(--muted)}.kitten-quote-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+.kitten-quote-item{display:flex;flex-direction:column;gap:3px;min-width:0;padding:6px;border-radius:7px;background:rgba(0,0,0,.13);border:1px solid rgba(255,255,255,.055)}.kitten-quote-item>b{font-size:.78rem;color:var(--gold)}.kitten-quote-item>span{font-size:.52rem;line-height:1.35;color:var(--muted);overflow-wrap:anywhere}
+.kitten-empty{grid-column:1/-1;padding:8px;border-radius:7px;background:rgba(0,0,0,.12);font-size:.6rem;color:var(--muted)}.kitten-foot{margin-top:7px;font-size:.56rem;line-height:1.4;color:var(--muted)}
+@media(max-width:620px){.kitten-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.kitten-kpis>div:last-child{grid-column:1/-1}.kitten-quote-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:380px){.kitten-head{align-items:flex-start;flex-direction:column;gap:3px}.kitten-kpis>div{padding:6px}.kitten-kpis strong{font-size:.75rem}}
