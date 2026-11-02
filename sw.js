@@ -1,4 +1,4 @@
-const CACHE_NAME = 'thelord-aviator-oficial-v38-kitten';
+const CACHE_NAME = 'thelord-aviator-oficial-v39-cache-sync';
 const APP_SHELL = [
   './',
   './index.html',
@@ -7,12 +7,12 @@ const APP_SHELL = [
   './icon-192.png',
   './icon-512.png',
   './aviator-perspectiva.jpg',
-  './style.css?v=20261101-bdpv-only',
-  './desktop.css?v=20261101-monitor-flyout4',
+  './style.css?v=20261101-expo-glass',
+  './desktop.css?v=20261101-expo-glass',
   './app.js?v=20261102-kitten1',
   './probability-core.js?v=20261102-kitten1',
   './timing-core.js?v=20261026b',
-  './timing.js?v=20261101-bdpv-only'
+  './timing.js?v=20261102-min2x'
 ];
 
 self.addEventListener('install', event => {
