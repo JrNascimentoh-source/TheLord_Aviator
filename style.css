@@ -318,3 +318,8 @@ body.auth-login{background:radial-gradient(ellipse at top,#260711 0%,#10060f 48%
 .graph-quality-bars span{display:flex;flex-direction:column;gap:3px;padding:6px;border-radius:6px;background:rgba(0,0,0,.12);font-size:.57rem;color:var(--muted)}
 .graph-quality-bars b{font-size:.67rem;color:var(--text);font-variant-numeric:tabular-nums}
 .graph-quality-foot{margin-top:7px;font-size:.57rem;line-height:1.4;color:var(--muted)}
+
+/* Relógio em tempo real no cabeçalho do card de padrões */
+.probability-title-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.probability-clock{flex:0 0 auto;padding:7px 12px;border:1px solid rgba(255,192,31,.3);border-radius:9px;background:rgba(255,192,31,.075);color:var(--gold);font-size:.88rem;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:.06em;white-space:nowrap;text-shadow:0 0 12px rgba(255,192,31,.2)}
+@media(max-width:520px){.probability-title-row{align-items:flex-start}.probability-clock{font-size:.72rem;padding:6px 8px}}
