@@ -313,7 +313,7 @@ body.auth-login{background:radial-gradient(ellipse at top,#260711 0%,#10060f 48%
 .graph-quality-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px;font-size:.66rem}
 .graph-quality-head> b{color:var(--text);letter-spacing:.03em}
 .graph-quality-head>strong{font-size:.68rem;letter-spacing:.04em}
-.graph-quality-head .quality-ótimo{color:#42c99a}.graph-quality-head .quality-ruim{color:#f07878}.graph-quality-head .quality-regular,.graph-quality-head .quality-pending{color:var(--gold)}
+.graph-quality-head .quality-ótimo{color:#42c99a}.graph-quality-head .quality-bom{color:#55c7e8}.graph-quality-head .quality-ruim{color:#f07878}.graph-quality-head .quality-regular,.graph-quality-head .quality-pending{color:var(--gold)}
 .graph-quality-bars{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
 .graph-quality-bars span{display:flex;flex-direction:column;gap:3px;padding:6px;border-radius:6px;background:rgba(0,0,0,.12);font-size:.57rem;color:var(--muted)}
 .graph-quality-bars b{font-size:.67rem;color:var(--text);font-variant-numeric:tabular-nums}
