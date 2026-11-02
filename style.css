@@ -377,3 +377,6 @@ body.auth-login{background:radial-gradient(ellipse at top,#260711 0%,#10060f 48%
 .kitten-occurrence-pair .round-chip-time{font-size:.56rem}
 .kitten-occurrence-arrow{color:var(--gold);font-weight:950}
 @media(max-width:390px){.kitten-detail-overlay{padding:10px}.kitten-detail-card{padding:14px 10px}.kitten-occurrence{padding:8px}}
+
+/* Contraste da legenda da vela gatilho correspondente */
+.kitten-quote-item>small{color:#fff!important}
