@@ -59,11 +59,12 @@ function analyzeGraphQuality(input,options={}){
  const windows=[];
  for(let i=0;i+windowSize+lookahead<=rounds.length;i+=lookahead){const current=scoreWindow(rounds.slice(i,i+windowSize)),future=rounds.slice(i+windowSize,i+windowSize+lookahead);windows.push({...current,nextPinkRate:future.filter(r=>r.value>=10).length/lookahead});}
  const current=scoreWindow(rounds.slice(-windowSize)),scores=windows.map(w=>w.score);
- const q25=quantile(scores,.25),q75=quantile(scores,.75);
- const label=scores.length>=4&&current.score>=q75?'ÓTIMO':scores.length>=4&&current.score<=q25?'RUIM':'REGULAR';
- const comparable=windows.filter(w=>label==='ÓTIMO'?w.score>=q75:label==='RUIM'?w.score<=q25:w.score>q25&&w.score<q75);
+ const q25=quantile(scores,.25),q50=quantile(scores,.5),q75=quantile(scores,.75);
+ // Mantém os limites de ÓTIMO e RUIM; divide a antiga faixa REGULAR pela mediana.
+ const label=scores.length>=4&&current.score>=q75?'ÓTIMO':scores.length>=4&&current.score<=q25?'RUIM':scores.length>=4&&current.score>=q50?'BOM':'REGULAR';
+ const comparable=windows.filter(w=>label==='ÓTIMO'?w.score>=q75:label==='RUIM'?w.score<=q25:label==='BOM'?w.score>=q50&&w.score<q75:w.score>q25&&w.score<q50);
  const nextPinkRate=comparable.length?comparable.reduce((s,w)=>s+w.nextPinkRate,0)/comparable.length:null;
- return {status:'ready',label,sample:rounds.length,windowSize,blue:current.blue,purple:current.purple,pink:current.pink,blueRate:current.blueRate,purpleRate:current.purpleRate,pinkRate:current.pinkRate,score:current.score,historySamples:windows.length,comparableSamples:comparable.length,nextPinkRate,q25,q75,historyScope:'complete'};
+ return {status:'ready',label,sample:rounds.length,windowSize,blue:current.blue,purple:current.purple,pink:current.pink,blueRate:current.blueRate,purpleRate:current.purpleRate,pinkRate:current.pinkRate,score:current.score,historySamples:windows.length,comparableSamples:comparable.length,nextPinkRate,q25,q50,q75,historyScope:'complete'};
 }
 
 
