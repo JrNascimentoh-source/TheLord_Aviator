@@ -445,7 +445,7 @@
     <div id="probabilityGrid" class="probability-grid" aria-live="polite">
       <div class="probability-empty">Carregando histórico compartilhado...</div>
     </div>
-    <div class="probability-note">As faixas mínima e máxima são percentis de velas que vieram após sequências semelhantes no histórico compartilhado. As frequências de 10x, 50x e 100x só aparecem com amostra suficiente; nada disso garante ou protege a próxima rodada.</div>
+    <div class="probability-note">As faixas mínima e máxima são percentis ponderados do volume recente de todas as velas. Frequências e recorrências descrevem o histórico observado; não garantem nem preveem a próxima rodada.</div>
   </section>
 
   <section class="card timing-advanced"><div class="title">📊 Distribuição por minutagem</div><p class="timing-source">Análise complementar do histórico do Monitor · <span id="timingAdvGame">Aviator</span> · <time id="timingAdvClock"></time></p><div class="timing-controls"><label class="timing-option-group"><span>Janela</span><div class="timing-picker">
@@ -618,8 +618,8 @@
 </div>
 
 <script src="timing-core.js?v=20261026b" defer></script>
-<script src="probability-core.js?v=20261102-adaptive-ceilings1" defer></script>
-<script src="app.js?v=20261102-adaptive-ceilings1" defer></script>
+<script src="probability-core.js?v=20261102-high-recurrence1" defer></script>
+<script src="app.js?v=20261102-high-recurrence1" defer></script>
 <script src="timing.js?v=20261101-bdpv-only" defer></script>
 <script>
 if ('serviceWorker' in navigator) {
