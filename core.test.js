@@ -169,4 +169,16 @@ check('recorrência de velas altas inicia sem inventar probabilidade quando não
  const result=probability.analyzeHighMultiplierRecurrence([],{now:Date.now()});assert.strictEqual(result.roundCount,0);
  result.targets.forEach(t=>{assert.strictEqual(t.count,0);assert.strictEqual(t.probabilityNext10,null);assert.strictEqual(t.absenceMs,null);});
 });
+
+check('vela gatinho mede a vela anterior, cotação decimal e inversão',()=>{
+ const now=Date.now(),values=[1.72,50,2.05,20,1.27,100],rounds=values.map((value,i)=>({id:'k'+i,value,ts:now-(values.length-i)*1000}));
+ const r=probability.analyzeKittenTriggers(rounds,{now}),q=Object.fromEntries(r.quotes.map(x=>[x.quote,x.count]));
+ assert.strictEqual(r.triggerCount,3);assert.ok(Math.abs(r.averagePink-(50+20+100)/3)<1e-9);
+ assert.strictEqual(q['72'],2);assert.strictEqual(q['27'],2);assert.strictEqual(q['05'],1);assert.strictEqual(q['50'],1);
+});
+check('vela gatinho ignora rosas como gatilho e não inventa cotação sem pares válidos',()=>{
+ const now=Date.now(),rounds=[10,1.5,12,15,2.2].map((value,i)=>({id:'z'+i,value,ts:now-(5-i)*1000}));
+ const r=probability.analyzeKittenTriggers(rounds,{now});assert.strictEqual(r.triggerCount,1);assert.strictEqual(r.averagePink,12);
+});
+
 console.log(`\n${passed} teste(s) passaram.`);
