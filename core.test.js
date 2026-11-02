@@ -148,11 +148,15 @@ check('tetos adaptam a memória à volatilidade e aceitam todas as categorias de
  assert.ok(a.halfLifeRounds>b.halfLifeRounds);
  assert.ok(b.maximum>a.maximum);
 });
-check('tetos permanecem em formação com poucas rodadas e não inventam uma faixa',()=>{
- const now=Date.now(),rounds=[1.2,2.4,3.1,1.8,4.2].map((value,i)=>({id:'w'+i,value,ts:now-(5-i)*1000}));
- const p=probability.analyze(rounds,{now}).pattern;
- assert.strictEqual(p.status,'warming');
- assert.strictEqual(p.minimum,null);
- assert.strictEqual(p.maximum,null);
+check('tetos exibem estimativa desde a primeira vela e atualizam com cada rodada',()=>{
+ const now=Date.now(),rounds=[2.4].map((value,i)=>({id:'w'+i,value,ts:now-(1-i)*1000}));
+ const first=probability.analyze(rounds,{now}).pattern;
+ assert.strictEqual(first.status,'provisional');
+ assert.strictEqual(first.minimum,2.4);
+ assert.strictEqual(first.maximum,2.4);
+ rounds.push({id:'w2',value:12,ts:now+1});
+ const updated=probability.analyze(rounds,{now:now+1}).pattern;
+ assert.ok(updated.minimum<=updated.maximum);
+ assert.strictEqual(updated.sampleCount,2);
 });
 console.log(`\n${passed} teste(s) passaram.`);
