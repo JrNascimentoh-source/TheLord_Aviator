@@ -33,26 +33,29 @@ function analyzeWalkForward(input,options={}){
   .map(r=>({value:Number(r.value),ts:Number(r.ts)})).sort((a,b)=>a.ts-b.ts);
  const metrics=targets.map(target=>{
   let tested=0,rollingBrier=0,baselineBrier=0,predicted=0,observed=0;
+  // Prefix sums make both expanding and rolling hit counts O(1) per test round.
+  const prefixHits=new Uint32Array(rounds.length+1);
+  for(let i=0;i<rounds.length;i++)prefixHits[i+1]=prefixHits[i]+(rounds[i].value>=target?1:0);
   for(let i=minTrain;i<rounds.length;i++){
-   const start=Math.max(0,i-windowSize),train=rounds.slice(start,i),expanding=rounds.slice(0,i);
-   const hits=train.reduce((sum,r)=>sum+(r.value>=target?1:0),0);
-   const allHits=expanding.reduce((sum,r)=>sum+(r.value>=target?1:0),0);
-   const p=(hits+1)/(train.length+2),base=(allHits+1)/(expanding.length+2);
+   const start=Math.max(0,i-windowSize),trainLength=i-start;
+   const hits=prefixHits[i]-prefixHits[start];
+   const allHits=prefixHits[i];
+   const p=(hits+1)/(trainLength+2),base=(allHits+1)/(i+2);
    const actual=rounds[i].value>=target?1:0;
    rollingBrier+=(p-actual)*(p-actual);
    baselineBrier+=(base-actual)*(base-actual);
    predicted+=p;observed+=actual;tested++;
   }
-  const last=rounds.slice(Math.max(0,rounds.length-windowSize));
-  const lastHits=last.reduce((sum,r)=>sum+(r.value>=target?1:0),0);
-  const nextProbability=last.length?(lastHits+1)/(last.length+2):null;
+  const lastStart=Math.max(0,rounds.length-windowSize),lastLength=rounds.length-lastStart;
+  const lastHits=prefixHits[rounds.length]-prefixHits[lastStart];
+  const nextProbability=lastLength?(lastHits+1)/(lastLength+2):null;
   const brier=tested?rollingBrier/tested:null,baseline=tested?baselineBrier/tested:null;
   const skill=brier!==null&&baseline>0?1-brier/baseline:null;
   return {target,trainingWindow:windowSize,minimumTraining:minTrain,testedRounds:tested,
    brierScore:brier,baselineBrierScore:baseline,skillVsBaseline:skill,
    meanPredictedRate:tested?predicted/tested:null,observedRate:tested?observed/tested:null,
    calibrationGap:tested?Math.abs(predicted/tested-observed/tested):null,
-   nextProbability,nextProbabilityInterval:wilsonInterval(lastHits,last.length),observedRateInterval:wilsonInterval(observed,tested),trainingRounds:last.length,trainingHits:lastHits,
+   nextProbability,nextProbabilityInterval:wilsonInterval(lastHits,lastLength),observedRateInterval:wilsonInterval(observed,tested),trainingRounds:lastLength,trainingHits:lastHits,
    status:tested>=20?'evaluated':tested>0?'limited':'insufficient'};
  });
  return {method:'walk-forward-rolling-vs-expanding-laplace',roundCount:rounds.length,
