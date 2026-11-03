@@ -339,4 +339,35 @@ check('análise principal disponibiliza backtesting interno sem alterar indicado
  assert.ok(result.pattern.minimum>=1);
 });
 
+
+check('intervalo de Wilson contém a taxa observada e respeita limites',()=>{
+ const interval=probability.wilsonInterval(70,100);
+ assert.ok(interval.lower<0.7&&interval.upper>0.7);
+ assert.ok(interval.lower>=0&&interval.upper<=1);
+ assert.strictEqual(interval.level,0.95);
+});
+check('intervalo de Wilson comunica incerteza mesmo sem ocorrências',()=>{
+ const interval=probability.wilsonInterval(0,100);
+ assert.strictEqual(interval.lower,0);
+ assert.ok(interval.upper>0&&interval.upper<0.1);
+ assert.strictEqual(probability.wilsonInterval(0,0),null);
+});
+check('intervalos de recorrência transformam incerteza para horizontes futuros',()=>{
+ const now=Date.now(),values=Array.from({length:200},(_,i)=>i%50===0?60:1.5);
+ const rounds=values.map((value,i)=>({value,ts:now-(values.length-i)*1000}));
+ const result=probability.analyzeHighMultiplierRecurrence(rounds,{now});
+ const metric=result.targets.find(x=>x.target===50);
+ assert.ok(metric.rateInterval.lower<=metric.rate&&metric.rateInterval.upper>=metric.rate);
+ assert.ok(metric.probabilityNext10Interval.upper>metric.probabilityNext10);
+ assert.ok(metric.probabilityNext50Interval.upper>=metric.probabilityNext10Interval.upper);
+});
+check('backtesting expõe intervalos da estimativa atual e da calibração',()=>{
+ const now=Date.now(),rounds=Array.from({length:90},(_,i)=>({value:i%9===0?15:1.5,ts:now-(90-i)*1000}));
+ const metric=probability.analyzeWalkForward(rounds,{minTrain:30,windowSize:50,targets:[10]}).targets[0];
+ assert.ok(metric.nextProbabilityInterval.lower<=metric.nextProbability);
+ assert.ok(metric.nextProbabilityInterval.upper>=metric.nextProbability);
+ assert.ok(metric.observedRateInterval.lower<=metric.observedRate);
+ assert.ok(metric.observedRateInterval.upper>=metric.observedRate);
+});
+
 console.log(`\n${passed} teste(s) passaram.`);
