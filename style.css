@@ -421,36 +421,52 @@ body.auth-login{background:radial-gradient(ellipse at top,#260711 0%,#10060f 48%
 
 
 
-/* Mobile: manter o selo “ONLINE COLETANDO” do seletor de plataforma
-   com a mesma presença visual da referência, ao lado do nome Aviator. */
+/* Mobile: faixa completa do seletor Aviator no formato horizontal da referência. */
 @media screen and (max-width:700px){
+  body:not(.auth-login) .monitor-game-options{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    width:100%;
+    gap:8px;
+  }
   body:not(.auth-login) .monitor-game-options .scenario-btn{
+    display:flex;
+    flex:0 0 100%;
+    width:100%;
+    min-width:0;
+    min-height:57px;
+    box-sizing:border-box;
+    flex-direction:row;
     flex-wrap:nowrap;
+    align-items:center;
+    justify-content:center;
     gap:10px;
-    padding:14px 10px;
+    padding:12px 14px;
+    border:1px solid var(--gold);
+    border-radius:17px;
+    background:rgba(255,192,31,.10);
     font-size:.85rem;
+    line-height:1.2;
+    white-space:nowrap;
   }
   body:not(.auth-login) .monitor-game-options .collector-status{
+    display:inline-flex;
     width:auto;
-    margin-left:0;
+    flex:0 0 auto;
+    align-items:center;
+    justify-content:center;
     gap:7px;
-    padding:5px 10px;
-    font-size:.75rem;
+    margin:0;
+    padding:5px 12px;
+    border-radius:999px;
+    font-size:.72rem;
     font-weight:800;
+    line-height:1.2;
+    white-space:nowrap;
   }
   body:not(.auth-login) .monitor-game-options .collector-dot{
     width:10px;
     height:10px;
     flex:0 0 10px;
-  }
-}
-@media screen and (max-width:480px){
-  body:not(.auth-login) .monitor-game-options{
-    display:flex;
-    flex-direction:column;
-  }
-  body:not(.auth-login) .monitor-game-options .scenario-btn{
-    width:100%;
-    justify-content:center;
   }
 }
