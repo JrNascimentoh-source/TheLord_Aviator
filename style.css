@@ -271,35 +271,12 @@ body.auth-login{background:radial-gradient(ellipse at top,#260711 0%,#10060f 48%
     line-height:1.25;
     margin:0 0 3px;
   }
-  .bottom .nav > .nav-label,
-  .bottom .nav > .nav-label-wrap{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    gap:4px;
-    font-size:inherit;
-    font-weight:inherit;
-    line-height:inherit;
-    margin:0;
-    white-space:nowrap;
-  }
-  .bottom .nav > .nav-label-wrap > .nav-label{
-    display:inline;
-    font-size:inherit;
-    font-weight:inherit;
-    line-height:inherit;
-    margin:0;
-  }
-  .bottom .nav > .nav-label-wrap .monitor-nav-chevron{
-    font-size:.72em;
-    line-height:1;
-  }
 }/* Seletor de plataforma e gráficos do Monitor */
 .monitor-platform-selector{display:grid;gap:10px}.monitor-platform-heading{font-size:.76rem;font-weight:850;color:var(--muted);letter-spacing:.03em}.monitor-platform-options, .monitor-game-options, .monitor-graph-actions{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap}.monitor-platform-options .scenario-btn{flex:1;min-width:110px}.monitor-game-options .scenario-btn{flex:1 1 190px;min-width:0;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}.monitor-graph-actions .btn{flex:1 1 190px;min-width:0}.monitor-game-options .collector-status{display:inline-flex;align-items:center;gap:5px;font-size:.58rem;font-weight:800;white-space:nowrap}.monitor-game-options .collector-dot{width:7px;height:7px;flex:0 0 7px;border-radius:50%;background:#ef4444;box-shadow:0 0 7px rgba(239,68,68,.65);animation:collectorPulse 1.5s ease-in-out infinite}.monitor-game-options .collector-status.on .collector-dot{background:#22c55e;box-shadow:0 0 8px rgba(34,197,94,.8)}.monitor-game-options .collector-status.on{color:#86efac}.monitor-game-options .collector-status.off{color:#fca5a5}
 @keyframes collectorPulse{0%, 100%{opacity:1}50%{opacity:.4}}
 @media(max-width:480px){.monitor-game-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.monitor-game-options .scenario-btn{padding:9px 5px;font-size:.68rem;gap:5px}.monitor-game-options .collector-status{width:100%;justify-content:center}.monitor-graph-actions{display:grid;grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.monitor-game-options .collector-dot{animation:none}}/* Menu de plataformas integrado ao item Monitor da navegação */
-.nav-dropdown-wrap{position:relative;display:flex;flex-direction:column;min-width:0}.nav-dropdown-wrap>.nav{width:100%}.nav-label-wrap{display:inline-flex;align-items:center;justify-content:center;gap:4px;min-width:0}.monitor-nav-chevron{display:inline-block;margin:0;font-size:.72em;line-height:1;opacity:.82;transition:transform .18s ease;vertical-align:middle}.nav-dropdown-wrap>.nav[aria-expanded="true"] .monitor-nav-chevron{transform:rotate(180deg)}.monitor-platform-menu{position:absolute;top:calc(100% + 9px);left:50%;transform:translateX(-50%);z-index:1200;display:grid;gap:5px;width:min(180px,calc(100% - 12px));margin:0;padding:8px;border:1px solid rgba(255,192,31,.35);border-radius:11px;background:rgba(16,10,19,.97);box-shadow:0 8px 20px rgba(0,0,0,.35)}.monitor-platform-menu[hidden]{display:none}.monitor-platform-option{width:100%;padding:10px 7px;border:1px solid transparent;border-radius:8px;background:rgba(255,255,255,.035);color:var(--muted);font-size:.72rem;font-weight:850;text-align:center;cursor:pointer}.monitor-platform-option.active{border-color:rgba(255,192,31,.38);background:rgba(255,192,31,.11);color:var(--gold)}.monitor-platform-selector{gap:10px}
+.nav-dropdown-wrap{position:relative;display:flex;flex-direction:column;min-width:0}.nav-dropdown-wrap>.nav{width:100%}#monitorNavBtn .nav-label::after{content:"⌄";display:inline-block;margin-left:4px;font-size:.72em;line-height:1;opacity:.82;vertical-align:middle;transition:transform .18s ease}#monitorNavBtn[aria-expanded="true"] .nav-label::after{transform:rotate(180deg)}.monitor-platform-menu{position:absolute;top:calc(100% + 9px);left:50%;transform:translateX(-50%);z-index:1200;display:grid;gap:5px;width:min(180px,calc(100% - 12px));margin:0;padding:8px;border:1px solid rgba(255,192,31,.35);border-radius:11px;background:rgba(16,10,19,.97);box-shadow:0 8px 20px rgba(0,0,0,.35)}.monitor-platform-menu[hidden]{display:none}.monitor-platform-option{width:100%;padding:10px 7px;border:1px solid transparent;border-radius:8px;background:rgba(255,255,255,.035);color:var(--muted);font-size:.72rem;font-weight:850;text-align:center;cursor:pointer}.monitor-platform-option.active{border-color:rgba(255,192,31,.38);background:rgba(255,192,31,.11);color:var(--gold)}.monitor-platform-selector{gap:10px}
 @media(min-width:701px){/* Desktop: opções fazem parte do fluxo da barra e empurram os itens seguintes. */
   .nav-dropdown-wrap{z-index:auto}.monitor-platform-menu{
     position:static;
