@@ -417,3 +417,21 @@ body.auth-login{background:radial-gradient(ellipse at top,#260711 0%,#10060f 48%
     max-width:none;
   }
 }
+
+
+/* Mobile: destaque do status do coletor no cabeçalho do histórico,
+   compensando a escala global de 80% para manter a proporção da referência. */
+@media screen and (max-width:700px){
+  body:not(.auth-login) .filter-right .collector-status{
+    font-size:1.25rem;
+    font-weight:800;
+    gap:10px;
+    padding:9px 16px;
+    border-radius:999px;
+  }
+  body:not(.auth-login) .filter-right .collector-status .collector-dot{
+    width:14px;
+    height:14px;
+    flex:0 0 14px;
+  }
+}
