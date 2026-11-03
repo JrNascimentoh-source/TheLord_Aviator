@@ -36,12 +36,12 @@ A gestão é armazenada localmente e sincronizada por usuário com `public.gesto
 O monitor e a minutagem leem o histórico da tabela `public.velas`. As chaves usadas pelo app são:
 
 - `aviator`: Aviator 7a7.
-- `aviator2`: Aviator BdPv / BetDoPovo.
+- `aviator2`: Aviator BdPv / BetDoPovo (identificador interno legado preservado).
 - `betdopovo`: chave histórica aceita na leitura e normalizada para `aviator2`.
 
-O coletor universal `Coletor-Universal-v2.1.js` (metadados internos 2.2) identifica a plataforma e envia as velas diretamente ao Supabase. Não existe dependência operacional do TheLord CaptureCore neste fluxo.
+O coletor universal `Coletor-Universal-v2.1.js` (metadados internos 2.2) identifica a plataforma e envia as velas diretamente ao Supabase.
 
-Os arquivos `coletor.user.js` e `coletor-aviator2.user.js` são alternativas legadas por plataforma. Não devem ser executados em paralelo com o universal na mesma origem, para evitar duplicidade.
+Os arquivos `coletor.user.js` e `coletor-aviator2.user.js` são alternativas legadas por plataforma, mantidas como reserva de segurança. Não devem ser executados em paralelo com o universal na mesma origem, para evitar duplicidade.
 
 ## Compatibilidade e segurança
 
