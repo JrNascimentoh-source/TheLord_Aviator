@@ -481,3 +481,11 @@ body.auth-login{background:radial-gradient(ellipse at top,#260711 0%,#10060f 48%
 
 /* Status secundário do radar quando não há padrão conhecido próximo */
 .probability-observation-status{display:inline-flex;align-items:center;justify-content:center;margin-top:7px;padding:6px 11px;border:1px solid rgba(255,209,102,.35);border-radius:999px;background:rgba(255,209,102,.07);color:#ffd166;font-size:.67rem;font-weight:900;letter-spacing:.035em;line-height:1.2;text-align:center}
+
+
+/* Alerta neon amarelo nos padrões em formação. */
+.pattern-frequency-row.is-alert{position:relative;border-color:rgba(255,221,40,.95);background:linear-gradient(100deg,rgba(255,213,0,.16),rgba(255,255,255,.045));box-shadow:0 0 0 1px rgba(255,221,40,.22),0 0 9px rgba(255,214,0,.55),inset 0 0 12px rgba(255,214,0,.10);animation:pattern-neon-alert 1.25s ease-in-out infinite}
+.pattern-frequency-row.is-alert b{color:#ffe76a;text-shadow:0 0 7px rgba(255,220,40,.75)}
+.pattern-frequency-row.is-alert>strong{color:#ffe45c;text-shadow:0 0 6px rgba(255,214,0,.55)}
+@keyframes pattern-neon-alert{0%,100%{border-color:rgba(255,221,40,.58);box-shadow:0 0 0 1px rgba(255,221,40,.12),0 0 4px rgba(255,214,0,.25),inset 0 0 5px rgba(255,214,0,.04)}50%{border-color:#ffe43b;box-shadow:0 0 0 1px rgba(255,221,40,.48),0 0 15px rgba(255,214,0,.78),0 0 25px rgba(255,214,0,.28),inset 0 0 13px rgba(255,214,0,.16)}}
+@media(prefers-reduced-motion:reduce){.pattern-frequency-row.is-alert{animation:none;border-color:#ffe43b;box-shadow:0 0 0 1px rgba(255,221,40,.35),0 0 9px rgba(255,214,0,.45)}}
