@@ -240,11 +240,8 @@ function applyScenarioLock(){
     if(daysNote){ daysNote.classList.add('hidden'); daysNote.textContent=''; }
   }
 }
-function getPeriod(hour){
-  if(hour>=5 && hour<12) return 'Manhã';
-  if(hour>=12 && hour<18) return 'Tarde';
-  return 'Noite';
-}
+const getPeriod=globalThis.TheLordTiming.period;
+const {startOfWeek,parseBRDate}=globalThis.TheLordDate;
 function computeHandResult(n){
   const val=parseFloat(document.getElementById('hand'+n+'Value').value)||0;
   const mult=parseFloat(document.getElementById('hand'+n+'Mult').value)||0;
@@ -762,8 +759,6 @@ function attachChartInteraction(wrap,points,values,W,H){
    Resumo semanal/mensal, atualização geral da tela e
    reinício de mês.
 ====================================================== */
-function startOfWeek(d){const x=new Date(d);const day=x.getDay();const diff=(day===0?-6:1-day);x.setDate(x.getDate()+diff);x.setHours(0,0,0,0);return x}
-function parseBRDate(s){const[dd,mm,yy]=s.split('/');return new Date(+yy,+mm-1,+dd)}
 function renderPeriodSummary(){
   const weekEl=document.getElementById('weekResult');
   const monthEl=document.getElementById('monthResult');
