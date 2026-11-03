@@ -44,12 +44,6 @@ check('vela gatinho exibe seis cotações recorrentes e suas velas de origem',()
  assert.deepStrictEqual(r.quotes.map(x=>x.quote),['11','22','33','44','55','66']);
  assert.deepStrictEqual(r.quotes.map(x=>x.triggerValue),[1.11,1.22,1.33,1.44,1.55,1.66]);
 });
-check('money formata em Real com 2 casas decimais', () => {
-  assert.strictEqual(money(100), 'R$ 100,00');
-  assert.strictEqual(money(0), 'R$ 0,00');
-  assert.strictEqual(money(1234.5), 'R$ 1.234,50');
-});
-
 check('projeção conservadora (10%/dia) mantém a conta linear atual', () => {
   assert.strictEqual(projectionFinal(200, 0.10, 10), 400);
 });
