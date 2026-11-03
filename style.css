@@ -382,13 +382,3 @@ body.auth-login{background:radial-gradient(ellipse at top,#260711 0%,#10060f 48%
 /* Contraste da legenda da vela gatilho correspondente */
 .kitten-quote-item>small{color:#fff!important}
 
-
-/* Layout mobile compacto: mantém a densidade visual de referência em zoom 100%. */
-@media (max-width:700px){
-  html{overflow-x:hidden}
-  body{
-    zoom:.8;
-    width:125%;
-    max-width:none;
-  }
-}
