@@ -15,7 +15,11 @@ function parseBRDate(s){
   const[dd,mm,yy]=s.split('/');
   return new Date(+yy,+mm-1,+dd);
 }
-const api={period,startOfWeek,parseBRDate};
+function nowTimeStr(d){
+  d=d||new Date();
+  return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0');
+}
+const api={period,startOfWeek,parseBRDate,nowTimeStr};
 if(typeof module==='object'&&module.exports) module.exports=api;
 else root.TheLordDate=api;
 })(typeof globalThis==='object'?globalThis:this);
