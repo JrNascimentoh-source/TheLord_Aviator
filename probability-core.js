@@ -4,6 +4,50 @@ function quantile(values,q){const a=values.filter(Number.isFinite).slice().sort(
 function category(v){return v<2?'baixa':v<10?'media':v<100?'rosa':v<500?'amarela':v<1000?'vermelha':'fogo';}
 function label(v){return v==='baixa'?'Azul (1–1,99x)':v==='media'?'Roxo (2–9,99x)':v==='rosa'?'Rosa (10–99,99x)':v==='amarela'?'Amarela (100–499,99x)':v==='vermelha'?'Vermelha (500–999,99x)':'Fogo (≥1000x)';}
 function weightedQuantile(items,q){const a=items.filter(x=>Number.isFinite(x.value)&&Number.isFinite(x.weight)&&x.weight>0).sort((x,y)=>x.value-y.value);if(!a.length)return null;const total=a.reduce((s,x)=>s+x.weight,0);let acc=0;for(const x of a){acc+=x.weight;if(acc>=total*q)return x.value;}return a[a.length-1].value;}
+
+/**
+ * Walk-forward backtest: each forecast uses only rounds strictly before the
+ * round being scored. Rolling model (last 100 rounds) is compared with an
+ * expanding-history baseline. Laplace smoothing avoids 0%/100% from tiny samples.
+ */
+function analyzeWalkForward(input,options={}){
+ const targets=Array.isArray(options.targets)?options.targets:[10,50,100,200,500,1000];
+ const minTrain=Math.max(10,Number(options.minTrain)||30);
+ const windowSize=Math.max(minTrain,Number(options.windowSize)||100);
+ const rounds=(Array.isArray(input)?input:[])
+  .filter(r=>r&&Number.isFinite(Number(r.value))&&Number(r.value)>=1&&Number.isFinite(Number(r.ts)))
+  .map(r=>({value:Number(r.value),ts:Number(r.ts)})).sort((a,b)=>a.ts-b.ts);
+ const metrics=targets.map(target=>{
+  let tested=0,rollingBrier=0,baselineBrier=0,predicted=0,observed=0;
+  for(let i=minTrain;i<rounds.length;i++){
+   const start=Math.max(0,i-windowSize),train=rounds.slice(start,i),expanding=rounds.slice(0,i);
+   const hits=train.reduce((sum,r)=>sum+(r.value>=target?1:0),0);
+   const allHits=expanding.reduce((sum,r)=>sum+(r.value>=target?1:0),0);
+   const p=(hits+1)/(train.length+2),base=(allHits+1)/(expanding.length+2);
+   const actual=rounds[i].value>=target?1:0;
+   rollingBrier+=(p-actual)*(p-actual);
+   baselineBrier+=(base-actual)*(base-actual);
+   predicted+=p;observed+=actual;tested++;
+  }
+  const last=rounds.slice(Math.max(0,rounds.length-windowSize));
+  const lastHits=last.reduce((sum,r)=>sum+(r.value>=target?1:0),0);
+  const nextProbability=last.length?(lastHits+1)/(last.length+2):null;
+  const brier=tested?rollingBrier/tested:null,baseline=tested?baselineBrier/tested:null;
+  const skill=brier!==null&&baseline>0?1-brier/baseline:null;
+  return {target,trainingWindow:windowSize,minimumTraining:minTrain,testedRounds:tested,
+   brierScore:brier,baselineBrierScore:baseline,skillVsBaseline:skill,
+   meanPredictedRate:tested?predicted/tested:null,observedRate:tested?observed/tested:null,
+   calibrationGap:tested?Math.abs(predicted/tested-observed/tested):null,
+   nextProbability,trainingRounds:last.length,trainingHits:lastHits,
+   status:tested>=20?'evaluated':tested>0?'limited':'insufficient'};
+ });
+ return {method:'walk-forward-rolling-vs-expanding-laplace',roundCount:rounds.length,
+  minimumTraining:minTrain,windowSize,evaluatedTargets:metrics.filter(x=>x.testedRounds>0).length,
+  status:metrics.some(x=>x.testedRounds>=20)?'evaluated':metrics.some(x=>x.testedRounds>0)?'limited':'insufficient',
+  note:'Backtest measures historical forecast error; it does not establish that future rounds are predictable.',
+  targets:metrics};
+}
+
 function analyze(input,options={}) {
  const now=Number(options.now)||Date.now(),size=Math.max(3,Math.min(6,Number(options.patternSize)||4));
  const rounds=(Array.isArray(input)?input:[]).filter(r=>r&&Number.isFinite(Number(r.value))&&Number(r.value)>=1&&Number.isFinite(Number(r.ts))&&Number(r.ts)<=now).map(r=>({id:r.id,value:Number(r.value),ts:Number(r.ts)})).sort((x,y)=>x.ts-y.ts);
@@ -32,9 +76,10 @@ function analyze(input,options={}) {
  const roundsSincePink=lastPinkTs===null?rounds.length:rounds.filter(r=>r.ts>lastPinkTs).length;
  const pinkIntervals={count:pinkGaps.length,roseCount:pinkRounds.length,lastTs:lastPinkTs,roundsSinceLast:roundsSincePink,median:quantile(pinkGaps,.5),p20:quantile(pinkGaps,.2),p80:quantile(pinkGaps,.8),mean:pinkGaps.length?pinkGaps.reduce((sum,v)=>sum+v,0)/pinkGaps.length:null};
  const thresholds={};TARGETS.forEach(target=>{const hits=rounds.filter(r=>r.value>=target),gaps=[];for(let i=1;i<hits.length;i++){const gap=(hits[i].ts-hits[i-1].ts)/1000;if(gap>0&&Number.isFinite(gap))gaps.push(gap);}thresholds[target]={target,count:hits.length,rate:rounds.length?hits.length/rounds.length:null,lastTs:hits.length?hits[hits.length-1].ts:null,gapCount:gaps.length,gapMedian:quantile(gaps,.5),gapP20:quantile(gaps,.2),gapP80:quantile(gaps,.8),gapMean:gaps.length?gaps.reduce((sum,v)=>sum+v,0)/gaps.length:null};});
+ const backtesting=analyzeWalkForward(rounds,options.backtesting||{});
  const enough=rounds.length>0&&Number.isFinite(minimum)&&Number.isFinite(maximum);
  const combined={historyCount:Math.max(0,rounds.length-size),method:'historical-descriptive-only',warning:'Historical metrics are descriptive and do not drive the adaptive ceilings.'};
- return {roundCount:rounds.length,pinkIntervals,combined,pattern:{labels:current.map(label),categories:current,matches:rounds.length,sampleCount:rounds.length,minimum:enough?minimum:null,median:enough?median:null,maximum:enough?maximum:null,roseMinimum:null,roseMedian:null,roseMaximum:null,roseMatches:0,rates,lastSimilarTs:null,gapCount:0,gapMedian:null,gapP20:null,gapP80:null,effectiveSampleSize,halfLifeRounds,volatility,status:enough?(effectiveSampleSize<5?'provisional':'ready'):'no-data',method:'adaptive-decayed-current-volume-quantiles'},thresholds};
+ return {roundCount:rounds.length,pinkIntervals,combined,backtesting,pattern:{labels:current.map(label),categories:current,matches:rounds.length,sampleCount:rounds.length,minimum:enough?minimum:null,median:enough?median:null,maximum:enough?maximum:null,roseMinimum:null,roseMedian:null,roseMaximum:null,roseMatches:0,rates,lastSimilarTs:null,gapCount:0,gapMedian:null,gapP20:null,gapP80:null,effectiveSampleSize,halfLifeRounds,volatility,status:enough?(effectiveSampleSize<5?'provisional':'ready'):'no-data',method:'adaptive-decayed-current-volume-quantiles'},thresholds};
 }
 function analyzeNamedPatterns(input,options={}){
  const now=Number(options.now)||Date.now(),cutoff=now-(Number(options.windowMs)||86400000);
@@ -116,5 +161,5 @@ function analyzeHighMultiplierRecurrence(input,options={}){
  return {roundCount:n,firstTs:n?rounds[0].ts:null,lastTs:n?rounds[n-1].ts:null,targets:metrics,method:'empirical-frequency-with-adaptive-recency'};
 }
 
-root.TheLordProbability={analyze,analyzeNamedPatterns,analyzeGraphQuality,analyzeHighMultiplierRecurrence,analyzeKittenTriggers,quantile,TARGETS};
+root.TheLordProbability={analyze,analyzeWalkForward,analyzeNamedPatterns,analyzeGraphQuality,analyzeHighMultiplierRecurrence,analyzeKittenTriggers,quantile,TARGETS};
 })(typeof globalThis==='object'?globalThis:this);
