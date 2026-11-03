@@ -1,4 +1,4 @@
-const CACHE_NAME = 'thelord-aviator-oficial-v41-quinta1';
+const CACHE_NAME = 'thelord-aviator-oficial-v42-mobile-fix';
 const APP_SHELL = [
   './',
   './index.html',
@@ -7,7 +7,7 @@ const APP_SHELL = [
   './icon-192.png',
   './icon-512.png',
   './aviator-perspectiva.jpg',
-  './style.css?v=20261101-expo-glass',
+  './style.css?v=20261103-mobile-fix',
   './desktop.css?v=20261101-expo-glass',
   './app.js?v=20261102-quinta1',
   './probability-core.js?v=20261102-quinta1',
