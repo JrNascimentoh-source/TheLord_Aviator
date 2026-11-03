@@ -310,4 +310,33 @@ check('períodos da gestão e minutagem compartilham os mesmos limites',()=>{
  for(const hour of [0,4,5,11,12,17,18,23]) assert.strictEqual(dates.period(hour),timing.period(hour));
 });
 
+
+check('backtesting walk-forward usa somente o passado e compara modelo móvel com baseline',()=>{
+ const now=Date.now(),values=Array.from({length:80},(_,i)=>i%7===0?12:1.5);
+ const rounds=values.map((value,i)=>({id:'bt'+i,value,ts:now-(values.length-i)*1000}));
+ const result=probability.analyzeWalkForward(rounds,{minTrain:30,windowSize:50,targets:[10]});
+ const metric=result.targets[0];
+ assert.strictEqual(result.status,'evaluated');
+ assert.strictEqual(metric.testedRounds,50);
+ assert.ok(metric.brierScore>=0&&metric.brierScore<=1);
+ assert.ok(metric.baselineBrierScore>=0&&metric.baselineBrierScore<=1);
+ assert.ok(metric.nextProbability>0&&metric.nextProbability<1);
+ assert.strictEqual(metric.trainingRounds,50);
+ assert.strictEqual(result.method,'walk-forward-rolling-vs-expanding-laplace');
+});
+check('backtesting não declara desempenho com amostra curta',()=>{
+ const now=Date.now(),rounds=Array.from({length:20},(_,i)=>({value:i===19?50:1.5,ts:now-(20-i)*1000}));
+ const result=probability.analyzeWalkForward(rounds,{minTrain:30,targets:[10]});
+ assert.strictEqual(result.status,'insufficient');
+ assert.strictEqual(result.targets[0].testedRounds,0);
+ assert.strictEqual(result.targets[0].brierScore,null);
+});
+check('análise principal disponibiliza backtesting interno sem alterar indicadores existentes',()=>{
+ const now=Date.now(),rounds=Array.from({length:60},(_,i)=>({value:i%5===0?15:1.4,ts:now-(60-i)*1000}));
+ const result=probability.analyze(rounds,{now});
+ assert.ok(result.backtesting);
+ assert.strictEqual(result.backtesting.roundCount,60);
+ assert.ok(result.pattern.minimum>=1);
+});
+
 console.log(`\n${passed} teste(s) passaram.`);
