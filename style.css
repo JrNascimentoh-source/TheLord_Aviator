@@ -419,3 +419,38 @@ body.auth-login{background:radial-gradient(ellipse at top,#260711 0%,#10060f 48%
 }
 
 
+
+
+/* Mobile: manter o selo “ONLINE COLETANDO” do seletor de plataforma
+   com a mesma presença visual da referência, ao lado do nome Aviator. */
+@media screen and (max-width:700px){
+  body:not(.auth-login) .monitor-game-options .scenario-btn{
+    flex-wrap:nowrap;
+    gap:10px;
+    padding:14px 10px;
+    font-size:.85rem;
+  }
+  body:not(.auth-login) .monitor-game-options .collector-status{
+    width:auto;
+    margin-left:0;
+    gap:7px;
+    padding:5px 10px;
+    font-size:.75rem;
+    font-weight:800;
+  }
+  body:not(.auth-login) .monitor-game-options .collector-dot{
+    width:10px;
+    height:10px;
+    flex:0 0 10px;
+  }
+}
+@media screen and (max-width:480px){
+  body:not(.auth-login) .monitor-game-options{
+    display:flex;
+    flex-direction:column;
+  }
+  body:not(.auth-login) .monitor-game-options .scenario-btn{
+    width:100%;
+    justify-content:center;
+  }
+}
