@@ -1,4 +1,4 @@
-const CACHE_NAME = 'thelord-aviator-oficial-v52-audit-cleanup-1';
+const CACHE_NAME = 'thelord-aviator-oficial-v53-auth-handler-cleanup';
 const APP_SHELL = [
   './',
   './index.html',
