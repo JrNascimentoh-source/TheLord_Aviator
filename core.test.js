@@ -117,9 +117,9 @@ check('padrões conhecidos reconhecem espelho, xadrez e quinta casa',()=>{
  const now=Date.now(),values=[12,15,1.5,12,1.5,1.8,2.2,1.4,12],rounds=values.map((value,i)=>({id:'p'+i,value,ts:now-(values.length-i)*1000}));
  const r=probability.analyzeNamedPatterns(rounds,{now});assert.strictEqual(r.patterns.espelho.count,1);assert.strictEqual(r.patterns.xadrez.count,1);assert.strictEqual(r.patterns.quinta.count,1);
 });
-check('quinta casa exige quatro velas intermediárias azuis ou roxas',()=>{
+check('quinta casa exige rosa inicial, quatro casas intermediárias e rosa final',()=>{
  const now=Date.now(),values=[12,1.5,2.5,1.8,1.2,12],rounds=values.map((value,i)=>({id:'q'+i,value,ts:now-(values.length-i)*1000}));
- const r=probability.analyzeNamedPatterns(rounds,{now});assert.strictEqual(r.patterns.quinta.count,1);assert.strictEqual(r.patterns.xadrez.count,0);
+ const r=probability.analyzeNamedPatterns(rounds,{now});assert.strictEqual(r.patterns.quinta.count,1);assert.strictEqual(r.patterns.xadrez.count,0);assert.match(r.patterns.quinta.description,/4 casas intermediárias.*6 velas no total/);
 });
 check('minutagem conta todas as rosas a partir de 10x, sem teto',()=>{
  const now=new Date(2026,0,1,10,15,0).getTime(),r=timing.analyze([{id:'p',value:12,ts:now-60000},{id:'y',value:120,ts:now-30000},{id:'b',value:3,ts:now-15000}],{now,hours:1,minimum:10,mode:'minute'});assert.strictEqual(r.hits,2);
