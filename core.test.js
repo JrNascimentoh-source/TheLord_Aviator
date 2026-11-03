@@ -9,12 +9,7 @@ require('./probability-core.js');
 const timing = require('./timing-core.js');
 const probability = globalThis.TheLordProbability;
 
-function money(v) {
-  return 'R$ ' + Number(v || 0).toLocaleString('pt-BR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-}
+const format = require('./format-core.js');
 
 function projectionFinal(bank, rate, days) {
   const dailyTarget = bank * rate;
@@ -26,6 +21,15 @@ function stopWinTarget(bank) {
 }
 
 let passed = 0;
+
+check('formatadores compartilhados preservam moeda, percentual e multiplicador', () => {
+  assert.strictEqual(format.money(100), 'R$ 100,00');
+  assert.strictEqual(format.money(0), 'R$ 0,00');
+  assert.strictEqual(format.money(1234.5), 'R$ 1.234,50');
+  assert.strictEqual(format.pct(12.5), '12,50%');
+  assert.strictEqual(format.formatMultiplier(1214.46), '1,214.46x');
+  assert.strictEqual(format.formatMultiplier('inválido'), '—');
+});
 
 function check(label, fn) {
   fn();
@@ -40,12 +44,6 @@ check('vela gatinho exibe seis cotações recorrentes e suas velas de origem',()
  assert.deepStrictEqual(r.quotes.map(x=>x.quote),['11','22','33','44','55','66']);
  assert.deepStrictEqual(r.quotes.map(x=>x.triggerValue),[1.11,1.22,1.33,1.44,1.55,1.66]);
 });
-check('money formata em Real com 2 casas decimais', () => {
-  assert.strictEqual(money(100), 'R$ 100,00');
-  assert.strictEqual(money(0), 'R$ 0,00');
-  assert.strictEqual(money(1234.5), 'R$ 1.234,50');
-});
-
 check('projeção conservadora (10%/dia) mantém a conta linear atual', () => {
   assert.strictEqual(projectionFinal(200, 0.10, 10), 400);
 });

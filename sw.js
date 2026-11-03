@@ -1,4 +1,4 @@
-const CACHE_NAME = 'thelord-aviator-oficial-v53-auth-handler-cleanup';
+const CACHE_NAME = 'thelord-aviator-oficial-v54-format-core';
 const APP_SHELL = [
   './',
   './index.html',
@@ -9,7 +9,8 @@ const APP_SHELL = [
   './aviator-perspectiva.jpg',
   './style.css?v=20261103-audit-cleanup-1',
   './desktop.css?v=20261101-expo-glass',
-  './app.js?v=20261102-quinta1',
+  './format-core.js?v=20261103-format1',
+  './app.js?v=20261103-format1',
   './probability-core.js?v=20261102-quinta1',
   './timing-core.js?v=20261026b',
   './timing.js?v=20261102-min2x'
