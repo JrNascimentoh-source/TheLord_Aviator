@@ -3,6 +3,20 @@ const TARGETS=[2,10,20,30,50,100,250,500,1000];
 function quantile(values,q){const a=values.filter(Number.isFinite).slice().sort((x,y)=>x-y);if(!a.length)return null;const i=(a.length-1)*Math.max(0,Math.min(1,q)),l=Math.floor(i),h=Math.ceil(i);return a[l]+(a[h]-a[l])*(i-l);}
 function category(v){return v<2?'baixa':v<10?'media':v<100?'rosa':v<500?'amarela':v<1000?'vermelha':'fogo';}
 function label(v){return v==='baixa'?'Azul (1–1,99x)':v==='media'?'Roxo (2–9,99x)':v==='rosa'?'Rosa (10–99,99x)':v==='amarela'?'Amarela (100–499,99x)':v==='vermelha'?'Vermelha (500–999,99x)':'Fogo (≥1000x)';}
+
+/** Wilson score interval for a binomial proportion (95% by default). */
+function wilsonInterval(successes,total,z=1.959963984540054){
+ const n=Math.max(0,Number(total)||0),k=Math.max(0,Math.min(n,Number(successes)||0));
+ if(!n)return null;
+ const p=k/n,z2=z*z,den=1+z2/n,center=(p+z2/(2*n))/den;
+ const margin=z*Math.sqrt((p*(1-p)/n)+(z2/(4*n*n)))/den;
+ return {lower:Math.max(0,center-margin),upper:Math.min(1,center+margin),level:0.95};
+}
+function horizonInterval(interval,h){
+ if(!interval||!Number.isFinite(h)||h<1)return null;
+ return {lower:1-Math.pow(1-interval.lower,h),upper:1-Math.pow(1-interval.upper,h),level:interval.level};
+}
+
 function weightedQuantile(items,q){const a=items.filter(x=>Number.isFinite(x.value)&&Number.isFinite(x.weight)&&x.weight>0).sort((x,y)=>x.value-y.value);if(!a.length)return null;const total=a.reduce((s,x)=>s+x.weight,0);let acc=0;for(const x of a){acc+=x.weight;if(acc>=total*q)return x.value;}return a[a.length-1].value;}
 
 /**
@@ -38,7 +52,7 @@ function analyzeWalkForward(input,options={}){
    brierScore:brier,baselineBrierScore:baseline,skillVsBaseline:skill,
    meanPredictedRate:tested?predicted/tested:null,observedRate:tested?observed/tested:null,
    calibrationGap:tested?Math.abs(predicted/tested-observed/tested):null,
-   nextProbability,trainingRounds:last.length,trainingHits:lastHits,
+   nextProbability,nextProbabilityInterval:wilsonInterval(lastHits,last.length),observedRateInterval:wilsonInterval(observed,tested),trainingRounds:last.length,trainingHits:lastHits,
    status:tested>=20?'evaluated':tested>0?'limited':'insufficient'};
  });
  return {method:'walk-forward-rolling-vs-expanding-laplace',roundCount:rounds.length,
@@ -154,12 +168,12 @@ function analyzeHighMultiplierRecurrence(input,options={}){
   const hits=hitIndexes.length,lastIndex=hits?hitIndexes[hits-1]:-1,lastTs=hits?rounds[lastIndex].ts:null,gapsRounds=[],gapsMs=[];
   for(let i=1;i<hitIndexes.length;i++){const gap=hitIndexes[i]-hitIndexes[i-1],ms=rounds[hitIndexes[i]].ts-rounds[hitIndexes[i-1]].ts;if(gap>0)gapsRounds.push(gap);if(ms>0)gapsMs.push(ms);}
   const rate=n?hits/n:null,weightedHits=rounds.reduce((sum,r,i)=>sum+(r.value>=target?weights[i]:0),0),recentRate=weightTotal?weightedHits/weightTotal:null;
-  const probability=h=>rate===null||hits===0?null:1-Math.pow(1-rate,h),ratio=rate>0&&recentRate!==null?recentRate/rate:null;
+  const probability=h=>rate===null||hits===0?null:1-Math.pow(1-rate,h),rateInterval=wilsonInterval(hits,n),probabilityNext10Interval=horizonInterval(rateInterval,10),probabilityNext50Interval=horizonInterval(rateInterval,50),probabilityNext100Interval=horizonInterval(rateInterval,100),ratio=rate>0&&recentRate!==null?recentRate/rate:null;
   const activity=ratio===null?'sem-base':ratio>=1.25?'acima-da-média':ratio<=.75?'abaixo-da-média':'na-média';
-  return {target,count:hits,roundCount:n,rate,frequencyPer1000:n?hits/n*1000:null,averageEveryRounds:hits?n/hits:null,averageGapRounds:gapsRounds.length?gapsRounds.reduce((a,b)=>a+b,0)/gapsRounds.length:null,medianGapRounds:quantile(gapsRounds,.5),averageGapMs:gapsMs.length?gapsMs.reduce((a,b)=>a+b,0)/gapsMs.length:null,lastTs,absenceRounds:lastIndex>=0?n-1-lastIndex:n,absenceMs:lastTs!==null?Math.max(0,now-lastTs):(n?Math.max(0,now-rounds[0].ts):null),probabilityNext10:probability(10),probabilityNext50:probability(50),probabilityNext100:probability(100),recentRate,activity,activityRatio:ratio,halfLifeRounds};
+  return {target,count:hits,roundCount:n,rate,rateInterval,probabilityNext10Interval,probabilityNext50Interval,probabilityNext100Interval,frequencyPer1000:n?hits/n*1000:null,averageEveryRounds:hits?n/hits:null,averageGapRounds:gapsRounds.length?gapsRounds.reduce((a,b)=>a+b,0)/gapsRounds.length:null,medianGapRounds:quantile(gapsRounds,.5),averageGapMs:gapsMs.length?gapsMs.reduce((a,b)=>a+b,0)/gapsMs.length:null,lastTs,absenceRounds:lastIndex>=0?n-1-lastIndex:n,absenceMs:lastTs!==null?Math.max(0,now-lastTs):(n?Math.max(0,now-rounds[0].ts):null),probabilityNext10:probability(10),probabilityNext50:probability(50),probabilityNext100:probability(100),recentRate,activity,activityRatio:ratio,halfLifeRounds};
  });
  return {roundCount:n,firstTs:n?rounds[0].ts:null,lastTs:n?rounds[n-1].ts:null,targets:metrics,method:'empirical-frequency-with-adaptive-recency'};
 }
 
-root.TheLordProbability={analyze,analyzeWalkForward,analyzeNamedPatterns,analyzeGraphQuality,analyzeHighMultiplierRecurrence,analyzeKittenTriggers,quantile,TARGETS};
+root.TheLordProbability={analyze,analyzeWalkForward,wilsonInterval,horizonInterval,analyzeNamedPatterns,analyzeGraphQuality,analyzeHighMultiplierRecurrence,analyzeKittenTriggers,quantile,TARGETS};
 })(typeof globalThis==='object'?globalThis:this);
