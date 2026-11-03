@@ -7,6 +7,7 @@
 const assert = require('assert');
 require('./probability-core.js');
 const timing = require('./timing-core.js');
+const dates = require('./date-core.js');
 const probability = globalThis.TheLordProbability;
 
 const format = require('./format-core.js');
