@@ -398,3 +398,22 @@ body.auth-login{background:radial-gradient(ellipse at top,#260711 0%,#10060f 48%
     margin-right:0;
   }
 }
+
+
+/* Escala real do layout mobile: replica a proporção visual do navegador em 80%,
+   mantendo o navegador em 100%. A navegação inferior fica fora de .app no HTML,
+   por isso recebe a mesma escala separadamente. Desktop e autenticação preservados. */
+@media screen and (max-width:700px){
+  body:not(.auth-login) .app{
+    zoom:.8;
+    width:125%;
+    max-width:none;
+    margin-left:0;
+    margin-right:0;
+  }
+  body:not(.auth-login) .bottom{
+    zoom:.8;
+    width:min(700px,calc((100% - 24px)/.8));
+    max-width:none;
+  }
+}
