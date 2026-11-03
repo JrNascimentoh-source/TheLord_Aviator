@@ -478,3 +478,6 @@ body.auth-login{background:radial-gradient(ellipse at top,#260711 0%,#10060f 48%
 .probability-analysis-panel .pattern-frequency-list{margin-bottom:0}
 .probability-analysis-panel .probability-signal-detail{margin:8px 0 0;text-align:left;font-size:.61rem}
 @media(max-width:380px){.probability-analysis-panels{grid-template-columns:1fr}.probability-analysis-panel{padding:9px}}
+
+/* Status secundário do radar quando não há padrão conhecido próximo */
+.probability-observation-status{display:inline-flex;align-items:center;justify-content:center;margin-top:7px;padding:6px 11px;border:1px solid rgba(255,209,102,.35);border-radius:999px;background:rgba(255,209,102,.07);color:#ffd166;font-size:.67rem;font-weight:900;letter-spacing:.035em;line-height:1.2;text-align:center}
