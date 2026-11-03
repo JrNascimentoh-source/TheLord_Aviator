@@ -41,7 +41,7 @@ function analyzeNamedPatterns(input,options={}){
  const rounds=(Array.isArray(input)?input:[]).filter(r=>r&&Number.isFinite(Number(r.value))&&Number(r.value)>=1&&Number.isFinite(Number(r.ts))&&Number(r.ts)<=now).map(r=>({id:r.id,value:Number(r.value),ts:Number(r.ts)})).sort((a,b)=>a.ts-b.ts);
  const token=r=>r.value>=10?'R':r.value<10?'B':'X';
  const recent=rounds.filter(r=>r.ts>=cutoff),rt=recent.map(token),at=rounds.map(token);
- const defs=[{id:'espelho',name:'Espelho',sequence:['R','R'],description:'Rosa → Rosa'},{id:'xadrez',name:'Xadrez',sequence:['R','B','R'],description:'Rosa → Azul/Roxa → Rosa'},{id:'quinta',name:'Quinta casa',sequence:['R','B','B','B','B','R'],description:'Rosa inicial → 4 casas intermediárias azuis/roxas → rosa final (6 velas no total)'}];
+ const defs=[{id:'espelho',name:'Espelho',sequence:['R','R'],description:'Rosa → Rosa'},{id:'xadrez',name:'Xadrez',sequence:['R','B','R'],description:'Rosa → Azul/Roxa → Rosa'},{id:'quinta',name:'Quinta casa',sequence:['R','B','B','B','B','R'],description:'Rosa inicial → casas 1, 2, 3 e 4 azuis/roxas → rosa na 5ª casa'}];
  const frequencies=defs.map(d=>{const hits=[];for(let i=0;i<=rt.length-d.sequence.length;i++)if(d.sequence.every((v,j)=>rt[i+j]===v))hits.push(recent[i+d.sequence.length-1].ts);return {...d,count:hits.length,lastTs:hits.length?hits[hits.length-1]:null,frequencyPer1000:recent.length?hits.length/recent.length*1000:0};}).sort((a,b)=>b.count-a.count||a.sequence.length-b.sequence.length);
  let last=-1;for(let i=at.length-1;i>=0;i--){if(at[i]==='R'){last=i;break;}if(at[i]==='X')break;}
  let formation=null;
