@@ -1,4 +1,4 @@
-const CACHE_NAME = 'thelord-aviator-oficial-v58-cache-sync';
+const CACHE_NAME = 'thelord-aviator-oficial-v59-pink-badge-ranking';
 const APP_SHELL = [
   './',
   './index.html',
@@ -12,8 +12,8 @@ const APP_SHELL = [
   './format-core.js?v=20261103-format1',
   './color-core.js?v=20261103-color1',
   './game-core.js?v=20261103-game1',
-  './app.js?v=20261103-radar-observation-1',
-  './probability-core.js?v=20261103-radar-observation-1',
+  './app.js?v=20261103-pink-badge-ranking-1',
+  './probability-core.js?v=20261103-pink-badge-ranking-1',
   './timing-core.js?v=20261026b',
   './date-core.js?v=20261103-date1',
   './timing.js?v=20261102-min2x'
