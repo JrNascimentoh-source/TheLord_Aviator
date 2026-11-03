@@ -37,7 +37,7 @@ function analyze(input,options={}) {
  return {roundCount:rounds.length,pinkIntervals,combined,pattern:{labels:current.map(label),categories:current,matches:rounds.length,sampleCount:rounds.length,minimum:enough?minimum:null,median:enough?median:null,maximum:enough?maximum:null,roseMinimum:null,roseMedian:null,roseMaximum:null,roseMatches:0,rates,lastSimilarTs:null,gapCount:0,gapMedian:null,gapP20:null,gapP80:null,effectiveSampleSize,halfLifeRounds,volatility,status:enough?(effectiveSampleSize<5?'provisional':'ready'):'no-data',method:'adaptive-decayed-current-volume-quantiles'},thresholds};
 }
 function analyzeNamedPatterns(input,options={}){
- const now=Number(options.now)||Date.now(),windowMs=options.windowMs===0?0:Math.max(0,Number(options.windowMs)||86400000),cutoff=windowMs?now-windowMs:-Infinity;
+ const now=Number(options.now)||Date.now(),cutoff=now-(Number(options.windowMs)||86400000);
  const rounds=(Array.isArray(input)?input:[]).filter(r=>r&&Number.isFinite(Number(r.value))&&Number(r.value)>=1&&Number.isFinite(Number(r.ts))&&Number(r.ts)<=now).map(r=>({id:r.id,value:Number(r.value),ts:Number(r.ts)})).sort((a,b)=>a.ts-b.ts);
  const token=r=>r.value>=10?'R':r.value<10?'B':'X';
  const recent=rounds.filter(r=>r.ts>=cutoff),rt=recent.map(token),at=rounds.map(token);
