@@ -62,6 +62,53 @@ function analyzeWalkForward(input,options={}){
   targets:metrics};
 }
 
+
+/**
+ * Detecta mudança na composição do gráfico comparando uma janela recente
+ * com a janela imediatamente anterior. É um detector descritivo de regime,
+ * não uma previsão de resultados futuros.
+ */
+function analyzeRegimeChange(input,options={}){
+ const now=Number(options.now)||Date.now();
+ const recentSize=Math.max(20,Math.min(200,Number(options.recentSize)||50));
+ const baselineSize=Math.max(40,Math.min(500,Number(options.baselineSize)||150));
+ const minRecent=Math.max(20,Number(options.minRecent)||40);
+ const minBaseline=Math.max(40,Number(options.minBaseline)||100);
+ const rounds=(Array.isArray(input)?input:[])
+  .filter(r=>r&&Number.isFinite(Number(r.value))&&Number(r.value)>=1&&Number.isFinite(Number(r.ts))&&Number(r.ts)<=now)
+  .map(r=>({value:Number(r.value),ts:Number(r.ts)})).sort((a,b)=>a.ts-b.ts);
+ const recent=rounds.slice(-recentSize);
+ const baseline=rounds.slice(-(recentSize+baselineSize),-recentSize);
+ const empty={blue:null,purple:null,pink:null};
+ if(recent.length<minRecent||baseline.length<minBaseline){
+  return {status:'insufficient',label:'Amostra em formação',recentCount:recent.length,baselineCount:baseline.length,recentRates:empty,baselineRates:empty,differences:empty,chiSquare:null,dominantChange:null,method:'recent-vs-previous-composition'};
+ }
+ const rates=items=>{
+  const counts={blue:0,purple:0,pink:0};
+  items.forEach(r=>{if(r.value<2)counts.blue++;else if(r.value<10)counts.purple++;else counts.pink++;});
+  return {blue:counts.blue/items.length,purple:counts.purple/items.length,pink:counts.pink/items.length};
+ };
+ const recentRates=rates(recent),baselineRates=rates(baseline),differences={};
+ ['blue','purple','pink'].forEach(k=>{differences[k]=recentRates[k]-baselineRates[k];});
+ let chiSquare=0;
+ ['blue','purple','pink'].forEach(k=>{
+  const observedRecent=recentRates[k]*recent.length,observedBase=baselineRates[k]*baseline.length;
+  const total=observedRecent+observedBase,expectedRecent=total*recent.length/(recent.length+baseline.length),expectedBase=total*baseline.length/(recent.length+baseline.length);
+  if(expectedRecent>0)chiSquare+=(observedRecent-expectedRecent)**2/expectedRecent;
+  if(expectedBase>0)chiSquare+=(observedBase-expectedBase)**2/expectedBase;
+ });
+ const dominantKey=['blue','purple','pink'].sort((a,b)=>Math.abs(differences[b])-Math.abs(differences[a]))[0];
+ const maxDifference=Math.abs(differences[dominantKey]);
+ const significant=chiSquare>=5.991&&maxDifference>=0.08;
+ const watch=chiSquare>=3||maxDifference>=0.05;
+ const labels={blue:'velas azuis',purple:'velas roxas',pink:'velas rosas'};
+ const direction=differences[dominantKey]>0?'aumento':'redução';
+ const dominantChange={category:dominantKey,label:labels[dominantKey],direction,difference:differences[dominantKey],recentRate:recentRates[dominantKey],baselineRate:baselineRates[dominantKey]};
+ return {status:significant?'shift_detected':watch?'watch':'stable',label:significant?'Mudança detectada':watch?'Em observação':'Composição estável',
+  recentCount:recent.length,baselineCount:baseline.length,recentRates,baselineRates,differences,chiSquare,
+  dominantChange,method:'recent-vs-previous-composition',note:'Compara a distribuição de cores em janelas consecutivas; identifica alteração histórica, não prevê a próxima vela.'};
+}
+
 function analyze(input,options={}) {
  const now=Number(options.now)||Date.now(),size=Math.max(3,Math.min(6,Number(options.patternSize)||4));
  const rounds=(Array.isArray(input)?input:[]).filter(r=>r&&Number.isFinite(Number(r.value))&&Number(r.value)>=1&&Number.isFinite(Number(r.ts))&&Number(r.ts)<=now).map(r=>({id:r.id,value:Number(r.value),ts:Number(r.ts)})).sort((x,y)=>x.ts-y.ts);
@@ -175,5 +222,5 @@ function analyzeHighMultiplierRecurrence(input,options={}){
  return {roundCount:n,firstTs:n?rounds[0].ts:null,lastTs:n?rounds[n-1].ts:null,targets:metrics,method:'empirical-frequency-with-adaptive-recency'};
 }
 
-root.TheLordProbability={analyze,analyzeWalkForward,wilsonInterval,horizonInterval,analyzeNamedPatterns,analyzeGraphQuality,analyzeHighMultiplierRecurrence,analyzeKittenTriggers,quantile,TARGETS};
+root.TheLordProbability={analyze,analyzeWalkForward,wilsonInterval,horizonInterval,analyzeNamedPatterns,analyzeGraphQuality,analyzeRegimeChange,analyzeHighMultiplierRecurrence,analyzeKittenTriggers,quantile,TARGETS};
 })(typeof globalThis==='object'?globalThis:this);
