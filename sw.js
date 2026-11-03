@@ -1,4 +1,4 @@
-const CACHE_NAME = 'thelord-aviator-oficial-v60-pink-count-title';
+const CACHE_NAME = 'thelord-aviator-oficial-v61-pattern-neon-alert';
 const APP_SHELL = [
   './',
   './index.html',
@@ -7,7 +7,7 @@ const APP_SHELL = [
   './icon-192.png',
   './icon-512.png',
   './aviator-perspectiva.jpg',
-  './style.css?v=20261103-radar-observation-1',
+  './style.css?v=20261103-pattern-neon-alert-1',
   './desktop.css?v=20261101-expo-glass',
   './format-core.js?v=20261103-format1',
   './color-core.js?v=20261103-color1',
