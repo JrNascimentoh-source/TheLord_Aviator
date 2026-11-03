@@ -40,9 +40,7 @@ if(data.managementDays===undefined) data.managementDays=null;
 if(data.freeManagement===undefined) data.freeManagement=false;
 if(data.contagemAtivada===undefined) data.contagemAtivada=true;
 
-const money=v=>'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-const pct=v=>Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%';
-const formatMultiplier=v=>Number.isFinite(Number(v))?new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(v))+'x':'—';
+const {money,pct,formatMultiplier}=globalThis.TheLordFormat;
 
 function save(){
   storageSet(STORAGE_KEY,JSON.stringify(data));
