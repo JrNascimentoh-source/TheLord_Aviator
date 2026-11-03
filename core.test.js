@@ -144,17 +144,22 @@ check('padrões conhecidos reconhecem espelho, xadrez e quinta casa',()=>{
  const now=Date.now(),values=[12,15,1.5,12,1.5,1.8,2.2,1.4,12],rounds=values.map((value,i)=>({id:'p'+i,value,ts:now-(values.length-i)*1000}));
  const r=probability.analyzeNamedPatterns(rounds,{now});assert.strictEqual(r.patterns.espelho.count,1);assert.strictEqual(r.patterns.xadrez.count,1);assert.strictEqual(r.patterns.quinta.count,1);
 });
-check('frequência dos padrões considera o histórico completo, mesmo quando há rodadas antigas',()=>{
- const now=Date.now(),day=24*60*60*1000;
- const values=[12,1.4,2.5,1.8,1.2,12];
+check('frequência dos padrões permanece limitada às últimas 24 horas',()=>{
+ const now=Date.now(),day=24*60*60*1000,values=[12,1.4,2.5,1.8,1.2,12];
  const old=values.map((value,i)=>({id:'old-'+i,value,ts:now-day*3+(i*1000)}));
  const recent=[{id:'recent-1',value:1.5,ts:now-5000},{id:'recent-2',value:1.7,ts:now-4000}];
- const all=[...old,...recent];
- const full=probability.analyzeNamedPatterns(all,{now,windowMs:0});
- const lastDay=probability.analyzeNamedPatterns(all,{now,windowMs:day});
- assert.strictEqual(full.patterns.quinta.count,1);
- assert.strictEqual(lastDay.patterns.quinta.count,0);
- assert.strictEqual(full.windowRounds,all.length);
+ const all=[...old,...recent],result=probability.analyzeNamedPatterns(all,{now});
+ assert.strictEqual(result.patterns.quinta.count,0);
+ assert.strictEqual(result.windowRounds,recent.length);
+});
+check('indicador de formação identifica os padrões que ainda podem se completar',()=>{
+ const now=Date.now(),make=values=>values.map((value,i)=>({id:'f'+i,value,ts:now-(values.length-i)*1000}));
+ const atStart=probability.analyzeNamedPatterns(make([12]),{now}).formation;
+ const afterOne=probability.analyzeNamedPatterns(make([12,1.5]),{now}).formation;
+ const afterFour=probability.analyzeNamedPatterns(make([12,1.5,2.5,1.8,1.2]),{now}).formation;
+ assert.deepStrictEqual(atStart.candidates,['espelho','quinta']);
+ assert.deepStrictEqual(afterOne.candidates,['xadrez','quinta']);
+ assert.deepStrictEqual(afterFour.candidates,['quinta']);
 });
 check('quinta casa exige rosa inicial, quatro casas intermediárias e rosa final',()=>{
  const now=Date.now(),values=[12,1.5,2.5,1.8,1.2,12],rounds=values.map((value,i)=>({id:'q'+i,value,ts:now-(values.length-i)*1000}));
