@@ -7,6 +7,7 @@
 const assert = require('assert');
 require('./probability-core.js');
 const timing = require('./timing-core.js');
+const dates = require('./date-core.js');
 const probability = globalThis.TheLordProbability;
 
 const format = require('./format-core.js');
@@ -216,6 +217,29 @@ check('vela gatinho guarda as cinco ocorrências mais recentes por cotação em 
  assert.ok(q);assert.strictEqual(q.count,5);assert.strictEqual(q.occurrences.length,5);
  assert.ok(q.occurrences[0].pinkTs>q.occurrences[4].pinkTs);
  assert.strictEqual(q.occurrences[0].triggerValue,1.71);assert.strictEqual(q.occurrences[0].pinkValue,40);
+});
+
+check('datas da gestão preservam início da semana na segunda-feira',()=>{
+ const monday=dates.startOfWeek(new Date(2026,10,4,15,30));
+ assert.strictEqual(monday.getFullYear(),2026);
+ assert.strictEqual(monday.getMonth(),10);
+ assert.strictEqual(monday.getDate(),2);
+ assert.strictEqual(monday.getDay(),1);
+ assert.strictEqual(monday.getHours(),0);
+});
+check('datas da gestão tratam domingo como parte da semana iniciada na segunda',()=>{
+ const monday=dates.startOfWeek(new Date(2026,10,8,23,59));
+ assert.strictEqual(monday.getDate(),2);
+ assert.strictEqual(monday.getDay(),1);
+});
+check('datas brasileiras mantêm interpretação dd/mm/aaaa e anos bissextos',()=>{
+ const parsed=dates.parseBRDate('29/02/2024');
+ assert.strictEqual(parsed.getFullYear(),2024);
+ assert.strictEqual(parsed.getMonth(),1);
+ assert.strictEqual(parsed.getDate(),29);
+});
+check('períodos da gestão e minutagem compartilham os mesmos limites',()=>{
+ for(const hour of [0,4,5,11,12,17,18,23]) assert.strictEqual(dates.period(hour),timing.period(hour));
 });
 
 console.log(`\n${passed} teste(s) passaram.`);

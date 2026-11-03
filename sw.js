@@ -1,4 +1,4 @@
-const CACHE_NAME = 'thelord-aviator-oficial-v55-color-core';
+const CACHE_NAME = 'thelord-aviator-oficial-v56-date-core';
 const APP_SHELL = [
   './',
   './index.html',
@@ -14,6 +14,7 @@ const APP_SHELL = [
   './app.js?v=20261103-format1',
   './probability-core.js?v=20261102-quinta1',
   './timing-core.js?v=20261026b',
+  './date-core.js?v=20261103-date1',
   './timing.js?v=20261102-min2x'
 ];
 
