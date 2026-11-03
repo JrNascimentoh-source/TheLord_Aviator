@@ -925,10 +925,10 @@ function renderProbabilityCard(){
  if(live)live.textContent=velasRealtimeStatus==='SUBSCRIBED'?'Canal em tempo real conectado':['CHANNEL_ERROR','TIMED_OUT','CLOSED','UNAVAILABLE'].includes(velasRealtimeStatus)?'Consulta periódica ativa · canal ao vivo indisponível':'Conectando canal ao vivo · consulta periódica ativa';
  if(last)last.textContent='Última vela: '+(latest?new Date(latest.ts).toLocaleTimeString('pt-BR'):'—');
  const fmtX=v=>Number.isFinite(v)?new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v)+'x':'—',fmtCount=n=>Number(n||0).toLocaleString('pt-BR');
- if(sampleEl)sampleEl.textContent=fmtCount(total)+' rodadas nas últimas 24h · '+fmtCount(allRounds.length)+' no histórico total';if(gameEl)gameEl.textContent=game==='aviator2'?'Aviator BdPv':'Aviator 7a7';
+ if(sampleEl)sampleEl.textContent=fmtCount(total)+' rodadas nas últimas 24h · padrões calculados nas '+fmtCount(allRounds.length)+' rodadas do histórico completo';if(gameEl)gameEl.textContent=game==='aviator2'?'Aviator BdPv':'Aviator 7a7';
  if(!allRounds.length){grid.innerHTML='<div class="probability-empty">Aguardando as primeiras rodadas válidas do histórico compartilhado.</div>';return;}
  if(!window.TheLordProbability||typeof window.TheLordProbability.analyze!=='function'||typeof window.TheLordProbability.analyzeNamedPatterns!=='function'){grid.innerHTML='<div class="probability-empty">O motor de padrões ainda não foi carregado. Atualize a página.</div>';return;}
- const analysis=window.TheLordProbability.analyze(allRounds,{now}),pattern=analysis.pattern,named=window.TheLordProbability.analyzeNamedPatterns(allRounds,{now,windowMs:86400000});
+ const analysis=window.TheLordProbability.analyze(allRounds,{now}),pattern=analysis.pattern,named=window.TheLordProbability.analyzeNamedPatterns(allRounds,{now,windowMs:0});
  const high=window.TheLordProbability.analyzeHighMultiplierRecurrence(allRounds,{now});
  const kittenHours=Number(kittenHistoryRange),kittenCutoff=now-kittenHours*60*60*1000;
  const kittenRounds=allRounds.filter(r=>r.ts>=kittenCutoff);
@@ -938,7 +938,7 @@ function renderProbabilityCard(){
  let signal='RADAR EM OBSERVAÇÃO',cls='wait',formationText='Aguardando uma nova sequência rosa para iniciar o acompanhamento.';
  if(formation&&formation.candidates.length){signal='PADRÃO EM FORMAÇÃO';cls='observe';const n=formation.housesSincePink;formationText=n===0?'Uma rosa identificada. Observando a próxima vela para verificar espelho, xadrez ou quinta casa.':n===1?'1ª casa intermediária identificada. Xadrez ou quinta casa ainda podem se completar.':n<4?n+' casas intermediárias identificadas. A quinta casa será completada se a próxima vela for rosa.':'Casas 1 a 4 identificadas. Uma rosa na próxima vela completa a 5ª casa e o padrão.';}
  else if(formation){signal='SEQUÊNCIA FORA DOS PADRÕES';formationText='A sequência atual ultrapassou as estruturas conhecidas. O histórico continua sendo analisado.';}
- const frequencyHtml=named.frequencies.map(x=>'<div class="pattern-frequency-row"><span><b>'+x.name+'</b><small>'+x.description+'</small></span><strong>'+fmtCount(x.count)+' <small>ocorrências</small></strong></div>').join('');
+ const frequencyHtml=named.frequencies.map(x=>'<div class="pattern-frequency-row"><span><b>'+x.name+'</b><small>'+x.description+'</small></span><strong>'+fmtCount(x.count)+' <small>no gráfico completo</small></strong></div>').join('');
  let minuteText='Minutagem histórica indisponível.';
  if(window.TheLordTiming&&typeof window.TheLordTiming.analyze==='function'){const minute=window.TheLordTiming.analyze(recent,{now,hours:24,minimum:10,mode:'minute'}),m=new Date(now).getMinutes(),current=minute.bins.find(x=>x.key===m),top=minute.ranked[0];minuteText='Minuto atual '+String(m).padStart(2,'0')+' · '+(current?current.hits+' rosas em '+current.total+' rodadas':'sem amostra')+'. '+(top?'Minuto mais frequente: '+String(top.key).padStart(2,'0')+' ('+top.hits+' rosas em '+top.total+' rodadas).':'Sem minuto com ocorrências.');}
  
