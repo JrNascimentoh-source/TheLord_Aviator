@@ -16,9 +16,9 @@ Aplicativo de gestão de banca e análise do histórico de velas, com autentica�
 
 - **`Coletor-Universal-v2.1.js`**: coletor universal (metadados internos na versão 2.2), que identifica a plataforma e envia os resultados para a tabela compartilhada `public.velas`. É o arquivo universal mantido como referência principal.
 - `coletor.user.js`: coletor legado específico do Aviator 7a7.
-- `coletor-aviator2.user.js`: coletor legado específico do Aviator 2 / BetDoPovo.
+- `coletor-aviator2.user.js`: coletor legado específico do Aviator BdPv (BetDoPovo).
 
-Os dois coletores específicos foram mantidos como alternativas históricas; não os instale junto com o coletor universal para a mesma origem, pois isso pode duplicar envios.
+Os dois coletores específicos permanecem no repositório como reserva de segurança. Não os execute junto com o coletor universal na mesma origem, pois isso pode duplicar envios.
 
 ## Dados
 
@@ -26,7 +26,7 @@ Os dois coletores específicos foram mantidos como alternativas históricas; nã
 - Os dados de gestão pessoal são sincronizados por conta na tabela `public.gestoes`.
 - `velas.sql` documenta a criação inicial da tabela de velas. Antes de executar novamente qualquer SQL em produção, confira o esquema e as políticas atuais do projeto Supabase.
 
-O aplicativo principal não depende do TheLord CaptureCore para receber velas: o coletor universal deste repositório grava diretamente no Supabase.
+O aplicativo principal recebe o histórico compartilhado diretamente do Supabase. O coletor universal deste repositório identifica a origem e grava as velas na tabela `public.velas`.
 
 ## Desenvolvimento e testes
 
