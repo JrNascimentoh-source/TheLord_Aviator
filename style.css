@@ -421,35 +421,48 @@ body.auth-login{background:radial-gradient(ellipse at top,#260711 0%,#10060f 48%
 
 
 
-/* Mobile: faixa completa do seletor Aviator no formato horizontal da referência. */
+
+/* Mobile: reproduzir o cartão superior completo do Monitor conforme a referência.
+   Medidas compensadas pelo zoom .8 do app para igualar as dimensões visíveis. */
 @media screen and (max-width:700px){
-  body:not(.auth-login) .monitor-game-options{
+  body:not(.auth-login) #monitor > section.card:first-child{
+    box-sizing:border-box;
+    width:100%;
+    min-height:278px;
+    padding:34px;
+    border-radius:38px;
+  }
+  body:not(.auth-login) #monitor > section.card:first-child .monitor-platform-selector{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    gap:44px;
+    width:100%;
+  }
+  body:not(.auth-login) #monitor > section.card:first-child .monitor-game-options{
     display:grid;
     grid-template-columns:minmax(0,1fr);
     width:100%;
-    gap:8px;
+    gap:0;
   }
-  body:not(.auth-login) .monitor-game-options .scenario-btn{
+  body:not(.auth-login) #monitor > section.card:first-child .monitor-game-options .scenario-btn{
+    box-sizing:border-box;
     display:flex;
-    flex:0 0 100%;
     width:100%;
     min-width:0;
-    min-height:57px;
-    box-sizing:border-box;
-    flex-direction:row;
-    flex-wrap:nowrap;
+    min-height:72px;
     align-items:center;
     justify-content:center;
+    flex-flow:row nowrap;
     gap:10px;
     padding:12px 14px;
-    border:1px solid var(--gold);
-    border-radius:17px;
+    border:2px solid var(--gold);
+    border-radius:24px;
     background:rgba(255,192,31,.10);
     font-size:.85rem;
     line-height:1.2;
     white-space:nowrap;
   }
-  body:not(.auth-login) .monitor-game-options .collector-status{
+  body:not(.auth-login) #monitor > section.card:first-child .monitor-game-options .collector-status{
     display:inline-flex;
     width:auto;
     flex:0 0 auto;
@@ -464,11 +477,23 @@ body.auth-login{background:radial-gradient(ellipse at top,#260711 0%,#10060f 48%
     line-height:1.2;
     white-space:nowrap;
   }
-  body:not(.auth-login) .monitor-game-options .collector-dot{
+  body:not(.auth-login) #monitor > section.card:first-child .monitor-game-options .collector-dot{
     width:10px;
     height:10px;
     flex:0 0 10px;
   }
+  body:not(.auth-login) #monitor > section.card:first-child .monitor-graph-actions{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    width:100%;
+    gap:0;
+  }
+  body:not(.auth-login) #monitor > section.card:first-child .monitor-graph-actions .btn{
+    box-sizing:border-box;
+    width:100%;
+    min-height:93px;
+    margin:0;
+    border-radius:34px;
+    font-size:1.25rem;
+  }
 }
-
-
