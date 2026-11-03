@@ -219,6 +219,10 @@ check('vela gatinho guarda as cinco ocorrências mais recentes por cotação em 
  assert.strictEqual(q.occurrences[0].triggerValue,1.71);assert.strictEqual(q.occurrences[0].pinkValue,40);
 });
 
+check('relógio mantém o formato HH:MM:SS com zeros à esquerda',()=>{
+ assert.strictEqual(dates.nowTimeStr(new Date(2026,10,3,4,5,6)),'04:05:06');
+ assert.strictEqual(dates.nowTimeStr(new Date(2026,10,3,14,25,9)),'14:25:09');
+});
 check('datas da gestão preservam início da semana na segunda-feira',()=>{
  const monday=dates.startOfWeek(new Date(2026,10,4,15,30));
  assert.strictEqual(monday.getFullYear(),2026);
