@@ -656,32 +656,36 @@ function switchAuthMode(mode){
 }
 </script>
 <script>
-/* Fallback explícito para que falhas no carregamento do app.js não deixem o botão silencioso. */
+/* Fallback de autenticação: um único handler no botão, substituído pelo modo cadastro quando necessário. */
 document.addEventListener('DOMContentLoaded', function () {
   const submit = document.getElementById('authSubmitBtn');
   const email = document.getElementById('loginEmail');
   const password = document.getElementById('loginPassword');
   if (!submit) return;
-  submit.addEventListener('click', function () {
-    const loginFn = window.doLogin;
-    if (typeof loginFn !== 'function') {
-      const status = document.getElementById('loginStatus');
-      if (status) {
-        status.textContent = 'O código principal do aplicativo não foi carregado. Verifique a conexão e tente novamente.';
-        status.className = 'login-status error';
+
+  if (!submit.onclick) {
+    submit.onclick = function () {
+      const loginFn = window.doLogin;
+      if (typeof loginFn !== 'function') {
+        const status = document.getElementById('loginStatus');
+        if (status) {
+          status.textContent = 'O código principal do aplicativo não foi carregado. Verifique a conexão e tente novamente.';
+          status.className = 'login-status error';
+        }
+        console.error('TheLord_Aviator: window.doLogin indisponível; o arquivo app.js pode não ter carregado ou contém erro de execução.');
+        return;
       }
-      console.error('TheLord_Aviator: window.doLogin indisponível; o arquivo app.js pode não ter carregado ou contém erro de execução.');
-      return;
-    }
-    Promise.resolve(loginFn()).catch(function (error) {
-      console.error('Falha inesperada no login:', error);
-      const status = document.getElementById('loginStatus');
-      if (status) {
-        status.textContent = 'Não foi possível concluir o login. Verifique a conexão e tente novamente.';
-        status.className = 'login-status error';
-      }
-    });
-  });
+      Promise.resolve(loginFn()).catch(function (error) {
+        console.error('Falha inesperada na autenticação:', error);
+        const status = document.getElementById('loginStatus');
+        if (status) {
+          status.textContent = 'Não foi possível concluir a autenticação. Verifique a conexão e tente novamente.';
+          status.className = 'login-status error';
+        }
+      });
+    };
+  }
+
   [email, password].forEach(function (field) {
     if (!field) return;
     field.addEventListener('keydown', function (event) {
