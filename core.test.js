@@ -9,12 +9,7 @@ require('./probability-core.js');
 const timing = require('./timing-core.js');
 const probability = globalThis.TheLordProbability;
 
-function money(v) {
-  return 'R$ ' + Number(v || 0).toLocaleString('pt-BR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-}
+const format = require('./format-core.js');
 
 function projectionFinal(bank, rate, days) {
   const dailyTarget = bank * rate;
@@ -26,6 +21,15 @@ function stopWinTarget(bank) {
 }
 
 let passed = 0;
+
+check('formatadores compartilhados preservam moeda, percentual e multiplicador', () => {
+  assert.strictEqual(format.money(100), 'R$ 100,00');
+  assert.strictEqual(format.money(0), 'R$ 0,00');
+  assert.strictEqual(format.money(1234.5), 'R$ 1.234,50');
+  assert.strictEqual(format.pct(12.5), '12,50%');
+  assert.strictEqual(format.formatMultiplier(1214.46), '1,214.46x');
+  assert.strictEqual(format.formatMultiplier('inválido'), '—');
+});
 
 function check(label, fn) {
   fn();
