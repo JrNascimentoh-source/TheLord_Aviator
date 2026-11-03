@@ -854,6 +854,7 @@ const colorMeta={
 const nowTimeStr=globalThis.TheLordDate.nowTimeStr;
 // Histórico compartilhado em memória, carregado exclusivamente da tabela pública `velas`.
 const sharedRoundsByGame={aviator:[],aviator2:[]};
+const sharedRoundIndexes={aviator:new Map(),aviator2:new Map()};
 function currentRounds(){return sharedRoundsByGame[data.activeGame]||[]}
 let kittenHistoryRange=storageGet('thelord_kitten_history_range')||'24';
 let selectedKittenQuote=null;
@@ -1082,21 +1083,33 @@ let velasRealtimeStatus='CONNECTING';
 let velasRealtimeStarted=false;
 
 const normalizeSharedGameKey=globalThis.TheLordGame.normalizeSharedGameKey;
-function upsertSharedVelaRow(r){
+function rebuildSharedRoundIndex(game){
+  const list=sharedRoundsByGame[game],index=sharedRoundIndexes[game];
+  index.clear();
+  list.forEach((round,i)=>index.set(round.id,i));
+}
+function upsertSharedVelaRow(r,{deferSort=false}={}){
   if(!r)return false;
   const game=normalizeSharedGameKey(r.game);
   if(game!=='aviator'&&game!=='aviator2')return false;
   const t=new Date(r.created_at).getTime(),v=Number(r.value);
   if(!Number.isFinite(t)||!Number.isFinite(v)||v<1||v>=1000000||r.id===undefined||r.id===null)return false;
   if(t>(lastVelaTsByGame[game]||0))lastVelaTsByGame[game]=t;
-  const list=sharedRoundsByGame[game],id='v'+r.id;
-  const existing=list.findIndex(x=>x.id===id);
+  const list=sharedRoundsByGame[game],index=sharedRoundIndexes[game],id='v'+r.id;
+  const existing=index.get(id);
   const entry={id,value:v,color:classifyRound(v).key,ts:t};
-  if(existing>=0){
+  if(existing!==undefined){
     if(list[existing].value===entry.value&&list[existing].ts===entry.ts)return false;
     list[existing]=entry;
-  }else list.push(entry);
-  list.sort((a,b)=>a.ts-b.ts);
+    return true;
+  }
+  const appendInOrder=!list.length||t>=list[list.length-1].ts;
+  index.set(id,list.length);
+  list.push(entry);
+  if(!deferSort&&!appendInOrder){
+    list.sort((a,b)=>a.ts-b.ts);
+    rebuildSharedRoundIndex(game);
+  }
   return true;
 }
 
@@ -1161,20 +1174,27 @@ async function syncVelas(){
       page=result.data;rows=rows.concat(page);offset+=page.length;
     }while(page.length===VELAS_PAGE_SIZE);
     lastSyncOk=true;
+    const firstLoad=!initialVelasLoaded;
     let changed=false;
-    rows.forEach(r=>{if(upsertSharedVelaRow(r))changed=true;});
+    rows.forEach(r=>{if(upsertSharedVelaRow(r,{deferSort:true}))changed=true;});
+    if(changed){
+      ['aviator','aviator2'].forEach(game=>{
+        sharedRoundsByGame[game].sort((a,b)=>a.ts-b.ts);
+        rebuildSharedRoundIndex(game);
+      });
+    }
     initialVelasLoaded=true;
     // Não apagar rodadas antigas do cache: o histórico é cumulativo e compartilhado.
     renderCollectorStatus();
-    // Atualiza o card mesmo quando a sincronização não trouxe rodadas novas.
-    renderProbabilityCard();
+    // Recalcula somente na carga inicial ou quando o histórico realmente muda.
+    if(changed||firstLoad)renderProbabilityCard();
     if(changed){renderMonitor();const timing=document.getElementById('timing');if(timing&&!timing.classList.contains('hidden')){if(typeof renderTiming==='function')renderTiming();}}
   }catch(e){console.error('Erro ao sincronizar histórico compartilhado de velas:',e);lastSyncOk=false;renderCollectorStatus();const grid=document.getElementById('probabilityGrid');if(grid)grid.innerHTML='<div class="probability-empty">Falha ao sincronizar o histórico compartilhado. Confira a conexão e recarregue a página.</div>';}
   finally{syncVelasRunning=false;}
 }
 setInterval(syncVelas,3000);
 // Atualiza a contagem regressiva do card sem depender de uma nova rodada.
-setInterval(()=>{if(document.getElementById('probabilityGrid'))renderProbabilityCard();},1000);
+// O relógio visual atualiza em separado; a análise pesada só roda após mudança no histórico.
 setInterval(renderCollectorStatus,3000);
 setTimeout(syncVelas,1500);
 let contagemCasasEnabled=(data.contagemAtivada!==undefined)?data.contagemAtivada:true;
