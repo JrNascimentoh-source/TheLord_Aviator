@@ -1051,10 +1051,7 @@ const lastVelaTsByGame={aviator:0,aviator2:0};
 // Horário em que o app recebeu uma nova inserção, separado do horário original da rodada.
 const lastVelaReceivedTsByGame={aviator:0,aviator2:0};
 let lastSyncOk=false;
-function collectorGameDisplayName(game){
-  if(game==='aviator2')return 'Aviator BdPv';
-  return 'Aviator 7a7';
-}
+const collectorGameDisplayName=globalThis.TheLordGame.collectorGameDisplayName;
 function updateCollectorBadge(el,lb,game,includeGameName=false){
   if(!el||!lb)return;
   const ts=Math.max(lastVelaTsByGame[game]||0,lastVelaReceivedTsByGame[game]||0);
@@ -1074,11 +1071,7 @@ let velasRealtimeChannel=null;
 let velasRealtimeStatus='CONNECTING';
 let velasRealtimeStarted=false;
 
-function normalizeSharedGameKey(value){
-  const game=String(value||'').trim().toLowerCase();
-  // Compatibilidade com a chave histórica usada pelo Coletor Universal.
-  return game==='betdopovo'?'aviator2':game;
-}
+const normalizeSharedGameKey=globalThis.TheLordGame.normalizeSharedGameKey;
 function upsertSharedVelaRow(r){
   if(!r)return false;
   const game=normalizeSharedGameKey(r.game);
