@@ -417,3 +417,55 @@ body.auth-login{background:radial-gradient(ellipse at top,#260711 0%,#10060f 48%
     max-width:none;
   }
 }
+
+
+/* Mobile: faixa do seletor Aviator em largura total, como na referência.
+   Mantém o cartão externo e o botão de gráfico nas dimensões originais. */
+@media screen and (max-width:700px){
+  body:not(.auth-login) #monitor .monitor-platform-selector{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    gap:10px;
+    width:100%;
+  }
+  body:not(.auth-login) #monitor .monitor-game-options{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    width:100%;
+    gap:8px;
+  }
+  body:not(.auth-login) #monitor .monitor-game-options .scenario-btn{
+    display:flex;
+    box-sizing:border-box;
+    width:100%;
+    min-width:0;
+    min-height:88px;
+    flex:0 0 100%;
+    flex-flow:row nowrap;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    padding:12px 16px;
+    border:2px solid var(--gold);
+    border-radius:22px;
+    white-space:nowrap;
+  }
+  body:not(.auth-login) #monitor .monitor-game-options .collector-status{
+    display:inline-flex;
+    width:auto;
+    flex:0 0 auto;
+    align-items:center;
+    justify-content:center;
+    gap:7px;
+    margin:0;
+    padding:5px 12px;
+    font-size:.72rem;
+    line-height:1.2;
+    white-space:nowrap;
+  }
+  body:not(.auth-login) #monitor .monitor-game-options .collector-dot{
+    width:10px;
+    height:10px;
+    flex:0 0 10px;
+  }
+}
