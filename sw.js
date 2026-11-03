@@ -7,7 +7,7 @@ const APP_SHELL = [
   './icon-192.png',
   './icon-512.png',
   './aviator-perspectiva.jpg',
-  './style.css?v=20261103-platform-card-reverted',
+  './style.css?v=20261103-monitor-card-proportions',
   './desktop.css?v=20261101-expo-glass',
   './app.js?v=20261102-quinta1',
   './probability-core.js?v=20261102-quinta1',
