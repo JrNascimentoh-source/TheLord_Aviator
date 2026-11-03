@@ -470,3 +470,17 @@ body.auth-login{background:radial-gradient(ellipse at top,#260711 0%,#10060f 48%
     flex:0 0 10px;
   }
 }
+
+
+/* Mobile: redimensiona o BLOCO SUPERIOR inteiro do Monitor,
+   não somente o botão/status. Compensa a escala .8 aplicada ao app,
+   preservando a largura visual e ampliando borda, padding, seletor,
+   espaçamento e botão “Ir para o gráfico” em conjunto. */
+@media screen and (max-width:700px){
+  body:not(.auth-login) #monitor > section.card:has(.monitor-platform-selector){
+    zoom:1.25;
+    width:80%;
+    max-width:80%;
+    box-sizing:border-box;
+  }
+}
