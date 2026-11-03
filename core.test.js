@@ -12,6 +12,7 @@ const probability = globalThis.TheLordProbability;
 
 const format = require('./format-core.js');
 const color = require('./color-core.js');
+const game = require('./game-core.js');
 
 function projectionFinal(bank, rate, days) {
   const dailyTarget = bank * rate;
@@ -23,6 +24,21 @@ function stopWinTarget(bank) {
 }
 
 let passed = 0;
+
+check('normalização de origem mantém compatibilidade BetDoPovo sem misturar Aviator 7a7',()=>{
+  assert.strictEqual(game.normalizeSharedGameKey('betdopovo'),'aviator2');
+  assert.strictEqual(game.normalizeSharedGameKey(' BetDoPovo '),'aviator2');
+  assert.strictEqual(game.normalizeSharedGameKey('aviator2'),'aviator2');
+  assert.strictEqual(game.normalizeSharedGameKey('aviator'),'aviator');
+  assert.strictEqual(game.normalizeSharedGameKey(' Aviator '),'aviator');
+  assert.strictEqual(game.normalizeSharedGameKey(''),'');
+});
+
+check('rótulos do coletor identificam as duas origens corretamente',()=>{
+  assert.strictEqual(game.collectorGameDisplayName('aviator2'),'Aviator BdPv');
+  assert.strictEqual(game.collectorGameDisplayName('aviator'),'Aviator 7a7');
+  assert.strictEqual(game.collectorGameDisplayName('desconhecido'),'Aviator 7a7');
+});
 
 check('formatadores compartilhados preservam moeda, percentual e multiplicador', () => {
   assert.strictEqual(format.money(100), 'R$ 100,00');
