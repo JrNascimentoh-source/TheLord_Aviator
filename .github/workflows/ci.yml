@@ -25,6 +25,11 @@ jobs:
       - name: Check JavaScript syntax
         run: |
           node --check app.js
+          node --check sw.js
+          node --check date-core.js
+          node --check format-core.js
+          node --check color-core.js
+          node --check game-core.js
           node --check timing.js
           node --check timing-core.js
           node --check probability-core.js
