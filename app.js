@@ -851,7 +851,7 @@ const colorMeta={
   hot:{cls:'hot',label:'Vermelha'},
   fire:{cls:'fire',label:'Fogo'}
 };
-function nowTimeStr(d){d=d||new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0')}
+const nowTimeStr=globalThis.TheLordDate.nowTimeStr;
 // Histórico compartilhado em memória, carregado exclusivamente da tabela pública `velas`.
 const sharedRoundsByGame={aviator:[],aviator2:[]};
 function currentRounds(){return sharedRoundsByGame[data.activeGame]||[]}
