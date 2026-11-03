@@ -310,3 +310,51 @@
 @media(prefers-reduced-motion:reduce){
   .bottom .nav{transition:none}
 }
+
+/* Mobile: densidade visual equivalente ao layout de referência em 80%,
+   mantendo o viewport em escala nativa (100%) e sem afetar o desktop. */
+@media screen and (max-width:700px){
+  html{font-size:80%}
+  body:not(.auth-login){
+    padding:10px 12px 92px;
+  }
+  body:not(.auth-login) .app{
+    width:100%;
+    max-width:none;
+    margin:0;
+  }
+  body:not(.auth-login) .header,
+  body:not(.auth-login) .card{
+    margin-bottom:12px;
+    border-radius:18px;
+  }
+  body:not(.auth-login) .header{
+    padding:14px;
+    gap:12px;
+  }
+  body:not(.auth-login) .logo{
+    width:58px;
+    height:58px;
+    min-width:58px;
+    font-size:28px;
+  }
+  body:not(.auth-login) .header h1{font-size:1.18rem}
+  body:not(.auth-login) .subtitle{font-size:.72rem}
+  body:not(.auth-login) .card{padding:16px}
+  body:not(.auth-login) .title{margin-bottom:12px}
+  body:not(.auth-login) .bottom{
+    width:calc(100% - 24px);
+    max-width:none;
+    bottom:max(8px,env(safe-area-inset-bottom));
+    padding:6px;
+    border-radius:20px;
+  }
+  body:not(.auth-login) .bottom .nav{
+    padding:6px 2px;
+    font-size:.65rem;
+  }
+  body:not(.auth-login) .bottom .nav>span:first-child{
+    font-size:1.25rem;
+    margin-bottom:2px;
+  }
+}
