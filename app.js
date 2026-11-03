@@ -986,6 +986,16 @@ function setActiveGame(game){
   renderMonitor();
   if(typeof renderTiming==='function')renderTiming();
 }
+function handleMonitorNavClick(){
+  const monitor=document.getElementById('monitor');
+  const alreadyOnMonitor=!!monitor&&!monitor.classList.contains('hidden');
+  if(!alreadyOnMonitor){
+    showPage('monitor',document.getElementById('monitorNavBtn'));
+    toggleMonitorPlatformMenu(false);
+    return;
+  }
+  toggleMonitorPlatformMenu();
+}
 function toggleMonitorPlatformMenu(force){
   const menu=document.getElementById('monitorPlatformMenu');
   const trigger=document.getElementById('monitorNavBtn');
