@@ -1,4 +1,4 @@
-const CACHE_NAME = 'thelord-aviator-oficial-v40-kitten6';
+const CACHE_NAME = 'thelord-aviator-oficial-v41-quinta1';
 const APP_SHELL = [
   './',
   './index.html',
