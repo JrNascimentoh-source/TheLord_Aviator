@@ -1,4 +1,4 @@
-const CACHE_NAME = 'thelord-aviator-oficial-v57-game-core';
+const CACHE_NAME = 'thelord-aviator-oficial-v58-cache-sync';
 const APP_SHELL = [
   './',
   './index.html',
@@ -7,13 +7,13 @@ const APP_SHELL = [
   './icon-192.png',
   './icon-512.png',
   './aviator-perspectiva.jpg',
-  './style.css?v=20261103-audit-cleanup-1',
+  './style.css?v=20261103-radar-observation-1',
   './desktop.css?v=20261101-expo-glass',
   './format-core.js?v=20261103-format1',
   './color-core.js?v=20261103-color1',
   './game-core.js?v=20261103-game1',
-  './app.js?v=20261103-format1',
-  './probability-core.js?v=20261102-quinta1',
+  './app.js?v=20261103-radar-observation-1',
+  './probability-core.js?v=20261103-radar-observation-1',
   './timing-core.js?v=20261026b',
   './date-core.js?v=20261103-date1',
   './timing.js?v=20261102-min2x'
