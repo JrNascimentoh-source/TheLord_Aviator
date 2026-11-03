@@ -68,6 +68,48 @@ function analyzeWalkForward(input,options={}){
  * com a janela imediatamente anterior. É um detector descritivo de regime,
  * não uma previsão de resultados futuros.
  */
+
+/**
+ * Cross-validates distinct descriptive indicators. Agreement is not a
+ * probability forecast: all indicators still derive from the same game history.
+ */
+function analyzeSignalConfluence(quality,regime,high,backtesting){
+ const signals=[];
+ if(quality&&quality.status==='ready'){
+  const direction=quality.label==='ÓTIMO'||quality.label==='BOM'?'positive':quality.label==='RUIM'?'negative':'neutral';
+  signals.push({id:'quality',label:'Qualidade do gráfico',direction,detail:'Classificação atual: '+quality.label});
+ }
+ if(regime&&regime.status!=='insufficient'&&regime.recentRates&&regime.baselineRates){
+  const delta=Number(regime.recentRates.pink)-Number(regime.baselineRates.pink);
+  const direction=delta>=0.05?'positive':delta<=-0.05?'negative':'neutral';
+  signals.push({id:'regime',label:'Composição recente',direction,detail:'Variação de rosas: '+(delta*100).toFixed(1)+' pontos percentuais'});
+ }
+ const highMetrics=high&&Array.isArray(high.targets)?high.targets.filter(x=>x.target>=50&&x.activity==='acima-da-média'||x.target>=50&&x.activity==='abaixo-da-média'):[];
+ if(highMetrics.length){
+  const up=highMetrics.filter(x=>x.activity==='acima-da-média').length,down=highMetrics.filter(x=>x.activity==='abaixo-da-média').length;
+  const direction=up===down?'neutral':up>down?'positive':'negative';
+  signals.push({id:'high',label:'Atividade de velas altas',direction,detail:up+' alvo(s) acima e '+down+' abaixo da própria média recente'});
+ }
+ const votes=signals.filter(x=>x.direction!=='neutral'),positive=votes.filter(x=>x.direction==='positive').length,negative=votes.filter(x=>x.direction==='negative').length,total=votes.length;
+ const agreementRatio=total?Math.max(positive,negative)/total:null;
+ let status='insufficient',label='Aguardando indicadores suficientes',direction='neutral';
+ if(total>=2){
+  if(positive>0&&negative>0){status='divergent';label='Indicadores divergentes';}
+  else if(agreementRatio>=2/3){status='concordant';direction=positive>negative?'positive':'negative';label=direction==='positive'?'Sinais convergentes · composição mais favorável':'Sinais convergentes · composição menos favorável';}
+  else{status='mixed';label='Sinais mistos';}
+ }else if(total===1){status='limited';label='Apenas um sinal direcional disponível';}
+ const metric=backtesting&&Array.isArray(backtesting.targets)?backtesting.targets.find(x=>x.target===10):null;
+ let validation={status:'insufficient',label:'Backtesting ainda sem amostra suficiente',testedRounds:metric?metric.testedRounds:0,skillVsBaseline:metric?metric.skillVsBaseline:null};
+ if(metric&&metric.testedRounds>=20&&Number.isFinite(metric.skillVsBaseline)){
+  validation={status:metric.skillVsBaseline>0.02?'better':metric.skillVsBaseline<-.02?'worse':'similar',
+   label:metric.skillVsBaseline>0.02?'Melhor que a referência histórica':metric.skillVsBaseline<-.02?'Abaixo da referência histórica':'Próximo da referência histórica',
+   testedRounds:metric.testedRounds,skillVsBaseline:metric.skillVsBaseline,calibrationGap:metric.calibrationGap};
+ }
+ return {status,label,direction,signals,positive,negative,neutral:signals.length-total,agreementRatio,
+  validation,method:'descriptive-indicator-cross-validation',
+  note:'Os indicadores compartilham o mesmo histórico e não são evidências independentes nem previsão da próxima rodada.'};
+}
+
 function analyzeRegimeChange(input,options={}){
  const now=Number(options.now)||Date.now();
  const recentSize=Math.max(20,Math.min(200,Number(options.recentSize)||50));
@@ -222,5 +264,5 @@ function analyzeHighMultiplierRecurrence(input,options={}){
  return {roundCount:n,firstTs:n?rounds[0].ts:null,lastTs:n?rounds[n-1].ts:null,targets:metrics,method:'empirical-frequency-with-adaptive-recency'};
 }
 
-root.TheLordProbability={analyze,analyzeWalkForward,wilsonInterval,horizonInterval,analyzeNamedPatterns,analyzeGraphQuality,analyzeRegimeChange,analyzeHighMultiplierRecurrence,analyzeKittenTriggers,quantile,TARGETS};
+root.TheLordProbability={analyze,analyzeWalkForward,wilsonInterval,horizonInterval,analyzeNamedPatterns,analyzeGraphQuality,analyzeRegimeChange,analyzeSignalConfluence,analyzeHighMultiplierRecurrence,analyzeKittenTriggers,quantile,TARGETS};
 })(typeof globalThis==='object'?globalThis:this);

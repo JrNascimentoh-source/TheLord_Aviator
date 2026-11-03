@@ -394,4 +394,38 @@ check('detector de regime não conclui com amostra insuficiente',()=>{
  assert.strictEqual(result.dominantChange,null);
 });
 
+
+check('validação cruzada identifica concordância entre indicadores',()=>{
+ const quality={status:'ready',label:'BOM'};
+ const regime={status:'shift_detected',recentRates:{pink:.3},baselineRates:{pink:.2}};
+ const high={targets:[50,100,200].map(target=>({target,activity:'acima-da-média'}))};
+ const backtesting={targets:[{target:10,testedRounds:40,skillVsBaseline:.12,calibrationGap:.02}]};
+ const result=probability.analyzeSignalConfluence(quality,regime,high,backtesting);
+ assert.strictEqual(result.status,'concordant');
+ assert.strictEqual(result.positive,3);
+ assert.strictEqual(result.validation.status,'better');
+ assert.strictEqual(result.validation.testedRounds,40);
+});
+check('validação cruzada sinaliza divergência sem esconder conflito',()=>{
+ const quality={status:'ready',label:'RUIM'};
+ const regime={status:'watch',recentRates:{pink:.3},baselineRates:{pink:.2}};
+ const high={targets:[{target:50,activity:'acima-da-média'}]};
+ const result=probability.analyzeSignalConfluence(quality,regime,high,{targets:[]});
+ assert.strictEqual(result.status,'divergent');
+ assert.strictEqual(result.positive,2);
+ assert.strictEqual(result.negative,1);
+});
+check('validação cruzada não inventa concordância com amostra insuficiente',()=>{
+ const result=probability.analyzeSignalConfluence({status:'insufficient'},{status:'insufficient'}, {targets:[]},{targets:[]});
+ assert.strictEqual(result.status,'insufficient');
+ assert.strictEqual(result.agreementRatio,null);
+ assert.strictEqual(result.validation.status,'insufficient');
+});
+check('backtesting separa desempenho semelhante, melhor e pior da referência',()=>{
+ const mk=skill=>probability.analyzeSignalConfluence(null,null,null,{targets:[{target:10,testedRounds:30,skillVsBaseline:skill,calibrationGap:.1}]}).validation.status;
+ assert.strictEqual(mk(.01),'similar');
+ assert.strictEqual(mk(.1),'better');
+ assert.strictEqual(mk(-.1),'worse');
+});
+
 console.log(`\n${passed} teste(s) passaram.`);
