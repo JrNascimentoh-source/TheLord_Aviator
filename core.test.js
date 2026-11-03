@@ -374,7 +374,7 @@ check('backtesting expõe intervalos da estimativa atual e da calibração',()=>
 check('detector de regime identifica mudança clara na composição recente',()=>{
  const now=Date.now(),values=[];
  for(let i=0;i<150;i++)values.push(i%3===0?12:i%3===1?4:1.5);
- for(let i=0;i<50;i++)values.push(i%10===0?12:i%10===1?4:1.5);
+ for(let i=0;i<50;i++)values.push(i%10===0?12:i%10<5?4:1.5);
  const rounds=values.map((value,i)=>({value,ts:now-(values.length-i)*1000}));
  const result=probability.analyzeRegimeChange(rounds,{now,recentSize:50,baselineSize:150});
  assert.strictEqual(result.status,'shift_detected');
