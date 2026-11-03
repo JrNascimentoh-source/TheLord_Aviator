@@ -160,6 +160,22 @@ check('contagem de casas ranqueia intervalos completos entre rosas nas últimas 
  assert.strictEqual(result.completedHouseIntervals,4);
  assert.strictEqual(result.houseCounts.reduce((sum,x)=>sum+x.count,0),4);
 });
+check('padrões em destaque ranqueiam o número exibido na própria vela rosa',()=>{
+ const now=Date.now(),values=[12,1.2,12,2,3,12,1.5,2.5,12],rounds=values.map((value,i)=>({id:'badge-'+i,value,ts:now-(values.length-i)*1000}));
+ const result=probability.analyzeNamedPatterns(rounds,{now});
+ assert.deepStrictEqual(result.pinkBadgeCounts.map(x=>[x.number,x.count]),[[3,2],[1,1],[2,1]]);
+ assert.strictEqual(result.recentPinkCount,4);
+});
+check('número da vela rosa respeita a contagem visual mesmo quando a sequência começa antes das últimas 24 horas',()=>{
+ const now=Date.now(),day=24*60*60*1000,rounds=[
+  {id:'old-pink',value:12,ts:now-day-5000},{id:'recent-blue',value:1.5,ts:now-3000},
+  {id:'recent-pink',value:12,ts:now-2000},{id:'recent-blue-2',value:2,ts:now-1000},
+  {id:'recent-pink-2',value:12,ts:now-500}
+ ];
+ const result=probability.analyzeNamedPatterns(rounds,{now});
+ assert.deepStrictEqual(result.pinkBadgeCounts.map(x=>[x.number,x.count]),[[2,2]]);
+ assert.strictEqual(result.recentPinkCount,2);
+});
 check('contagem de casas desconsidera intervalos que atravessam a janela de 24 horas',()=>{
  const now=Date.now(),day=24*60*60*1000;
  const rounds=[{id:'old-pink',value:12,ts:now-day-2000},{id:'recent-blue',value:1.5,ts:now-1000},{id:'recent-pink',value:12,ts:now-500}];

@@ -47,10 +47,16 @@ function analyzeNamedPatterns(input,options={}){
  const houseMap=new Map();let previousPink=-1,completedIntervals=0;
  rt.forEach((value,index)=>{if(value!=='R')return;if(previousPink>=0){const houses=index-previousPink-1;houseMap.set(houses,(houseMap.get(houses)||0)+1);completedIntervals++;}previousPink=index;});
  const houseCounts=[...houseMap.entries()].map(([houses,count])=>({houses,count,share:completedIntervals?count/completedIntervals:0,frequencyPer1000:recent.length?count/recent.length*1000:0})).sort((a,b)=>b.count-a.count||a.houses-b.houses);
+ // Replica exatamente o número mostrado no canto superior esquerdo de cada vela rosa:
+ // conta todas as rodadas desde a rosa anterior, incluindo a própria rosa atual.
+ const pinkBadgeMap=new Map();let streakNumber=0;
+ rounds.forEach(r=>{streakNumber++;if(r.value>=10){if(r.ts>=cutoff)pinkBadgeMap.set(streakNumber,(pinkBadgeMap.get(streakNumber)||0)+1);streakNumber=0;}});
+ const recentPinkCount=recent.filter(r=>r.value>=10).length;
+ const pinkBadgeCounts=[...pinkBadgeMap.entries()].map(([number,count])=>({number,count,share:recentPinkCount?count/recentPinkCount:0,frequencyPer1000:recent.length?count/recent.length*1000:0})).sort((a,b)=>b.count-a.count||a.number-b.number);
  let last=-1;for(let i=at.length-1;i>=0;i--){if(at[i]==='R'){last=i;break;}if(at[i]==='X')break;}
  let formation=null;
  if(last>=0){let valid=true,houses=0;for(let i=last+1;i<at.length;i++){if(at[i]!=='B'){valid=false;break;}houses++;}if(valid){const candidates=defs.filter(d=>d.id==='espelho'?houses===0:d.id==='xadrez'?houses===1:houses<=4).map(d=>d.id);formation={housesSincePink:houses,candidates,valid:true,lastPinkTs:rounds[last].ts};}}
- return {windowRounds:recent.length,frequencies,mostFrequent:frequencies[0]&&frequencies[0].count?frequencies[0]:null,houseCounts,completedHouseIntervals:completedIntervals,mostCommonHouse:houseCounts[0]||null,formation,patterns:Object.fromEntries(frequencies.map(x=>[x.id,x]))};
+ return {windowRounds:recent.length,frequencies,mostFrequent:frequencies[0]&&frequencies[0].count?frequencies[0]:null,houseCounts,completedHouseIntervals:completedIntervals,pinkBadgeCounts,recentPinkCount,mostCommonHouse:houseCounts[0]||null,formation,patterns:Object.fromEntries(frequencies.map(x=>[x.id,x]))};
 }
 
 
