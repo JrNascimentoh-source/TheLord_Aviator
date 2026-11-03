@@ -10,6 +10,7 @@ const timing = require('./timing-core.js');
 const probability = globalThis.TheLordProbability;
 
 const format = require('./format-core.js');
+const color = require('./color-core.js');
 
 function projectionFinal(bank, rate, days) {
   const dailyTarget = bank * rate;
@@ -29,6 +30,17 @@ check('formatadores compartilhados preservam moeda, percentual e multiplicador',
   assert.strictEqual(format.pct(12.5), '12,50%');
   assert.strictEqual(format.formatMultiplier(1214.46), '1,214.46x');
   assert.strictEqual(format.formatMultiplier('inválido'), '—');
+});
+
+check('classificação de velas mantém as seis faixas e seus limites',()=>{
+  assert.deepStrictEqual(color.classifyRound(1.99),{cls:'blue',color:'#5aa7ff',key:'blue'});
+  assert.deepStrictEqual(color.classifyRound(2),{cls:'purple',color:'#8b5cf6',key:'purple'});
+  assert.deepStrictEqual(color.classifyRound(9.99),{cls:'purple',color:'#8b5cf6',key:'purple'});
+  assert.deepStrictEqual(color.classifyRound(10),{cls:'pink',color:'#ff2f87',key:'pink'});
+  assert.deepStrictEqual(color.classifyRound(99.99),{cls:'pink',color:'#ff2f87',key:'pink'});
+  assert.deepStrictEqual(color.classifyRound(100),{cls:'yellow',color:'#ffc01f',key:'yellow'});
+  assert.deepStrictEqual(color.classifyRound(500),{cls:'hot',color:'#ff1e43',key:'hot'});
+  assert.deepStrictEqual(color.classifyRound(1000),{cls:'fire',color:'#ff5a1a',key:'fire'});
 });
 
 function check(label, fn) {
