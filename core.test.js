@@ -370,4 +370,28 @@ check('backtesting expõe intervalos da estimativa atual e da calibração',()=>
  assert.ok(metric.observedRateInterval.upper>=metric.observedRate);
 });
 
+
+check('detector de regime identifica mudança clara na composição recente',()=>{
+ const now=Date.now(),values=[];
+ for(let i=0;i<150;i++)values.push(i%3===0?12:i%3===1?4:1.5);
+ for(let i=0;i<50;i++)values.push(i%10===0?12:i%10<5?4:1.5);
+ const rounds=values.map((value,i)=>({value,ts:now-(values.length-i)*1000}));
+ const result=probability.analyzeRegimeChange(rounds,{now,recentSize:50,baselineSize:150});
+ assert.strictEqual(result.status,'shift_detected');
+ assert.strictEqual(result.dominantChange.category,'pink');
+ assert.ok(result.dominantChange.difference<0);
+});
+check('detector de regime mantém estabilidade em composição semelhante',()=>{
+ const now=Date.now(),values=Array.from({length:200},(_,i)=>i%4===0?12:i%4===1?4:1.5);
+ const rounds=values.map((value,i)=>({value,ts:now-(values.length-i)*1000}));
+ const result=probability.analyzeRegimeChange(rounds,{now,recentSize:50,baselineSize:150});
+ assert.strictEqual(result.status,'stable');
+});
+check('detector de regime não conclui com amostra insuficiente',()=>{
+ const now=Date.now(),rounds=Array.from({length:80},(_,i)=>({value:i%2?12:1.5,ts:now-(80-i)*1000}));
+ const result=probability.analyzeRegimeChange(rounds,{now,recentSize:50,baselineSize:150});
+ assert.strictEqual(result.status,'insufficient');
+ assert.strictEqual(result.dominantChange,null);
+});
+
 console.log(`\n${passed} teste(s) passaram.`);
