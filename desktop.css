@@ -272,6 +272,7 @@
 @media (prefers-reduced-motion:reduce){.sidebar-collapsed .nav::after{transition:none}}/* Menu lateral do Monitor no desktop recolhido: o JS o posiciona no viewport, fora da árvore da barra, para impedir qualquer recorte por overflow ou backdrop-filter. */
 @media screen and (min-width:701px){
   body.sidebar-collapsed .nav-dropdown-wrap{position:relative;z-index:1400;overflow:visible}
+  body.sidebar-collapsed .monitor-nav-chevron{display:none}
   body.sidebar-collapsed .monitor-platform-menu{
     position:fixed!important;display:grid;right:auto;bottom:auto;
     width:156px;max-width:calc(100vw - 120px);
