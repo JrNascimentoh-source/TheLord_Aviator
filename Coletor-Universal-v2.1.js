@@ -28,7 +28,7 @@
   const SPRIBE_DOMAINS = ['spribegaming.com', 'spribe.io', 'spribe.co'];
 
   function matchesDomain(host, domain) {
-    host = String(host || '').toLowerCase().replace(/\\.$/, '');
+    host = String(host || '').toLowerCase().replace(/\.$/, '');
     return host === domain || host.endsWith('.' + domain);
   }
 
