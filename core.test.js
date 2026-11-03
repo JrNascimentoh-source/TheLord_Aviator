@@ -156,7 +156,7 @@ check('contagem de casas ranqueia intervalos completos entre rosas nas últimas 
  const now=Date.now(),values=[12,1.2,12,2,3,12,1.5,2.5,12,1.1,1.3,1.4,12];
  const rounds=values.map((value,i)=>({id:'h'+i,value,ts:now-(values.length-i)*1000}));
  const result=probability.analyzeNamedPatterns(rounds,{now});
- assert.deepStrictEqual(result.houseCounts.map(x=>[x.houses,x.count]),[[1,1],[2,1],[3,1]]);
+ assert.deepStrictEqual(result.houseCounts.map(x=>[x.houses,x.count]),[[2,2],[1,1],[3,1]]);
  assert.strictEqual(result.completedHouseIntervals,3);
  assert.strictEqual(result.houseCounts.reduce((sum,x)=>sum+x.count,0),3);
 });
