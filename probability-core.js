@@ -94,7 +94,7 @@ function analyzeSignalConfluence(quality,regime,high,backtesting){
  const agreementRatio=total?Math.max(positive,negative)/total:null;
  let status='insufficient',label='Aguardando indicadores suficientes',direction='neutral';
  if(total>=2){
-  if(positive===negative){status='divergent';label='Indicadores divergentes';}
+  if(positive>0&&negative>0){status='divergent';label='Indicadores divergentes';}
   else if(agreementRatio>=2/3){status='concordant';direction=positive>negative?'positive':'negative';label=direction==='positive'?'Sinais convergentes · composição mais favorável':'Sinais convergentes · composição menos favorável';}
   else{status='mixed';label='Sinais mistos';}
  }else if(total===1){status='limited';label='Apenas um sinal direcional disponível';}
