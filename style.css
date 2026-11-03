@@ -382,3 +382,19 @@ body.auth-login{background:radial-gradient(ellipse at top,#260711 0%,#10060f 48%
 /* Contraste da legenda da vela gatilho correspondente */
 .kitten-quote-item>small{color:#fff!important}
 
+
+
+/* Mobile em zoom nativo de 100%: usar a largura real do viewport,
+   sem escala artificial nem limite de largura herdado do desktop. */
+@media screen and (max-width:700px){
+  body{
+    padding-left:16px;
+    padding-right:16px;
+  }
+  body .app{
+    width:100%;
+    max-width:none;
+    margin-left:0;
+    margin-right:0;
+  }
+}
