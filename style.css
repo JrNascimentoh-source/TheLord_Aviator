@@ -439,13 +439,13 @@ body.auth-login{background:radial-gradient(ellipse at top,#260711 0%,#10060f 48%
     box-sizing:border-box;
     width:100%;
     min-width:0;
-    min-height:88px;
+    min-height:44px;
     flex:0 0 100%;
     flex-flow:row nowrap;
     align-items:center;
     justify-content:center;
     gap:12px;
-    padding:12px 16px;
+    padding:8px 16px;
     border:2px solid var(--gold);
     border-radius:22px;
     white-space:nowrap;
