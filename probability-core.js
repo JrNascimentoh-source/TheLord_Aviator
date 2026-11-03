@@ -10,7 +10,7 @@ function wilsonInterval(successes,total,z=1.959963984540054){
  if(!n)return null;
  const p=k/n,z2=z*z,den=1+z2/n,center=(p+z2/(2*n))/den;
  const margin=z*Math.sqrt((p*(1-p)/n)+(z2/(4*n*n)))/den;
- return {lower:Math.max(0,center-margin),upper:Math.min(1,center+margin),level:0.95};
+ return {lower:k===0?0:Math.max(0,center-margin),upper:k===n?1:Math.min(1,center+margin),level:0.95};
 }
 function horizonInterval(interval,h){
  if(!interval||!Number.isFinite(h)||h<1)return null;
