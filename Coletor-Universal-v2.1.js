@@ -1,11 +1,18 @@
 // ==UserScript==
 // @name         TheLord Coletor Universal
 // @namespace    thelord-aviator
-// @version      2.2
-// @description  Identifica automaticamente Aviator ou Aviator 2 (inclusive dentro do iframe da Spribe) e envia as velas para o jogo correto
-// @match        *://*/*
-// @exclude      *://7a7dd.com/*
-// @exclude      *://*.7a7dd.com/*
+// @version      2.3
+// @description  Coleta somente origens autorizadas do Aviator 7a7 e Aviator BdPv; bloqueia origens desconhecidas
+// @match        https://7a7agent.com/*
+// @match        https://*.7a7agent.com/*
+// @match        https://betdopovo.co/*
+// @match        https://*.betdopovo.co/*
+// @match        https://spribegaming.com/*
+// @match        https://*.spribegaming.com/*
+// @match        https://spribe.io/*
+// @match        https://*.spribe.io/*
+// @match        https://spribe.co/*
+// @match        https://*.spribe.co/*
 // @grant        none
 // @run-at       document-idle
 // ==/UserScript==
@@ -13,68 +20,91 @@
 (function () {
   'use strict';
 
-  // Qualquer endereço que contenha estes nomes é tratado como Aviator 2
-  // (vale para betdopovo.co, betdopovo.com, www.betdopovo..., etc.).
-  const AVIATOR2_NAMES = ['betdopovo'];
+  // Lista fechada de origens autorizadas. Não classifica domínios por substring.
+  const TRUSTED_DOMAINS = {
+    aviator: ['7a7agent.com'],
+    aviator2: ['betdopovo.co']
+  };
+  const SPRIBE_DOMAINS = ['spribegaming.com', 'spribe.io', 'spribe.co'];
 
-  function isAviator2Host(host) {
-    host = String(host || '').toLowerCase();
-    return AVIATOR2_NAMES.some(n => host.indexOf(n) !== -1);
+  function matchesDomain(host, domain) {
+    host = String(host || '').toLowerCase().replace(/\\.$/, '');
+    return host === domain || host.endsWith('.' + domain);
   }
-  function hostOf(url) {
-    try { return new window.URL(url).hostname.toLowerCase(); } catch (_) { return ''; }
+
+  function resolveKnownGame(host) {
+    for (const [game, domains] of Object.entries(TRUSTED_DOMAINS)) {
+      if (domains.some(domain => matchesDomain(host, domain))) return game;
+    }
+    return null;
+  }
+
+  function isSpribeHost(host) {
+    return SPRIBE_DOMAINS.some(domain => matchesDomain(host, domain));
   }
 
   const SELF_HOST = location.hostname.toLowerCase();
   const IS_TOP = window.top === window.self;
-  const MSG = 'thelord-coletor-top-host';
+  const MSG = 'thelord-coletor-top-game-v2';
 
-  // Endereço da página principal, quando já for conhecido.
-  let topHost = IS_TOP ? SELF_HOST : '';
+  // A página principal só transmite a identificação se pertencer a uma origem autorizada.
+  let topGame = IS_TOP ? resolveKnownGame(SELF_HOST) : null;
 
-  function forwardToFrames(h) {
+  function forwardToFrames(game) {
+    if (!game || !['aviator', 'aviator2'].includes(game)) return;
     for (let i = 0; i < window.frames.length; i++) {
-      try { window.frames[i].postMessage({ type: MSG, host: h }, '*'); } catch (_) {}
+      try { window.frames[i].postMessage({ type: MSG, game }, '*'); } catch (_) {}
     }
   }
 
-  // A página principal avisa os quadros (o jogo) em qual site eles estão,
-  // e cada quadro repassa o aviso para os quadros dentro dele.
+  // Cada iframe aceita identificação somente da sua janela pai e a retransmite aos filhos.
   window.addEventListener('message', ev => {
+    if (IS_TOP || ev.source !== window.parent) return;
     const d = ev.data;
-    if (!d || d.type !== MSG || IS_TOP) return;
-    topHost = String(d.host || '').toLowerCase();
-    forwardToFrames(topHost);
+    if (!d || d.type !== MSG || !['aviator', 'aviator2'].includes(d.game)) return;
+    topGame = d.game;
+    forwardToFrames(topGame);
   });
-  if (IS_TOP) {
-    forwardToFrames(SELF_HOST);
-    setInterval(() => forwardToFrames(SELF_HOST), 1500);
+
+  if (IS_TOP && topGame) {
+    forwardToFrames(topGame);
+    setInterval(() => forwardToFrames(topGame), 1500);
   }
 
-  // Igual ao coletor original: roda em qualquer página.
-  // Aviator 2 = página principal (ou o próprio quadro) no betdopovo; senão, Aviator.
   function resolveGame() {
+    // Página principal: só inicia nas origens oficiais explicitamente autorizadas.
+    if (IS_TOP) return Promise.resolve(topGame);
+
+    // Uma página BetDoPovo dentro do frame também pode ser reconhecida diretamente.
+    const directGame = resolveKnownGame(SELF_HOST);
+    if (directGame) return Promise.resolve(directGame);
+
+    // Iframes Spribe só são aceitos quando recebem a origem da página principal confiável.
+    if (!isSpribeHost(SELF_HOST)) return Promise.resolve(null);
+
     return new Promise(resolve => {
-      if (isAviator2Host(SELF_HOST)) return resolve('aviator2');
-      if (IS_TOP) return resolve('aviator');
+      if (topGame) return resolve(topGame);
 
-      // Chrome/Edge: ancestorOrigins. Firefox: document.referrer.
-      try {
-        const anc = location.ancestorOrigins;
-        if (anc && anc.length) return resolve(isAviator2Host(hostOf(anc[anc.length - 1])) ? 'aviator2' : 'aviator');
-      } catch (_) {}
-      if (isAviator2Host(hostOf(document.referrer))) return resolve('aviator2');
-
-      // Aguarda o aviso da página principal; sem aviso em 4 s, assume Aviator.
-      const t0 = Date.now();
+      const startedAt = Date.now();
       const wait = setInterval(() => {
-        if (topHost) { clearInterval(wait); resolve(isAviator2Host(topHost) ? 'aviator2' : 'aviator'); }
-        else if (Date.now() - t0 > 4000) { clearInterval(wait); resolve('aviator'); }
+        if (topGame) {
+          clearInterval(wait);
+          resolve(topGame);
+        } else if (Date.now() - startedAt > 10000) {
+          clearInterval(wait);
+          resolve(null);
+        }
       }, 200);
     });
   }
 
-  resolveGame().then(start);
+  resolveGame().then(game => {
+    if (!game) {
+      // Falha fechada: origem desconhecida ou sem vínculo confiável não coleta nem envia.
+      return;
+    }
+    start(game);
+  });
 
   function start(GAME) {
   const URL = 'https://aypjaqmmlurlqeotbepp.supabase.co/rest/v1/velas';
