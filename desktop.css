@@ -241,28 +241,6 @@
 @media screen and (max-width:700px){.sidebar-toggle{display:none!important}
 }
 @media (prefers-reduced-motion:reduce){.sidebar-toggle{transition:none}
-}/* Monitor: manter somente texto e seta no mesmo padrão tipográfico dos demais itens desktop. */
-@media screen and (min-width:701px){
-  #monitorNavBtn .nav-label-wrap,
-  #monitorNavBtn .nav-label-wrap > .nav-label{
-    font-family:inherit!important;
-    font-size:inherit!important;
-    font-weight:inherit!important;
-    line-height:inherit!important;
-  }
-  #monitorNavBtn .monitor-nav-chevron{
-    font-size:.72em!important;
-    line-height:1!important;
-  }
-}
-/* Ajuste fino: o texto dos itens mantém o tamanho original após envolver o label. */
-@media screen and (min-width:701px){
-  .nav .nav-label-wrap,
-  .nav .nav-label-wrap > .nav-label{
-    font-size:inherit;
-    font-weight:inherit;
-    line-height:inherit;
-  }
 }/* Identidade da conta e dicas visuais da barra recolhida. */
 @media screen and (min-width:701px){
   .bottom::before{content:none!important}
@@ -291,7 +269,6 @@
 @media (prefers-reduced-motion:reduce){.sidebar-collapsed .nav::after{transition:none}}/* Menu lateral do Monitor no desktop recolhido: o JS o posiciona no viewport, fora da árvore da barra, para impedir qualquer recorte por overflow ou backdrop-filter. */
 @media screen and (min-width:701px){
   body.sidebar-collapsed .nav-dropdown-wrap{position:relative;z-index:1400;overflow:visible}
-  body.sidebar-collapsed .monitor-nav-chevron{display:none}
   body.sidebar-collapsed .monitor-platform-menu{
     position:fixed!important;display:grid;right:auto;bottom:auto;
     width:156px;max-width:calc(100vw - 120px);
