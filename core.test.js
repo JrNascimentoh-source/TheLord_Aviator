@@ -152,6 +152,21 @@ check('frequência dos padrões permanece limitada às últimas 24 horas',()=>{
  assert.strictEqual(result.patterns.quinta.count,0);
  assert.strictEqual(result.windowRounds,recent.length);
 });
+check('contagem de casas ranqueia intervalos completos entre rosas nas últimas 24 horas',()=>{
+ const now=Date.now(),values=[12,1.2,12,2,3,12,1.5,2.5,12,1.1,1.3,1.4,12];
+ const rounds=values.map((value,i)=>({id:'h'+i,value,ts:now-(values.length-i)*1000}));
+ const result=probability.analyzeNamedPatterns(rounds,{now});
+ assert.deepStrictEqual(result.houseCounts.map(x=>[x.houses,x.count]),[[2,2],[1,1],[3,1]]);
+ assert.strictEqual(result.completedHouseIntervals,4);
+ assert.strictEqual(result.houseCounts.reduce((sum,x)=>sum+x.count,0),4);
+});
+check('contagem de casas desconsidera intervalos que atravessam a janela de 24 horas',()=>{
+ const now=Date.now(),day=24*60*60*1000;
+ const rounds=[{id:'old-pink',value:12,ts:now-day-2000},{id:'recent-blue',value:1.5,ts:now-1000},{id:'recent-pink',value:12,ts:now-500}];
+ const result=probability.analyzeNamedPatterns(rounds,{now});
+ assert.strictEqual(result.completedHouseIntervals,0);
+ assert.strictEqual(result.houseCounts.length,0);
+});
 check('indicador de formação identifica os padrões que ainda podem se completar',()=>{
  const now=Date.now(),make=values=>values.map((value,i)=>({id:'f'+i,value,ts:now-(values.length-i)*1000}));
  const atStart=probability.analyzeNamedPatterns(make([12]),{now}).formation;

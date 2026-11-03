@@ -43,10 +43,14 @@ function analyzeNamedPatterns(input,options={}){
  const recent=rounds.filter(r=>r.ts>=cutoff),rt=recent.map(token),at=rounds.map(token);
  const defs=[{id:'espelho',name:'Espelho',sequence:['R','R'],description:'Rosa → Rosa'},{id:'xadrez',name:'Xadrez',sequence:['R','B','R'],description:'Rosa → Azul/Roxa → Rosa'},{id:'quinta',name:'Quinta casa',sequence:['R','B','B','B','B','R'],description:'Rosa inicial → casas 1, 2, 3 e 4 azuis/roxas → rosa na 5ª casa'}];
  const frequencies=defs.map(d=>{const hits=[];for(let i=0;i<=rt.length-d.sequence.length;i++)if(d.sequence.every((v,j)=>rt[i+j]===v))hits.push(recent[i+d.sequence.length-1].ts);return {...d,count:hits.length,lastTs:hits.length?hits[hits.length-1]:null,frequencyPer1000:recent.length?hits.length/recent.length*1000:0};}).sort((a,b)=>b.count-a.count||a.sequence.length-b.sequence.length);
+ // Intervalos completos entre rosas consecutivas: conta somente as velas intermediárias dentro das últimas 24h.
+ const houseMap=new Map();let previousPink=-1,completedIntervals=0;
+ rt.forEach((value,index)=>{if(value!=='R')return;if(previousPink>=0){const houses=index-previousPink-1;houseMap.set(houses,(houseMap.get(houses)||0)+1);completedIntervals++;}previousPink=index;});
+ const houseCounts=[...houseMap.entries()].map(([houses,count])=>({houses,count,share:completedIntervals?count/completedIntervals:0,frequencyPer1000:recent.length?count/recent.length*1000:0})).sort((a,b)=>b.count-a.count||a.houses-b.houses);
  let last=-1;for(let i=at.length-1;i>=0;i--){if(at[i]==='R'){last=i;break;}if(at[i]==='X')break;}
  let formation=null;
  if(last>=0){let valid=true,houses=0;for(let i=last+1;i<at.length;i++){if(at[i]!=='B'){valid=false;break;}houses++;}if(valid){const candidates=defs.filter(d=>d.id==='espelho'?houses===0:d.id==='xadrez'?houses===1:houses<=4).map(d=>d.id);formation={housesSincePink:houses,candidates,valid:true,lastPinkTs:rounds[last].ts};}}
- return {windowRounds:recent.length,frequencies,mostFrequent:frequencies[0]&&frequencies[0].count?frequencies[0]:null,formation,patterns:Object.fromEntries(frequencies.map(x=>[x.id,x]))};
+ return {windowRounds:recent.length,frequencies,mostFrequent:frequencies[0]&&frequencies[0].count?frequencies[0]:null,houseCounts,completedHouseIntervals:completedIntervals,mostCommonHouse:houseCounts[0]||null,formation,patterns:Object.fromEntries(frequencies.map(x=>[x.id,x]))};
 }
 
 

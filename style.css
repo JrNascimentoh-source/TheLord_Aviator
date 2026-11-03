@@ -462,3 +462,19 @@ body.auth-login{background:radial-gradient(ellipse at top,#260711 0%,#10060f 48%
     flex:0 0 10px;
   }
 }
+
+/* Painéis lado a lado: formação atual e ranking da contagem de casas */
+.probability-analysis-panels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:9px 0 12px}
+.probability-analysis-panel{min-width:0;padding:10px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:rgba(255,255,255,.035);text-align:left}
+.probability-analysis-title{font-size:.67rem;font-weight:950;letter-spacing:.035em;color:var(--text);margin-bottom:7px}
+.possible-patterns-panel{border-color:rgba(255,47,135,.2)}
+.house-highlights-panel{border-color:rgba(52,211,153,.22)}
+.house-highlights-panel .pattern-frequency-list{margin-top:7px}
+.house-highlight-row>strong{color:#6ee7b7}
+.house-highlights-subtitle,.house-highlights-foot,.house-highlight-empty{font-size:.59rem;line-height:1.4;color:var(--muted)}
+.house-highlights-foot{margin-top:7px}
+.house-highlight-empty{padding:9px 7px;border:1px dashed rgba(255,255,255,.12);border-radius:8px;text-align:center}
+.probability-analysis-panel .probability-main-detail{margin:0 0 7px;text-align:left}
+.probability-analysis-panel .pattern-frequency-list{margin-bottom:0}
+.probability-analysis-panel .probability-signal-detail{margin:8px 0 0;text-align:left;font-size:.61rem}
+@media(max-width:380px){.probability-analysis-panels{grid-template-columns:1fr}.probability-analysis-panel{padding:9px}}
